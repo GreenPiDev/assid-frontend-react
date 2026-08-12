@@ -8,9 +8,9 @@ export default function DirectorySection() {
   return (
     <section
       id="firma-rehberi"
-      className="relative flex h-[calc(100vh-78px)] scroll-mt-[78px] flex-col bg-[linear-gradient(180deg,rgba(6,18,30,.86),rgba(6,18,30,.9)),url('/assid-firma-rehberi-sehir.avif')] bg-cover bg-center py-5.5 text-white md:h-auto md:py-17"
+      className="relative flex h-auto scroll-mt-[78px] flex-col bg-[linear-gradient(180deg,rgba(6,18,30,.86),rgba(6,18,30,.9)),url('/assid-firma-rehberi-sehir.avif')] bg-cover bg-center py-17 text-white lg:h-[calc(100vh-78px)] lg:py-5.5"
     >
-      <div className="mx-auto flex h-full w-[min(calc(100%-40px),1240px)] flex-col md:h-auto">
+      <div className="mx-auto flex h-auto w-[min(calc(100%-40px),1240px)] flex-col lg:h-full">
         <div className="mb-5 flex items-end justify-between gap-5">
           <div>
             <div className="inline-flex items-center gap-2 text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-lime before:h-0.5 before:w-5 before:bg-assid-lime">
