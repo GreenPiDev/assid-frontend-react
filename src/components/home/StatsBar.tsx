@@ -13,8 +13,8 @@ export default function StatsBar() {
   const items = [
     { label: "Aktif üye firma", value: stats ? `${stats.approvedMembersCount}` : "—" },
     { label: "Farklı sektör", value: stats ? `${stats.sectorsCount}` : "—" },
+    { label: "Faaliyet alanı", value: stats ? `${stats.activityAreasCount}` : "—" },
     { label: "Etkinlik", value: stats ? `${stats.eventsCount}` : "—" },
-    { label: "Güçlü dijital iş ağı", value: "1" },
   ];
 
   return (

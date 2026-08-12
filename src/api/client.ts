@@ -58,6 +58,7 @@ export interface BackendEvent {
 export interface BackendStats {
   approvedMembersCount: number;
   sectorsCount: number;
+  activityAreasCount: number;
   eventsCount: number;
 }
 
