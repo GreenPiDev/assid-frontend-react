@@ -14,7 +14,7 @@ export default function Header() {
   const showToast = useToast();
 
   return (
-    <header className="sticky top-0 z-20 border-b border-assid-line/80 bg-white/92 backdrop-blur-md">
+    <header className="sticky top-0 z-30 border-b border-assid-line/80 bg-white/92 backdrop-blur-md">
       <div className="mx-auto flex min-h-[78px] w-[min(calc(100%-40px),1240px)] items-center gap-8">
         <a className="flex min-w-max items-center gap-2.5" href="#anasayfa" aria-label="ASSİD ana sayfa">
           <span className="relative grid h-[43px] w-[43px] place-items-center overflow-hidden rounded-full bg-assid-green text-base font-black tracking-tighter text-white">

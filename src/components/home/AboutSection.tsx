@@ -9,7 +9,10 @@ const features = [
 
 export default function AboutSection() {
   return (
-    <section className="py-17 md:py-24" id="hakkimizda">
+    <section
+      className="flex scroll-mt-[78px] flex-col justify-center py-17 md:py-24 lg:min-h-[calc(100vh-78px)] lg:py-0"
+      id="hakkimizda"
+    >
       <div className="mx-auto grid w-[min(calc(100%-40px),1240px)] grid-cols-1 items-stretch gap-8.5 md:grid-cols-2">
         <div className="rounded-[32px] bg-assid-sand p-8 md:p-11">
           <div className="inline-flex items-center gap-2 text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-green before:h-0.5 before:w-5 before:bg-assid-lime">

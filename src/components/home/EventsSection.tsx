@@ -13,9 +13,12 @@ export default function EventsSection() {
   const restEvents = events.filter((e) => e !== featuredEvent).slice(0, 3);
 
   return (
-    <section className="py-17 md:py-24" id="etkinlikler">
-      <div className="mx-auto w-[min(calc(100%-40px),1240px)]">
-        <div className="mb-9 flex flex-col items-start justify-between gap-5 md:flex-row md:items-end">
+    <section
+      className="flex scroll-mt-[78px] flex-col py-17 md:py-24 lg:h-[calc(100vh-78px)] lg:py-11"
+      id="etkinlikler"
+    >
+      <div className="mx-auto flex h-auto w-[min(calc(100%-40px),1240px)] flex-col lg:h-full">
+        <div className="mb-9 flex flex-none flex-col items-start justify-between gap-5 md:flex-row md:items-end">
           <div>
             <div className="inline-flex items-center gap-2 text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-green before:h-0.5 before:w-5 before:bg-assid-lime">
               Etkinlik takvimi
@@ -31,8 +34,8 @@ export default function EventsSection() {
             Tüm Etkinlikler →
           </Button>
         </div>
-        <div className="grid grid-cols-1 gap-6.5 lg:grid-cols-[1.12fr_.88fr]">
-          <article className="relative isolate flex min-h-105 flex-col justify-end overflow-hidden rounded-[32px] p-6 text-white md:min-h-[418px] md:p-8.5">
+        <div className="grid min-h-0 flex-1 grid-cols-1 gap-6.5 lg:grid-cols-[1.12fr_.88fr]">
+          <article className="relative isolate flex min-h-105 flex-col justify-end overflow-hidden rounded-[32px] p-6 text-white md:min-h-[418px] md:p-8.5 lg:min-h-0">
             <div
               className="absolute inset-0 -z-10 bg-cover bg-center"
               style={{
@@ -47,7 +50,7 @@ export default function EventsSection() {
             </h3>
             <p className="m-0 text-white/73">{featuredEvent.location}</p>
           </article>
-          <div className="grid gap-3">
+          <div className="grid grid-rows-3 gap-3 lg:h-full">
             {restEvents.map((event) => (
               <article
                 key={event._id}
