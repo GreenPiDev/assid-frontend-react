@@ -8,6 +8,7 @@ export const Paths = {
   Members: "/members",
   News: "/news",
   Events: "/events",
+  Stats: "/stats",
 };
 
 interface GetOptions extends Partial<Omit<UseQueryOptions, "queryKey" | "queryFn">> {

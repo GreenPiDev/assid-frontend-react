@@ -1,4 +1,4 @@
-import { stats } from "../../data/stats";
+import { useOrgStats } from "../../api/resources/stats";
 
 const borderClasses = [
   "border-b border-r border-assid-line md:border-b-0",
@@ -8,10 +8,19 @@ const borderClasses = [
 ];
 
 export default function StatsBar() {
+  const { data: stats } = useOrgStats();
+
+  const items = [
+    { label: "Aktif üye firma", value: stats ? `${stats.approvedMembersCount}` : "—" },
+    { label: "Farklı sektör", value: stats ? `${stats.sectorsCount}` : "—" },
+    { label: "Etkinlik", value: stats ? `${stats.eventsCount}` : "—" },
+    { label: "Güçlü dijital iş ağı", value: "1" },
+  ];
+
   return (
     <div className="relative z-3 mx-auto w-[min(calc(100%-40px),1240px)] pb-11">
       <div className="grid grid-cols-2 overflow-hidden rounded-[22px] bg-white shadow-card md:grid-cols-4">
-        {stats.map((stat, index) => (
+        {items.map((stat, index) => (
           <div key={stat.label} className={`px-5 py-5 md:px-7 ${borderClasses[index]}`}>
             <strong className="block text-[clamp(1.75rem,3.1vw,2.65rem)] leading-none tracking-tighter text-assid-green">
               {stat.value}

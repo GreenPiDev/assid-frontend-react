@@ -55,6 +55,12 @@ export interface BackendEvent {
   isFeatured: boolean;
 }
 
+export interface BackendStats {
+  approvedMembersCount: number;
+  sectorsCount: number;
+  eventsCount: number;
+}
+
 // Yönetim panelinden onaylanmamış (isApproved:false) üyeler herkese açık
 // sitede hiçbir yerde görünmemeli; bu yüzden filtre burada, tek noktada uygulanır.
 function toFrontendMember(m: BackendMember): Member {
@@ -123,6 +129,9 @@ export async function get({
       if (id) return request<BackendEvent>(`/events/${id}`);
       return request<BackendEvent[]>("/events", params);
     }
+
+    case "stats":
+      return request<BackendStats>("/stats");
 
     default:
       throw new Error(`Bilinmeyen kaynak: ${path}`);
