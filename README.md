@@ -1,16 +1,30 @@
-# React + Vite
+# Dernek Yönetim Sistemi — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React + TypeScript + Vite + Tailwind CSS ile yazılmış dernek web sitesi. Veri katmanı TanStack Query üzerinden [assid-api-nestjs](https://github.com/GreenPiDev/assid-api-nestjs) backend'ine bağlanır.
 
-Currently, two official plugins are available:
+## Kurulum
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+cp .env.example .env   # VITE_API_URL'i backend adresine göre düzenle
+npm run dev
+```
 
-## React Compiler
+## Ortam Değişkenleri
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```
+VITE_API_URL=http://localhost:3000/api
+```
 
-## Expanding the Oxlint configuration
+## Mimari
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+- **`api/client.ts`** — backend ile konuşan tek nokta. Backend'in gerçek veri şeklini frontend bileşenlerinin beklediği şekle dönüştürür; backend adresi/şekli değişse bile bileşenlere dokunulmaz.
+- **`api/factory.ts` + `api/resources/*`** — TanStack Query üzerine kurulu generic `useGet`/`useGetList` hook'ları ve her kaynak (members, news, events) için ince sarmalayıcılar.
+- **`constants/sectors.ts`** — sektörler admin tarafından yönetilmez, sistemde sabit bir liste olarak tutulur (backend'deki enum ile birebir aynı).
+- **`components/ui`** — Tailwind ile yazılmış küçük, tekrar kullanılabilir primitive'ler (ör. `Button`).
+- **`pages/FirmaRehberiPage`** — sürüklenebilir harita + sektör/faaliyet alanı filtreleriyle firma rehberi.
+
+## Notlar
+
+- Sadece `isApproved: true` olan üyeler herkese açık sitede görünür; bu filtre backend'e giden isteklerde uygulanır.
+- Üye girişi ve admin paneli henüz eklenmedi.
