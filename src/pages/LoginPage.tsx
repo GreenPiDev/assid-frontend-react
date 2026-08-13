@@ -29,7 +29,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-78px)] items-center justify-center bg-assid-paper px-5 py-16">
+    <div className="flex min-h-[calc(100vh-78px)] items-center justify-center bg-[linear-gradient(180deg,rgba(6,18,30,.86),rgba(6,18,30,.9)),url('/assid-firma-rehberi-sehir.avif')] bg-cover bg-center px-5 py-16">
       <div className="w-full max-w-[420px] rounded-[32px] bg-white p-8 shadow-card md:p-11">
         <div className="flex flex-col items-center text-center">
           <span className="relative grid h-[52px] w-[52px] place-items-center overflow-hidden rounded-full bg-assid-green text-lg font-black tracking-tighter text-white">
