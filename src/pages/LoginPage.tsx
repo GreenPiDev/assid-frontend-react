@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import AuthShell from "../components/auth/AuthShell";
 import Button from "../components/ui/Button";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -29,95 +30,81 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-78px)] items-center justify-center bg-[linear-gradient(180deg,rgba(6,18,30,.86),rgba(6,18,30,.9)),url('/assid-firma-rehberi-sehir.avif')] bg-cover bg-center px-5 py-16">
-      <div className="w-full max-w-[420px] rounded-[32px] bg-white p-8 shadow-card md:p-11">
-        <div className="flex flex-col items-center text-center">
-          <span className="relative grid h-[52px] w-[52px] place-items-center overflow-hidden rounded-full bg-assid-green text-lg font-black tracking-tighter text-white">
-            A
-            <span className="absolute -right-4 -top-3 h-8 w-8 rounded-full border-[3px] border-assid-lime" />
+    <AuthShell title="Kullanıcı Girişi" subtitle="Yönetim panelinize erişmek için giriş yapın.">
+      <form className="mt-8 grid gap-4" onSubmit={handleSubmit}>
+        <label className="grid gap-1.5">
+          <span className="text-[0.79rem] font-bold tracking-wide text-[#405048] uppercase">E-posta</span>
+          <span className="flex min-h-13 items-center gap-2.5 rounded-[14px] border border-transparent bg-assid-paper px-4 shadow-[0_8px_20px_rgba(18,58,99,.05)] focus-within:border-assid-green/50">
+            <input
+              type="email"
+              required
+              autoComplete="email"
+              placeholder="ornek@sirket.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full border-0 bg-transparent text-assid-ink outline-none"
+            />
           </span>
-          <h1 className="mt-5 text-[1.8rem] leading-tight tracking-[-.03em]">Kullanıcı Girişi</h1>
-          <p className="mt-2 max-w-xs text-[0.88rem] text-assid-muted">
-            ASSİD üye panelinize erişmek için giriş yapın.
-          </p>
-        </div>
+        </label>
 
-        <form className="mt-8 grid gap-4" onSubmit={handleSubmit}>
-          <label className="grid gap-1.5">
-            <span className="text-[0.79rem] font-bold tracking-wide text-[#405048] uppercase">E-posta</span>
-            <span className="flex min-h-13 items-center gap-2.5 rounded-[14px] border border-transparent bg-assid-paper px-4 shadow-[0_8px_20px_rgba(18,58,99,.05)] focus-within:border-assid-green/50">
-              <input
-                type="email"
-                required
-                autoComplete="email"
-                placeholder="ornek@sirket.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full border-0 bg-transparent text-assid-ink outline-none"
-              />
-            </span>
-          </label>
-
-          <label className="grid gap-1.5">
-            <span className="text-[0.79rem] font-bold tracking-wide text-[#405048] uppercase">Şifre</span>
-            <span className="flex min-h-13 items-center gap-2.5 rounded-[14px] border border-transparent bg-assid-paper px-4 shadow-[0_8px_20px_rgba(18,58,99,.05)] focus-within:border-assid-green/50">
-              <input
-                type={isPasswordVisible ? "text" : "password"}
-                required
-                autoComplete="current-password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full border-0 bg-transparent text-assid-ink outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => setIsPasswordVisible((v) => !v)}
-                aria-label={isPasswordVisible ? "Şifreyi gizle" : "Şifreyi göster"}
-                className="grid shrink-0 cursor-pointer place-items-center border-0 bg-transparent p-0 text-assid-muted hover:text-assid-ink"
+        <label className="grid gap-1.5">
+          <span className="text-[0.79rem] font-bold tracking-wide text-[#405048] uppercase">Şifre</span>
+          <span className="flex min-h-13 items-center gap-2.5 rounded-[14px] border border-transparent bg-assid-paper px-4 shadow-[0_8px_20px_rgba(18,58,99,.05)] focus-within:border-assid-green/50">
+            <input
+              type={isPasswordVisible ? "text" : "password"}
+              required
+              autoComplete="current-password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border-0 bg-transparent text-assid-ink outline-none"
+            />
+            <button
+              type="button"
+              onClick={() => setIsPasswordVisible((v) => !v)}
+              aria-label={isPasswordVisible ? "Şifreyi gizle" : "Şifreyi göster"}
+              className="grid shrink-0 cursor-pointer place-items-center border-0 bg-transparent p-0 text-assid-muted hover:text-assid-ink"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12Z" />
-                  <circle cx="12" cy="12" r="3" />
-                  {!isPasswordVisible && <line x1="3" y1="3" x2="21" y2="21" />}
-                </svg>
-              </button>
-            </span>
-          </label>
+                <path d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12Z" />
+                <circle cx="12" cy="12" r="3" />
+                {!isPasswordVisible && <line x1="3" y1="3" x2="21" y2="21" />}
+              </svg>
+            </button>
+          </span>
+        </label>
 
-          <button
-            type="button"
-            className="cursor-pointer justify-self-end border-0 bg-transparent p-0 text-[0.82rem] font-bold text-assid-green hover:underline"
-            onClick={() => showToast("Şifre sıfırlama yakında eklenecek.")}
-          >
-            Şifremi unuttum
-          </button>
+        <Link
+          to="/forgot-password"
+          className="justify-self-end text-[0.82rem] font-bold text-assid-green hover:underline"
+        >
+          Şifremi unuttum
+        </Link>
 
-          <Button type="submit" variant="primary" className="mt-2 w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Giriş yapılıyor..." : "Giriş Yap"}
-          </Button>
-        </form>
+        <Button type="submit" variant="primary" className="mt-2 w-full" disabled={isSubmitting}>
+          {isSubmitting ? "Giriş yapılıyor..." : "Giriş Yap"}
+        </Button>
+      </form>
 
-        <p className="mt-6 text-center text-[0.86rem] text-assid-muted">
-          Henüz üye değil misiniz?{" "}
-          <button
-            type="button"
-            className="cursor-pointer border-0 bg-transparent p-0 font-bold text-assid-green hover:underline"
-            onClick={() => showToast("Üyelik başvuru sayfası WordPress formuna bağlanacak.")}
-          >
-            Üyelik başvurusu yapın
-          </button>
-        </p>
-      </div>
-    </div>
+      <p className="mt-6 text-center text-[0.86rem] text-assid-muted">
+        Henüz üye değil misiniz?{" "}
+        <button
+          type="button"
+          className="cursor-pointer border-0 bg-transparent p-0 font-bold text-assid-green hover:underline"
+          onClick={() => showToast("Üyelik başvuru sayfası WordPress formuna bağlanacak.")}
+        >
+          Üyelik başvurusu yapın
+        </button>
+      </p>
+    </AuthShell>
   );
 }

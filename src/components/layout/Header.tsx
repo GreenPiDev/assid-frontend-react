@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Button from "../ui/Button";
+import { useOrganizationLogo } from "../../hooks/useOrganizationLogo";
 import { scrollToId, scrollToTop } from "../../utils/scroll";
 
 const navLinks = [
@@ -14,6 +15,7 @@ export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const isHome = location.pathname === "/";
+  const logoUrl = useOrganizationLogo();
 
   function goHome() {
     if (isHome) scrollToTop();
@@ -34,16 +36,7 @@ export default function Header() {
           onClick={goHome}
           aria-label="ASSİD ana sayfa"
         >
-          <span className="relative grid h-[43px] w-[43px] place-items-center overflow-hidden rounded-full bg-assid-green text-base font-black tracking-tighter text-white">
-            A
-            <span className="absolute -right-3.5 -top-2.5 h-7 w-7 rounded-full border-[3px] border-assid-lime" />
-          </span>
-          <span>
-            <b className="block text-base leading-none tracking-tight">ASSİD</b>
-            <small className="mt-1 block text-[0.58rem] tracking-wide text-assid-muted">
-              ANKARA SİTELER SANAYİCİ VE İŞ İNSANLARI DERNEĞİ
-            </small>
-          </span>
+          {logoUrl && <img src={logoUrl} alt="ASSİD logo" className="h-[43px] w-auto object-contain" />}
         </button>
         <nav className="ml-auto hidden items-center gap-6 text-[0.89rem] font-bold text-[#405048] lg:flex" aria-label="Ana menü">
           {navLinks.map((link) =>

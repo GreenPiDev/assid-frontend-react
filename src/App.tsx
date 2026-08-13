@@ -5,10 +5,12 @@ import Header from './components/layout/Header'
 import { AuthProvider } from './context/AuthContext'
 import { ToastProvider } from './context/ToastContext'
 import ContactPage from './pages/ContactPage'
-import DashboardPage from './pages/DashboardPage'
 import FirmaRehberiPage from './pages/FirmaRehberiPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
+import RoleDashboardRouter from './pages/RoleDashboardRouter'
 
 function SiteLayout() {
   return (
@@ -28,14 +30,16 @@ export default function App() {
           <Route element={<SiteLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/contact" element={<ContactPage />} />
           </Route>
           <Route path="/firma-rehberi" element={<FirmaRehberiPage />} />
           <Route
-            path="/dashboard"
+            path="/dashboard/*"
             element={
               <RequireAuth>
-                <DashboardPage />
+                <RoleDashboardRouter />
               </RequireAuth>
             }
           />

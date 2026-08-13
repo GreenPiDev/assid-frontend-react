@@ -68,6 +68,7 @@ function toFrontendMember(m: BackendMember): Member {
   return {
     id: m._id,
     name: m.companyName || m.fullName,
+    logo: m.logo,
     sectors: m.sectors,
     activityAreas: m.activityAreas ?? [],
     productsAndServices: m.productsAndServices ?? [],

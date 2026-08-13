@@ -40,3 +40,17 @@ export async function fetchCurrentUser(): Promise<AuthUser | null> {
     return null;
   }
 }
+
+export function forgotPassword(email: string) {
+  return authRequest<{ success: boolean }>("/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export function resetPassword(token: string, newPassword: string) {
+  return authRequest<{ success: boolean }>("/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ token, newPassword }),
+  });
+}
