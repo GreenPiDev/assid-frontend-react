@@ -1,9 +1,7 @@
-import { useToast } from "../../context/ToastContext";
+import { Link } from "react-router-dom";
 import Button from "../ui/Button";
 
 export default function JoinSection() {
-  const showToast = useToast();
-
   return (
     <section id="uyelik" className="flex scroll-mt-[78px] flex-col py-15 lg:h-[calc(100vh-78px)] lg:py-11">
       <div className="mx-auto grid w-[min(calc(100%-40px),1240px)] flex-1 grid-cols-1 items-stretch overflow-hidden rounded-[32px] bg-assid-sand md:grid-cols-[1.05fr_.95fr]">
@@ -18,10 +16,7 @@ export default function JoinSection() {
             Markanızı dijital firma rehberinde görünür kılın, yeni iş birliklerine erişin ve
             sektörünüzdeki gelişmeleri yakından takip edin.
           </p>
-          <Button
-            variant="primary"
-            onClick={() => showToast("Başvuru formu WordPress'te yönetim onay akışıyla çalışacak.")}
-          >
+          <Button as={Link} to="/uyelik-basvurusu" variant="primary">
             Üyelik Başvurusu <span>→</span>
           </Button>
         </div>

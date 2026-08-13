@@ -17,7 +17,7 @@ const navItems = [
   { to: "/dashboard/uyeler", label: "Üye Başvuruları", icon: UsersIcon },
   { to: "/dashboard/uyelikler", label: "Üyelikler", icon: ListIcon },
   { to: "/dashboard/etkinlikler", label: "Etkinlikler", icon: CalendarIcon },
-  { to: "/dashboard/haberler", label: "Haberler", icon: NewsIcon },
+  { to: "/dashboard/haberler", label: "Sektörel Haberler", icon: NewsIcon },
   { to: "/dashboard/kullanicilar", label: "Kullanıcılar", icon: UserCogIcon },
   { to: "/dashboard/ayarlar", label: "Kurum Ayarları", icon: SettingsIcon },
 ];

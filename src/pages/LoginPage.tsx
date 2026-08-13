@@ -30,7 +30,7 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthShell title="Kullanıcı Girişi" subtitle="Yönetim panelinize erişmek için giriş yapın.">
+    <AuthShell title="Üye Girişi" subtitle="Yönetim panelinize erişmek için giriş yapın.">
       <form className="mt-8 grid gap-4" onSubmit={handleSubmit}>
         <label className="grid gap-1.5">
           <span className="text-[0.79rem] font-bold tracking-wide text-[#405048] uppercase">E-posta</span>
@@ -97,13 +97,9 @@ export default function LoginPage() {
 
       <p className="mt-6 text-center text-[0.86rem] text-assid-muted">
         Henüz üye değil misiniz?{" "}
-        <button
-          type="button"
-          className="cursor-pointer border-0 bg-transparent p-0 font-bold text-assid-green hover:underline"
-          onClick={() => showToast("Üyelik başvuru sayfası WordPress formuna bağlanacak.")}
-        >
+        <Link to="/uyelik-basvurusu" className="font-bold text-assid-green hover:underline">
           Üyelik başvurusu yapın
-        </button>
+        </Link>
       </p>
     </AuthShell>
   );

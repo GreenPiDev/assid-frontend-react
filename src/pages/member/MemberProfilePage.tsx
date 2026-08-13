@@ -2,16 +2,10 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { fetchMyMemberProfile, updateMyMemberProfile, uploadMyLogo, type MyMemberProfile } from "../../api/member";
 import Badge from "../../components/admin/Badge";
 import MemberCardContent from "../../components/directory/MemberCardContent";
+import TagEditor from "../../components/forms/TagEditor";
+import { businessActivityLabels } from "../../constants/memberEnums";
 import { useToast } from "../../context/ToastContext";
 import { getSectorName } from "../../utils/directory";
-
-const businessActivityLabels: Record<string, string> = {
-  manufacturer: "Üretici",
-  importer: "İthalatçı",
-  exporter: "İhracatçı",
-  seller: "Satıcı",
-  service_other: "Hizmet / Diğer",
-};
 
 function Field({ label, value }: { label: string; value?: string | null }) {
   return (
@@ -27,76 +21,6 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
     <div className="rounded-[20px] border border-assid-line bg-white p-6 md:p-7">
       <h2 className="mb-5 text-[1.05rem] font-bold text-assid-ink">{title}</h2>
       {children}
-    </div>
-  );
-}
-
-function TagEditor({
-  items,
-  onChange,
-  placeholder,
-}: {
-  items: string[];
-  onChange: (items: string[]) => void;
-  placeholder: string;
-}) {
-  const [draft, setDraft] = useState("");
-
-  function addTag() {
-    const value = draft.trim();
-    if (!value || items.includes(value)) {
-      setDraft("");
-      return;
-    }
-    onChange([...items, value]);
-    setDraft("");
-  }
-
-  return (
-    <div>
-      <div className="mb-2.5 flex flex-wrap gap-2">
-        {items.length === 0 ? (
-          <span className="text-[0.85rem] text-assid-muted">Henüz eklenmedi.</span>
-        ) : (
-          items.map((item) => (
-            <span
-              key={item}
-              className="flex items-center gap-1.5 rounded-full bg-assid-paper px-3.5 py-1.5 text-[0.82rem] font-bold text-assid-ink"
-            >
-              {item}
-              <button
-                type="button"
-                onClick={() => onChange(items.filter((i) => i !== item))}
-                aria-label={`${item} etiketini kaldır`}
-                className="cursor-pointer border-0 bg-transparent p-0 text-assid-muted hover:text-[#c0392b]"
-              >
-                ×
-              </button>
-            </span>
-          ))
-        )}
-      </div>
-      <div className="flex gap-2">
-        <input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              addTag();
-            }
-          }}
-          placeholder={placeholder}
-          className="flex-1 rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 text-[0.85rem] outline-none focus:border-assid-green/50"
-        />
-        <button
-          type="button"
-          onClick={addTag}
-          className="cursor-pointer rounded-[12px] border border-assid-line bg-transparent px-4 py-2.5 text-[0.82rem] font-bold text-assid-ink"
-        >
-          Ekle
-        </button>
-      </div>
     </div>
   );
 }
@@ -220,10 +144,8 @@ export default function MemberProfilePage() {
             <Field label="Üyelik Tipi" value={profile.membershipType === "corporate" ? "Tüzel" : "Gerçek"} />
             <Field label="Sektörler" value={profile.sectors.map((s) => getSectorName(s)).join(", ")} />
             <Field
-              label="Alt Faaliyet Alanları"
-              value={[...profile.businessActivityTypes.map((t) => businessActivityLabels[t] ?? t), ...activityAreas].join(
-                ", ",
-              )}
+              label="Faaliyet Türleri"
+              value={profile.businessActivityTypes.map((t) => businessActivityLabels[t] ?? t).join(", ")}
             />
           </div>
           <p className="mt-4 text-[0.78rem] text-assid-muted">

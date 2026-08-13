@@ -47,14 +47,14 @@ export default function AdminNewsPage() {
           <span className="text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-green">
             Yönetim Paneli
           </span>
-          <h1 className="mt-1 text-[1.5rem] tracking-[-.03em] text-assid-ink">Haberler</h1>
+          <h1 className="mt-1 text-[1.5rem] tracking-[-.03em] text-assid-ink">Sektörel Haberler</h1>
         </div>
         <button
           type="button"
           onClick={() => setFormTarget("new")}
           className="flex cursor-pointer items-center gap-2 rounded-full border-0 bg-assid-green px-5 py-2.5 text-[0.85rem] font-bold text-white"
         >
-          <PlusIcon className="h-4 w-4" /> Yeni Haber
+          <PlusIcon className="h-4 w-4" /> Yeni Haber Ekle
         </button>
       </div>
 

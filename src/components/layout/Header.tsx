@@ -60,7 +60,7 @@ export default function Header() {
         </nav>
         <div className="ml-auto flex items-center gap-2.5 lg:ml-0">
           <Button as={Link} to="/login" variant="primary">
-            Kullanıcı Girişi
+            Üye Girişi
           </Button>
           <button className="p-2 text-assid-green lg:hidden" aria-label="Menüyü aç">
             ☰

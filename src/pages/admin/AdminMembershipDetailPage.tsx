@@ -3,27 +3,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { fetchAdminMember, type AdminMember } from "../../api/admin";
 import Badge from "../../components/admin/Badge";
 import { ArrowLeftIcon } from "../../components/admin/icons";
+import { businessActivityLabels, contactPreferenceLabels, sectorStatusLabels } from "../../constants/memberEnums";
 import { useToast } from "../../context/ToastContext";
 import { getSectorName } from "../../utils/directory";
-
-const businessActivityLabels: Record<string, string> = {
-  manufacturer: "Üretici",
-  importer: "İthalatçı",
-  exporter: "İhracatçı",
-  seller: "Satıcı",
-  service_other: "Hizmet / Diğer",
-};
-
-const sectorStatusLabels: Record<string, string> = {
-  in_sector: "Sektör İçi",
-  out_of_sector: "Sektör Dışı",
-};
-
-const contactPreferenceLabels: Record<string, string> = {
-  email: "E-posta",
-  sms: "SMS",
-  phone: "Telefon",
-};
 
 function Field({ label, value }: { label: string; value?: string | null }) {
   return (
@@ -142,7 +124,38 @@ export default function AdminMembershipDetailPage() {
             label="Onay Tarihi"
             value={member.approvedAt ? new Date(member.approvedAt).toLocaleDateString("tr-TR") : undefined}
           />
+          <Field
+            label="KVKK Onayı"
+            value={
+              member.kvkkConsentAt ? `Onaylandı — ${new Date(member.kvkkConsentAt).toLocaleDateString("tr-TR")}` : undefined
+            }
+          />
+          <Field
+            label="Tüzük Onayı"
+            value={
+              member.bylawsAcknowledgedAt
+                ? `Onaylandı — ${new Date(member.bylawsAcknowledgedAt).toLocaleDateString("tr-TR")}`
+                : undefined
+            }
+          />
         </Section>
+
+        {member.documents.length > 0 && (
+          <Section title="Ekler">
+            {member.documents.map((doc, index) => (
+              <a
+                key={`${doc.url}-${index}`}
+                href={doc.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between gap-2 rounded-[12px] border border-assid-line bg-assid-paper px-4 py-3 text-[0.85rem] font-bold text-assid-green hover:underline"
+              >
+                {doc.label}
+                <span aria-hidden="true">↗</span>
+              </a>
+            ))}
+          </Section>
+        )}
       </div>
     </div>
   );

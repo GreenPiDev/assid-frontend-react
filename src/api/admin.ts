@@ -27,6 +27,9 @@ export interface AdminMember {
   logo?: string;
   activityAreas: string[];
   productsAndServices: string[];
+  documents: { label: string; url: string }[];
+  kvkkConsentAt?: string;
+  bylawsAcknowledgedAt?: string;
   createdAt: string;
 }
 

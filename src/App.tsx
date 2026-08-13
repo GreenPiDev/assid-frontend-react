@@ -9,6 +9,7 @@ import FirmaRehberiPage from './pages/FirmaRehberiPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
+import MembershipApplicationPage from './pages/MembershipApplicationPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import RoleDashboardRouter from './pages/RoleDashboardRouter'
 
@@ -33,6 +34,7 @@ export default function App() {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/uyelik-basvurusu" element={<MembershipApplicationPage />} />
           </Route>
           <Route path="/firma-rehberi" element={<FirmaRehberiPage />} />
           <Route
