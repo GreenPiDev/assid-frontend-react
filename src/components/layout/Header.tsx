@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import Button from "../ui/Button";
 import { useToast } from "../../context/ToastContext";
-import { scrollToId } from "../../utils/scroll";
+import { scrollToId, scrollToTop } from "../../utils/scroll";
 
 const navLinks = [
   { id: "hakkimizda", label: "Dernek" },
@@ -20,7 +20,7 @@ export default function Header() {
         <button
           type="button"
           className="flex min-w-max cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-left"
-          onClick={() => scrollToId("anasayfa")}
+          onClick={scrollToTop}
           aria-label="ASSİD ana sayfa"
         >
           <span className="relative grid h-[43px] w-[43px] place-items-center overflow-hidden rounded-full bg-assid-green text-base font-black tracking-tighter text-white">
