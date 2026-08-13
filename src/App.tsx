@@ -1,16 +1,17 @@
-import { Route, Routes } from 'react-router-dom'
+import { Outlet, Route, Routes } from 'react-router-dom'
 import Footer from './components/layout/Footer'
 import Header from './components/layout/Header'
 import { ToastProvider } from './context/ToastContext'
+import ContactPage from './pages/ContactPage'
 import FirmaRehberiPage from './pages/FirmaRehberiPage'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 
-function HomeLayout() {
+function SiteLayout() {
   return (
     <>
       <Header />
-      <HomePage />
+      <Outlet />
       <Footer />
     </>
   )
@@ -20,9 +21,12 @@ export default function App() {
   return (
     <ToastProvider>
       <Routes>
-        <Route path="/" element={<HomeLayout />} />
+        <Route element={<SiteLayout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+        </Route>
         <Route path="/firma-rehberi" element={<FirmaRehberiPage />} />
-        <Route path="/login" element={<LoginPage />} />
       </Routes>
     </ToastProvider>
   )

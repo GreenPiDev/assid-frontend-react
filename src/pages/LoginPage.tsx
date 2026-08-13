@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import Button from "../components/ui/Button";
 import { useToast } from "../context/ToastContext";
 
@@ -14,17 +13,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-assid-paper px-5 py-16">
-      <Link
-        className="group fixed left-6 top-6 z-10 grid h-11.5 w-11.5 place-items-center rounded-full border border-assid-line bg-white text-assid-green shadow-[0_8px_20px_rgba(18,58,99,.08)] transition duration-250 hover:-translate-x-0.5 hover:border-assid-green/40"
-        to="/"
-        aria-label="Ana sayfaya dön"
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 12H5M12 19l-7-7 7-7" />
-        </svg>
-      </Link>
-
+    <div className="flex min-h-[calc(100vh-78px)] items-center justify-center bg-assid-paper px-5 py-16">
       <div className="w-full max-w-[420px] rounded-[32px] bg-white p-8 shadow-card md:p-11">
         <div className="flex flex-col items-center text-center">
           <span className="relative grid h-[52px] w-[52px] place-items-center overflow-hidden rounded-full bg-assid-green text-lg font-black tracking-tighter text-white">
