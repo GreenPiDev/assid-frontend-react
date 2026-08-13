@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import Button from "../ui/Button";
-import { useToast } from "../../context/ToastContext";
 import { scrollToId, scrollToTop } from "../../utils/scroll";
 
 const navLinks = [
@@ -12,8 +11,6 @@ const navLinks = [
 ];
 
 export default function Header() {
-  const showToast = useToast();
-
   return (
     <header className="sticky top-0 z-30 border-b border-assid-line/80 bg-white/92 backdrop-blur-md">
       <div className="mx-auto flex min-h-[78px] w-[min(calc(100%-40px),1240px)] items-center gap-8">
@@ -48,16 +45,8 @@ export default function Header() {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2.5 lg:ml-0">
-          <span className="hidden sm:block">
-            <Button as={Link} to="/firma-rehberi" variant="outline">
-              Firma Ara
-            </Button>
-          </span>
-          <Button
-            variant="primary"
-            onClick={() => showToast("Üyelik başvuru sayfası WordPress formuna bağlanacak.")}
-          >
-            Üye Ol <span>↗</span>
+          <Button as={Link} to="/login" variant="primary">
+            Kullanıcı Girişi
           </Button>
           <button className="p-2 text-assid-green lg:hidden" aria-label="Menüyü aç">
             ☰

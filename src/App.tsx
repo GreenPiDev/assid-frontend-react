@@ -4,6 +4,7 @@ import Header from './components/layout/Header'
 import { ToastProvider } from './context/ToastContext'
 import FirmaRehberiPage from './pages/FirmaRehberiPage'
 import HomePage from './pages/HomePage'
+import LoginPage from './pages/LoginPage'
 
 function HomeLayout() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomeLayout />} />
         <Route path="/firma-rehberi" element={<FirmaRehberiPage />} />
+        <Route path="/login" element={<LoginPage />} />
       </Routes>
     </ToastProvider>
   )
