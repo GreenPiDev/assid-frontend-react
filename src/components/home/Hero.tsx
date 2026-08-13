@@ -1,6 +1,7 @@
 import StatsBar from "./StatsBar";
 import Ticker from "./Ticker";
 import Button from "../ui/Button";
+import { scrollToId } from "../../utils/scroll";
 
 export default function Hero() {
   return (
@@ -21,7 +22,7 @@ export default function Hero() {
               ASSİD; üyelerini, üretim gücünü ve yeni iş fırsatlarını tek bir dijital platformda buluşturur.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Button as="a" href="#firma-rehberi" variant="light">
+              <Button onClick={() => scrollToId("firma-rehberi")} variant="light">
                 Firma Rehberini Keşfet <span>→</span>
               </Button>
             </div>

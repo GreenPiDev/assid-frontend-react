@@ -1,4 +1,5 @@
 import Button from "../ui/Button";
+import { scrollToId } from "../../utils/scroll";
 
 const features = [
   "Kurumsal tanıtım ve iletişim merkezi",
@@ -35,7 +36,7 @@ export default function AboutSection() {
               </li>
             ))}
           </ul>
-          <Button as="a" href="#b2b" variant="primary">
+          <Button onClick={() => scrollToId("b2b")} variant="primary">
             Platformu İncele <span>→</span>
           </Button>
         </div>

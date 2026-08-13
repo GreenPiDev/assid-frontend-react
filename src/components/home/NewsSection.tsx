@@ -51,9 +51,12 @@ export default function NewsSection() {
                     {item.title}
                   </h3>
                   {item.summary && <p className="m-0 text-[0.84rem] text-assid-muted">{item.summary}</p>}
-                  <a href="#" className="mt-3.5 inline-flex text-[0.84rem] font-extrabold text-assid-green">
+                  <button
+                    type="button"
+                    className="mt-3.5 inline-flex cursor-pointer border-0 bg-transparent p-0 text-[0.84rem] font-extrabold text-assid-green"
+                  >
                     Haberi Oku →
-                  </a>
+                  </button>
                 </div>
               </article>
             );

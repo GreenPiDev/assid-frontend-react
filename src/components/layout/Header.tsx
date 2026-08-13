@@ -1,13 +1,14 @@
 import { Link } from "react-router-dom";
 import Button from "../ui/Button";
 import { useToast } from "../../context/ToastContext";
+import { scrollToId, scrollToTop } from "../../utils/scroll";
 
 const navLinks = [
-  { href: "#hakkimizda", label: "Dernek" },
-  { href: "#firma-rehberi", label: "Firma Rehberi" },
-  { href: "#etkinlikler", label: "Etkinlikler" },
-  { href: "#", label: "Duyurular" },
-  { href: "#iletisim", label: "İletişim" },
+  { id: "hakkimizda", label: "Dernek" },
+  { id: "firma-rehberi", label: "Firma Rehberi" },
+  { id: "etkinlikler", label: "Etkinlikler" },
+  { id: null, label: "Duyurular" },
+  { id: "iletisim", label: "İletişim" },
 ];
 
 export default function Header() {
@@ -16,7 +17,12 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-30 border-b border-assid-line/80 bg-white/92 backdrop-blur-md">
       <div className="mx-auto flex min-h-[78px] w-[min(calc(100%-40px),1240px)] items-center gap-8">
-        <a className="flex min-w-max items-center gap-2.5" href="#anasayfa" aria-label="ASSİD ana sayfa">
+        <button
+          type="button"
+          className="flex min-w-max cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-left"
+          onClick={scrollToTop}
+          aria-label="ASSİD ana sayfa"
+        >
           <span className="relative grid h-[43px] w-[43px] place-items-center overflow-hidden rounded-full bg-assid-green text-base font-black tracking-tighter text-white">
             A
             <span className="absolute -right-3.5 -top-2.5 h-7 w-7 rounded-full border-[3px] border-assid-lime" />
@@ -27,17 +33,18 @@ export default function Header() {
               ANKARA SİTELER SANAYİCİ VE İŞ İNSANLARI DERNEĞİ
             </small>
           </span>
-        </a>
+        </button>
         <nav className="ml-auto hidden items-center gap-6 text-[0.89rem] font-bold text-[#405048] lg:flex" aria-label="Ana menü">
           {navLinks.map((link) => (
-            <a
+            <button
               key={link.label}
-              href={link.href}
-              className="group relative py-1.5"
+              type="button"
+              onClick={() => link.id && scrollToId(link.id)}
+              className="group relative cursor-pointer border-0 bg-transparent p-0 py-1.5 text-left"
             >
               {link.label}
               <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-assid-lime transition-all duration-250 group-hover:w-full" />
-            </a>
+            </button>
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2.5 lg:ml-0">
