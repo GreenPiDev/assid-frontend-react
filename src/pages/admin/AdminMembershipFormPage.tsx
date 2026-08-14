@@ -25,6 +25,12 @@ export default function AdminMembershipFormPage() {
   const [deleteTarget, setDeleteTarget] = useState<AdminMembershipFee | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showMembershipFeesTable, setShowMembershipFeesTable] = useState(true);
+  const [showAttachmentsSection, setShowAttachmentsSection] = useState(true);
+  const [showMembershipClassSection, setShowMembershipClassSection] = useState(true);
+  const [showKvkkConsent, setShowKvkkConsent] = useState(true);
+  const [requireKvkkConsent, setRequireKvkkConsent] = useState(true);
+  const [showBylawsConsent, setShowBylawsConsent] = useState(true);
+  const [requireBylawsConsent, setRequireBylawsConsent] = useState(true);
   const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
 
   function load() {
@@ -39,20 +45,99 @@ export default function AdminMembershipFormPage() {
 
   useEffect(() => {
     fetchOrganizationSettings()
-      .then((s) => setShowMembershipFeesTable(s.showMembershipFeesTable ?? true))
+      .then((s) => {
+        setShowMembershipFeesTable(s.showMembershipFeesTable ?? true);
+        setShowAttachmentsSection(s.showAttachmentsSection ?? true);
+        setShowMembershipClassSection(s.showMembershipClassSection ?? true);
+        setShowKvkkConsent(s.showKvkkConsent ?? true);
+        setRequireKvkkConsent(s.requireKvkkConsent ?? true);
+        setShowBylawsConsent(s.showBylawsConsent ?? true);
+        setRequireBylawsConsent(s.requireBylawsConsent ?? true);
+      })
       .catch(() => showToast("Ayarlar yüklenemedi."));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function handleToggleVisibility(checked: boolean) {
-    setShowMembershipFeesTable(checked);
+  async function handleToggleVisibility(
+    field: "showMembershipFeesTable" | "showAttachmentsSection" | "showMembershipClassSection",
+    checked: boolean,
+  ) {
+    const setState =
+      field === "showMembershipFeesTable"
+        ? setShowMembershipFeesTable
+        : field === "showAttachmentsSection"
+          ? setShowAttachmentsSection
+          : setShowMembershipClassSection;
+    setState(checked);
     setIsTogglingVisibility(true);
     try {
-      await updateOrganizationSettings({ showMembershipFeesTable: checked });
+      await updateOrganizationSettings({ [field]: checked });
       showToast("Ayarlar güncellendi.");
     } catch {
       showToast("Güncelleme başarısız oldu.");
-      setShowMembershipFeesTable(!checked);
+      setState(!checked);
+    } finally {
+      setIsTogglingVisibility(false);
+    }
+  }
+
+  async function handleShowKvkkChange(checked: boolean) {
+    const nextRequire = checked && requireKvkkConsent;
+    setShowKvkkConsent(checked);
+    setRequireKvkkConsent(nextRequire);
+    setIsTogglingVisibility(true);
+    try {
+      await updateOrganizationSettings({ showKvkkConsent: checked, requireKvkkConsent: nextRequire });
+      showToast("Ayarlar güncellendi.");
+    } catch {
+      showToast("Güncelleme başarısız oldu.");
+      setShowKvkkConsent(!checked);
+      setRequireKvkkConsent(requireKvkkConsent);
+    } finally {
+      setIsTogglingVisibility(false);
+    }
+  }
+
+  async function handleRequireKvkkChange(checked: boolean) {
+    setRequireKvkkConsent(checked);
+    setIsTogglingVisibility(true);
+    try {
+      await updateOrganizationSettings({ requireKvkkConsent: checked });
+      showToast("Ayarlar güncellendi.");
+    } catch {
+      showToast("Güncelleme başarısız oldu.");
+      setRequireKvkkConsent(!checked);
+    } finally {
+      setIsTogglingVisibility(false);
+    }
+  }
+
+  async function handleShowBylawsChange(checked: boolean) {
+    const nextRequire = checked && requireBylawsConsent;
+    setShowBylawsConsent(checked);
+    setRequireBylawsConsent(nextRequire);
+    setIsTogglingVisibility(true);
+    try {
+      await updateOrganizationSettings({ showBylawsConsent: checked, requireBylawsConsent: nextRequire });
+      showToast("Ayarlar güncellendi.");
+    } catch {
+      showToast("Güncelleme başarısız oldu.");
+      setShowBylawsConsent(!checked);
+      setRequireBylawsConsent(requireBylawsConsent);
+    } finally {
+      setIsTogglingVisibility(false);
+    }
+  }
+
+  async function handleRequireBylawsChange(checked: boolean) {
+    setRequireBylawsConsent(checked);
+    setIsTogglingVisibility(true);
+    try {
+      await updateOrganizationSettings({ requireBylawsConsent: checked });
+      showToast("Ayarlar güncellendi.");
+    } catch {
+      showToast("Güncelleme başarısız oldu.");
+      setRequireBylawsConsent(!checked);
     } finally {
       setIsTogglingVisibility(false);
     }
@@ -104,7 +189,7 @@ export default function AdminMembershipFormPage() {
             type="checkbox"
             checked={showMembershipFeesTable}
             disabled={isTogglingVisibility}
-            onChange={(e) => handleToggleVisibility(e.target.checked)}
+            onChange={(e) => handleToggleVisibility("showMembershipFeesTable", e.target.checked)}
           />
           Üyelik başvuru formunda göster
         </label>
@@ -161,6 +246,90 @@ export default function AdminMembershipFormPage() {
               )}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <div className="mt-5 rounded-[20px] border border-assid-line bg-white p-6 md:p-7">
+        <h2 className="mb-1 text-[1.02rem] font-bold text-assid-ink">Üyelik Sınıfı</h2>
+        <p className="mb-5 text-[0.78rem] text-assid-muted">
+          /uyelik-basvurusu sayfasındaki "Üyelik Sınıfı" bölümünde görüntülenir.
+        </p>
+        <label className="flex cursor-pointer items-center gap-2 text-[0.85rem] text-assid-ink">
+          <input
+            type="checkbox"
+            checked={showMembershipClassSection}
+            disabled={isTogglingVisibility}
+            onChange={(e) => handleToggleVisibility("showMembershipClassSection", e.target.checked)}
+          />
+          Üyelik başvuru formunda göster
+        </label>
+      </div>
+
+      <div className="mt-5 rounded-[20px] border border-assid-line bg-white p-6 md:p-7">
+        <h2 className="mb-1 text-[1.02rem] font-bold text-assid-ink">Ekler</h2>
+        <p className="mb-5 text-[0.78rem] text-assid-muted">
+          /uyelik-basvurusu sayfasındaki "Ekler" bölümünde görüntülenir.
+        </p>
+        <label className="flex cursor-pointer items-center gap-2 text-[0.85rem] text-assid-ink">
+          <input
+            type="checkbox"
+            checked={showAttachmentsSection}
+            disabled={isTogglingVisibility}
+            onChange={(e) => handleToggleVisibility("showAttachmentsSection", e.target.checked)}
+          />
+          Üyelik başvuru formunda göster
+        </label>
+      </div>
+
+      <div className="mt-5 rounded-[20px] border border-assid-line bg-white p-6 md:p-7">
+        <h2 className="mb-1 text-[1.02rem] font-bold text-assid-ink">Onaylar</h2>
+        <p className="mb-5 text-[0.78rem] text-assid-muted">
+          Metinler /dashboard/organizasyon-bilgileri sayfasından düzenlenir; bu bölüm sadece üyelik başvuru
+          formundaki görünürlük ve zorunluluk ayarlarını yönetir.
+        </p>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div className="grid gap-2">
+            <span className="text-[0.78rem] font-bold text-assid-muted">KVKK Aydınlatma Metni</span>
+            <label className="flex cursor-pointer items-center gap-2 text-[0.85rem] text-assid-ink">
+              <input
+                type="checkbox"
+                checked={showKvkkConsent}
+                disabled={isTogglingVisibility}
+                onChange={(e) => handleShowKvkkChange(e.target.checked)}
+              />
+              Üye başvuru formunda görünsün
+            </label>
+            <label className="flex cursor-pointer items-center gap-2 text-[0.85rem] text-assid-ink">
+              <input
+                type="checkbox"
+                checked={requireKvkkConsent}
+                disabled={!showKvkkConsent || isTogglingVisibility}
+                onChange={(e) => handleRequireKvkkChange(e.target.checked)}
+              />
+              Üyelik başvurusu için zorunlu
+            </label>
+          </div>
+          <div className="grid gap-2">
+            <span className="text-[0.78rem] font-bold text-assid-muted">Dernek Tüzüğü</span>
+            <label className="flex cursor-pointer items-center gap-2 text-[0.85rem] text-assid-ink">
+              <input
+                type="checkbox"
+                checked={showBylawsConsent}
+                disabled={isTogglingVisibility}
+                onChange={(e) => handleShowBylawsChange(e.target.checked)}
+              />
+              Üye başvuru formunda görünsün
+            </label>
+            <label className="flex cursor-pointer items-center gap-2 text-[0.85rem] text-assid-ink">
+              <input
+                type="checkbox"
+                checked={requireBylawsConsent}
+                disabled={!showBylawsConsent || isTogglingVisibility}
+                onChange={(e) => handleRequireBylawsChange(e.target.checked)}
+              />
+              Üyelik başvurusu için zorunlu
+            </label>
+          </div>
         </div>
       </div>
 

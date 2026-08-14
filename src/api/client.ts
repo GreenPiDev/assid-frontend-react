@@ -95,6 +95,8 @@ export interface BackendOrganizationSettings {
   requireBylawsConsent?: boolean;
   showLoginMembershipCta?: boolean;
   showMembershipFeesTable?: boolean;
+  showAttachmentsSection?: boolean;
+  showMembershipClassSection?: boolean;
 }
 
 // Yönetim panelinden onaylanmamış (isApproved:false) üyeler herkese açık

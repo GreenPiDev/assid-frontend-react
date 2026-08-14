@@ -86,6 +86,8 @@ export interface AdminOrganizationSettings {
   requireBylawsConsent?: boolean;
   showLoginMembershipCta?: boolean;
   showMembershipFeesTable?: boolean;
+  showAttachmentsSection?: boolean;
+  showMembershipClassSection?: boolean;
 }
 
 export interface AdminMembershipFee {

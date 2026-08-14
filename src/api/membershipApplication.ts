@@ -11,7 +11,7 @@ export interface MembershipApplicationPayload {
   sectors: string[];
   businessActivityTypes?: string[];
   references?: string;
-  membershipType: "individual" | "corporate";
+  membershipType?: "individual" | "corporate";
   sectorStatus?: string;
   birthPlace?: string;
   birthDate?: string;
