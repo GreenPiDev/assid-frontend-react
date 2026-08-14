@@ -4,6 +4,7 @@ import AdminEventsPage from "./AdminEventsPage";
 import AdminLoginPageSettingsPage from "./AdminLoginPageSettingsPage";
 import AdminMembersPage from "./AdminMembersPage";
 import AdminMembershipDetailPage from "./AdminMembershipDetailPage";
+import AdminMembershipFormPage from "./AdminMembershipFormPage";
 import AdminMembershipsPage from "./AdminMembershipsPage";
 import AdminNewsPage from "./AdminNewsPage";
 import AdminSettingsPage from "./AdminSettingsPage";
@@ -22,6 +23,7 @@ export default function AdminRoutes() {
         <Route path="kullanicilar" element={<AdminUsersPage />} />
         <Route path="organizasyon-bilgileri" element={<AdminSettingsPage />} />
         <Route path="uye-girisi-sayfasi" element={<AdminLoginPageSettingsPage />} />
+        <Route path="uye-kayit-formu" element={<AdminMembershipFormPage />} />
         <Route path="*" element={<Navigate to="/dashboard/uyeler" replace />} />
       </Routes>
     </AdminLayout>

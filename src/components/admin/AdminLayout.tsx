@@ -17,6 +17,7 @@ const contentChildren = [
   { to: "/dashboard/etkinlikler", label: "Etkinlikler" },
   { to: "/dashboard/haberler", label: "Sektörel Haberler" },
   { to: "/dashboard/uye-girisi-sayfasi", label: "Üye Girişi Sayfası" },
+  { to: "/dashboard/uye-kayit-formu", label: "Üye Kayıt Formu" },
 ];
 
 const navItems = [

@@ -15,6 +15,7 @@ import {
 import { SECTORS } from "../constants/sectors";
 import { useToast } from "../context/ToastContext";
 import { useOrganizationSettings } from "../api/resources/organizationSettings";
+import { useMembershipFees } from "../api/resources/membershipFees";
 
 function RequiredMark() {
   return (
@@ -90,6 +91,7 @@ const initialFiles: MembershipApplicationFiles = {
 export default function MembershipApplicationPage() {
   const showToast = useToast();
   const { data: settings } = useOrganizationSettings();
+  const { data: membershipFees } = useMembershipFees();
   const [form, setForm] = useState(initialForm);
   const [sectors, setSectors] = useState<string[]>([]);
   const [businessActivityTypes, setBusinessActivityTypes] = useState<string[]>([]);
@@ -436,6 +438,31 @@ export default function MembershipApplicationPage() {
               </label>
             </div>
           </Section>
+
+          {(settings?.showMembershipFeesTable ?? true) && (
+            <div className="rounded-[20px] border border-assid-line bg-white p-6 md:p-7">
+              <h2 className="text-[1.05rem] font-bold text-assid-ink">Ücretler</h2>
+              <p className="mb-5 mt-1 text-[0.78rem] text-assid-muted">Bilgilendirme Amaçlıdır</p>
+              <div className="overflow-x-auto rounded-[12px] border border-assid-line">
+                <table className="w-full min-w-[420px] border-collapse text-left text-[0.85rem]">
+                  <thead>
+                    <tr className="bg-assid-ink text-white">
+                      <th className="px-4 py-3 font-bold">Üyelik Sınıfı</th>
+                      <th className="px-4 py-3 font-bold">Tutar</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(membershipFees ?? []).map((fee) => (
+                      <tr key={fee._id} className="border-t border-assid-line">
+                        <td className="px-4 py-3 font-bold text-assid-ink">{fee.label}</td>
+                        <td className="px-4 py-3 font-bold text-assid-ink">{fee.amount.toLocaleString("tr-TR")}₺</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           <Section title="Ekler">
             <FileUploadField

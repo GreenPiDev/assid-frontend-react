@@ -85,6 +85,13 @@ export interface AdminOrganizationSettings {
   showBylawsConsent?: boolean;
   requireBylawsConsent?: boolean;
   showLoginMembershipCta?: boolean;
+  showMembershipFeesTable?: boolean;
+}
+
+export interface AdminMembershipFee {
+  _id: string;
+  label: string;
+  amount: number;
 }
 
 export interface AdminUser {
@@ -198,6 +205,23 @@ export async function uploadOrganizationLogo(file: File): Promise<AdminOrganizat
     throw new Error(message ?? `İstek başarısız (${res.status})`);
   }
   return res.json() as Promise<AdminOrganizationSettings>;
+}
+
+// --- Membership fees ---
+export function fetchMembershipFees() {
+  return request<AdminMembershipFee[]>("/membership-fees");
+}
+
+export function createMembershipFee(dto: { label: string; amount: number }) {
+  return request<AdminMembershipFee>("/membership-fees", { method: "POST", body: JSON.stringify(dto) });
+}
+
+export function updateMembershipFee(id: string, dto: Partial<{ label: string; amount: number }>) {
+  return request<AdminMembershipFee>(`/membership-fees/${id}`, { method: "PATCH", body: JSON.stringify(dto) });
+}
+
+export function deleteMembershipFee(id: string) {
+  return request<void>(`/membership-fees/${id}`, { method: "DELETE" });
 }
 
 // --- Users (login credentials) ---

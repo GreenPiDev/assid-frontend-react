@@ -62,6 +62,12 @@ export interface BackendStats {
   eventsCount: number;
 }
 
+export interface BackendMembershipFee {
+  _id: string;
+  label: string;
+  amount: number;
+}
+
 export interface BackendOrganizationSettings {
   _id: string;
   name: string;
@@ -88,6 +94,7 @@ export interface BackendOrganizationSettings {
   showBylawsConsent?: boolean;
   requireBylawsConsent?: boolean;
   showLoginMembershipCta?: boolean;
+  showMembershipFeesTable?: boolean;
 }
 
 // Yönetim panelinden onaylanmamış (isApproved:false) üyeler herkese açık
@@ -165,6 +172,9 @@ export async function get({
 
     case "organization-settings":
       return request<BackendOrganizationSettings>("/organization-settings");
+
+    case "membership-fees":
+      return request<BackendMembershipFee[]>("/membership-fees");
 
     default:
       throw new Error(`Bilinmeyen kaynak: ${path}`);
