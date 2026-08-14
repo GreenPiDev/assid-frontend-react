@@ -1,4 +1,4 @@
-const API_BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:3000/api";
+import { API_BASE_URL } from "./env";
 
 export type Role = "admin" | "member";
 

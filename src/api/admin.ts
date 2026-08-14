@@ -1,4 +1,4 @@
-const API_BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:3000/api";
+import { API_BASE_URL } from "./env";
 
 export interface AdminMember {
   _id: string;
@@ -74,6 +74,10 @@ export interface AdminOrganizationSettings {
     twitter?: string;
   };
   footerText?: string;
+  kvkkText?: string;
+  bylawsText?: string;
+  cookiePolicyText?: string;
+  privacyPolicyText?: string;
 }
 
 export interface AdminUser {

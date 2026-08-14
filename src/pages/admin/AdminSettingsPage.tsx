@@ -20,6 +20,10 @@ type FormState = {
   instagram: string;
   linkedin: string;
   twitter: string;
+  kvkkText: string;
+  bylawsText: string;
+  cookiePolicyText: string;
+  privacyPolicyText: string;
 };
 
 function toForm(s: AdminOrganizationSettings): FormState {
@@ -36,6 +40,10 @@ function toForm(s: AdminOrganizationSettings): FormState {
     instagram: s.socialLinks?.instagram ?? "",
     linkedin: s.socialLinks?.linkedin ?? "",
     twitter: s.socialLinks?.twitter ?? "",
+    kvkkText: s.kvkkText ?? "",
+    bylawsText: s.bylawsText ?? "",
+    cookiePolicyText: s.cookiePolicyText ?? "",
+    privacyPolicyText: s.privacyPolicyText ?? "",
   };
 }
 
@@ -82,7 +90,7 @@ export default function AdminSettingsPage() {
     try {
       await updateOrganizationSettings({
         name: form.name,
-        shortName: form.shortName || undefined,
+        shortName: form.shortName,
         description: form.description || undefined,
         address: form.address || undefined,
         phone: form.phone || undefined,
@@ -95,6 +103,10 @@ export default function AdminSettingsPage() {
           linkedin: form.linkedin || undefined,
           twitter: form.twitter || undefined,
         },
+        kvkkText: form.kvkkText || undefined,
+        bylawsText: form.bylawsText || undefined,
+        cookiePolicyText: form.cookiePolicyText || undefined,
+        privacyPolicyText: form.privacyPolicyText || undefined,
       });
       showToast("Kurum ayarları güncellendi.");
     } catch {
@@ -155,7 +167,6 @@ export default function AdminSettingsPage() {
                 <label className="grid gap-1.5">
                   <span className="text-[0.78rem] font-bold text-assid-muted">Kurum Adı</span>
                   <input
-                    required
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
@@ -259,6 +270,52 @@ export default function AdminSettingsPage() {
                   />
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div className="grid gap-4 rounded-[20px] border border-assid-line bg-white p-6 md:p-7">
+            <h2 className="text-[1.02rem] font-bold text-assid-ink">Yasal Metinler</h2>
+            <p className="text-[0.78rem] text-assid-muted">
+              Bu metinler footer'daki KVKK, Çerez Politikası ve Gizlilik pencerelerinde; KVKK ve Dernek Tüzüğü
+              metinleri ayrıca üyelik başvuru formunda gösterilir.
+            </p>
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+              <label className="grid gap-1.5">
+                <span className="text-[0.78rem] font-bold text-assid-muted">KVKK Aydınlatma Metni</span>
+                <textarea
+                  rows={6}
+                  value={form.kvkkText}
+                  onChange={(e) => setForm({ ...form, kvkkText: e.target.value })}
+                  className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
+                />
+              </label>
+              <label className="grid gap-1.5">
+                <span className="text-[0.78rem] font-bold text-assid-muted">Dernek Tüzüğü</span>
+                <textarea
+                  rows={6}
+                  value={form.bylawsText}
+                  onChange={(e) => setForm({ ...form, bylawsText: e.target.value })}
+                  className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
+                />
+              </label>
+              <label className="grid gap-1.5">
+                <span className="text-[0.78rem] font-bold text-assid-muted">Çerez Politikası</span>
+                <textarea
+                  rows={6}
+                  value={form.cookiePolicyText}
+                  onChange={(e) => setForm({ ...form, cookiePolicyText: e.target.value })}
+                  className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
+                />
+              </label>
+              <label className="grid gap-1.5">
+                <span className="text-[0.78rem] font-bold text-assid-muted">Gizlilik Politikası</span>
+                <textarea
+                  rows={6}
+                  value={form.privacyPolicyText}
+                  onChange={(e) => setForm({ ...form, privacyPolicyText: e.target.value })}
+                  className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
+                />
+              </label>
             </div>
           </div>
 

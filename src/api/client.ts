@@ -1,10 +1,10 @@
 import type { Member } from "../types";
+import { API_BASE_URL } from "./env";
 
 // Gerçek backend (NestJS + MongoDB) buradan çağrılıyor. get() imzası
 // (path, params) sabit kaldığı sürece factory.ts ve api/resources/* hiç
 // dokunulmadan kalır — backend adresi veya kaynak isimleri değişirse
 // sadece bu dosya güncellenir.
-const API_BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:3000/api";
 
 interface GetParams {
   sector?: string;
@@ -60,6 +60,29 @@ export interface BackendStats {
   sectorsCount: number;
   activityAreasCount: number;
   eventsCount: number;
+}
+
+export interface BackendOrganizationSettings {
+  _id: string;
+  name: string;
+  shortName?: string;
+  logo?: string;
+  description?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  socialLinks?: {
+    facebook?: string;
+    instagram?: string;
+    linkedin?: string;
+    twitter?: string;
+  };
+  footerText?: string;
+  kvkkText?: string;
+  bylawsText?: string;
+  cookiePolicyText?: string;
+  privacyPolicyText?: string;
 }
 
 // Yönetim panelinden onaylanmamış (isApproved:false) üyeler herkese açık
@@ -134,6 +157,9 @@ export async function get({
 
     case "stats":
       return request<BackendStats>("/stats");
+
+    case "organization-settings":
+      return request<BackendOrganizationSettings>("/organization-settings");
 
     default:
       throw new Error(`Bilinmeyen kaynak: ${path}`);
