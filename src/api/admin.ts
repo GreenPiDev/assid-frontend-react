@@ -82,6 +82,7 @@ export interface AdminOrganizationSettings {
   requireKvkkConsent?: boolean;
   showBylawsConsent?: boolean;
   requireBylawsConsent?: boolean;
+  showLoginMembershipCta?: boolean;
 }
 
 export interface AdminUser {

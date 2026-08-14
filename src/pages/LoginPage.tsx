@@ -4,9 +4,11 @@ import AuthShell from "../components/auth/AuthShell";
 import Button from "../components/ui/Button";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import { useOrganizationSettings } from "../api/resources/organizationSettings";
 
 export default function LoginPage() {
   const showToast = useToast();
+  const { data: settings } = useOrganizationSettings();
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -95,12 +97,14 @@ export default function LoginPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-[0.86rem] text-assid-muted">
-        Henüz üye değil misiniz?{" "}
-        <Link to="/uyelik-basvurusu" className="font-bold text-assid-green hover:underline">
-          Üyelik başvurusu yapın
-        </Link>
-      </p>
+      {(settings?.showLoginMembershipCta ?? true) && (
+        <p className="mt-6 text-center text-[0.86rem] text-assid-muted">
+          Henüz üye değil misiniz?{" "}
+          <Link to="/uyelik-basvurusu" className="font-bold text-assid-green hover:underline">
+            Üyelik başvurusu yapın
+          </Link>
+        </p>
+      )}
     </AuthShell>
   );
 }

@@ -187,14 +187,12 @@ export default function MembershipApplicationPage() {
     <main className="py-17 md:py-24">
       <div className="mx-auto w-[min(calc(100%-40px),1320px)]">
         <div className="mb-8 max-w-2xl">
-          <span className="text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-green">
-            Üyelik Başvurusu
-          </span>
+
           <h1 className="mt-3 text-[clamp(1.8rem,3.2vw,2.6rem)] leading-[1.05] tracking-[-.03em] text-assid-ink">
-            ASSİD ailesine katılın
+            Üyelik Başvurusu
           </h1>
           <p className="mt-3 text-[0.95rem] text-[#5d665f]">
-            Aşağıdaki formu doldurun, başvurunuz incelendikten sonra sizinle iletişime geçilecek.
+            Aşağıdaki formu eksiksiz olarak doldurmanızın ardından başvurunuz değerlendirmeye alınacak ve sonuç hakkında tarafınıza geri dönüş sağlanacaktır.
           </p>
         </div>
 

@@ -87,6 +87,7 @@ export interface BackendOrganizationSettings {
   requireKvkkConsent?: boolean;
   showBylawsConsent?: boolean;
   requireBylawsConsent?: boolean;
+  showLoginMembershipCta?: boolean;
 }
 
 // Yönetim panelinden onaylanmamış (isApproved:false) üyeler herkese açık

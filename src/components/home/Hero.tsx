@@ -12,9 +12,7 @@ export default function Hero() {
       <div className="flex flex-1 flex-col justify-center">
         <div className="relative z-10 mx-auto grid w-[min(calc(100%-40px),1240px)] grid-cols-1 items-end gap-10 py-16 md:py-22 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,.75fr)]">
           <div>
-            <div className="inline-flex items-center gap-2 text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-lime before:h-0.5 before:w-5 before:bg-assid-lime">
-              Siteler'in dijital iş ağı
-            </div>
+
             <h1 className="my-4 max-w-3xl text-[clamp(3rem,6vw,5.75rem)] leading-[.92] tracking-[-.07em]">
               Birlikte büyüyen <em>güçlü</em> bir sanayi ekosistemi.
             </h1>
