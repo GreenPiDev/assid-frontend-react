@@ -25,6 +25,10 @@ type FormState = {
   bylawsText: string;
   cookiePolicyText: string;
   privacyPolicyText: string;
+  showKvkkConsent: boolean;
+  requireKvkkConsent: boolean;
+  showBylawsConsent: boolean;
+  requireBylawsConsent: boolean;
 };
 
 function toForm(s: AdminOrganizationSettings): FormState {
@@ -45,6 +49,10 @@ function toForm(s: AdminOrganizationSettings): FormState {
     bylawsText: s.bylawsText ?? "",
     cookiePolicyText: s.cookiePolicyText ?? "",
     privacyPolicyText: s.privacyPolicyText ?? "",
+    showKvkkConsent: s.showKvkkConsent ?? true,
+    requireKvkkConsent: s.requireKvkkConsent ?? true,
+    showBylawsConsent: s.showBylawsConsent ?? true,
+    requireBylawsConsent: s.requireBylawsConsent ?? true,
   };
 }
 
@@ -108,6 +116,10 @@ export default function AdminSettingsPage() {
         bylawsText: form.bylawsText || undefined,
         cookiePolicyText: form.cookiePolicyText || undefined,
         privacyPolicyText: form.privacyPolicyText || undefined,
+        showKvkkConsent: form.showKvkkConsent,
+        requireKvkkConsent: form.requireKvkkConsent,
+        showBylawsConsent: form.showBylawsConsent,
+        requireBylawsConsent: form.requireBylawsConsent,
       });
       showToast("Kurum ayarları güncellendi.");
     } catch {
@@ -302,24 +314,74 @@ export default function AdminSettingsPage() {
               metinleri ayrıca üyelik başvuru formunda gösterilir.
             </p>
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-              <label className="grid gap-1.5">
-                <span className="text-[0.78rem] font-bold text-assid-muted">KVKK Aydınlatma Metni</span>
-                <textarea
-                  rows={6}
-                  value={form.kvkkText}
-                  onChange={(e) => setForm({ ...form, kvkkText: e.target.value })}
-                  className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
-                />
-              </label>
-              <label className="grid gap-1.5">
-                <span className="text-[0.78rem] font-bold text-assid-muted">Dernek Tüzüğü</span>
-                <textarea
-                  rows={6}
-                  value={form.bylawsText}
-                  onChange={(e) => setForm({ ...form, bylawsText: e.target.value })}
-                  className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
-                />
-              </label>
+              <div className="grid gap-2">
+                <label className="grid gap-1.5">
+                  <span className="text-[0.78rem] font-bold text-assid-muted">KVKK Aydınlatma Metni</span>
+                  <textarea
+                    rows={6}
+                    value={form.kvkkText}
+                    onChange={(e) => setForm({ ...form, kvkkText: e.target.value })}
+                    className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
+                  />
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 text-[0.8rem] text-assid-ink">
+                  <input
+                    type="checkbox"
+                    checked={form.showKvkkConsent}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        showKvkkConsent: e.target.checked,
+                        requireKvkkConsent: e.target.checked && form.requireKvkkConsent,
+                      })
+                    }
+                  />
+                  Üye başvuru formunda görünsün
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 text-[0.8rem] text-assid-ink">
+                  <input
+                    type="checkbox"
+                    checked={form.requireKvkkConsent}
+                    disabled={!form.showKvkkConsent}
+                    onChange={(e) => setForm({ ...form, requireKvkkConsent: e.target.checked })}
+                  />
+                  Üyelik başvurusu için zorunlu
+                </label>
+              </div>
+              <div className="grid gap-2">
+                <label className="grid gap-1.5">
+                  <span className="text-[0.78rem] font-bold text-assid-muted">Dernek Tüzüğü</span>
+                  <textarea
+                    rows={6}
+                    value={form.bylawsText}
+                    onChange={(e) => setForm({ ...form, bylawsText: e.target.value })}
+                    className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
+                  />
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 text-[0.8rem] text-assid-ink">
+                  <input
+                    type="checkbox"
+                    checked={form.showBylawsConsent}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        showBylawsConsent: e.target.checked,
+                        requireBylawsConsent: e.target.checked && form.requireBylawsConsent,
+                      })
+                    }
+                  />
+                  Üye başvuru formunda görünsün
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 text-[0.8rem] text-assid-ink">
+                  <input
+                    type="checkbox"
+                    checked={form.requireBylawsConsent}
+                    disabled={!form.showBylawsConsent}
+                    onChange={(e) => setForm({ ...form, requireBylawsConsent: e.target.checked })}
+                  />
+                  Üyelik başvurusu için zorunlu
+                </label>
+              </div>
               <label className="grid gap-1.5">
                 <span className="text-[0.78rem] font-bold text-assid-muted">Çerez Politikası</span>
                 <textarea

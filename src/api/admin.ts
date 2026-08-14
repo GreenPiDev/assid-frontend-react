@@ -78,6 +78,10 @@ export interface AdminOrganizationSettings {
   bylawsText?: string;
   cookiePolicyText?: string;
   privacyPolicyText?: string;
+  showKvkkConsent?: boolean;
+  requireKvkkConsent?: boolean;
+  showBylawsConsent?: boolean;
+  requireBylawsConsent?: boolean;
 }
 
 export interface AdminUser {
