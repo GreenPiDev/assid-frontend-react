@@ -1,4 +1,4 @@
-import { Outlet, Route, Routes } from 'react-router-dom'
+import { createBrowserRouter, Outlet, ScrollRestoration } from 'react-router-dom'
 import RequireAuth from './components/auth/RequireAuth'
 import Footer from './components/layout/Footer'
 import Header from './components/layout/Header'
@@ -13,6 +13,17 @@ import MembershipApplicationPage from './pages/MembershipApplicationPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import RoleDashboardRouter from './pages/RoleDashboardRouter'
 
+function RootLayout() {
+  return (
+    <AuthProvider>
+      <ToastProvider>
+        <Outlet />
+        <ScrollRestoration />
+      </ToastProvider>
+    </AuthProvider>
+  )
+}
+
 function SiteLayout() {
   return (
     <>
@@ -23,30 +34,30 @@ function SiteLayout() {
   )
 }
 
-export default function App() {
-  return (
-    <AuthProvider>
-      <ToastProvider>
-        <Routes>
-          <Route element={<SiteLayout />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/uyelik-basvurusu" element={<MembershipApplicationPage />} />
-          </Route>
-          <Route path="/firma-rehberi" element={<FirmaRehberiPage />} />
-          <Route
-            path="/dashboard/*"
-            element={
-              <RequireAuth>
-                <RoleDashboardRouter />
-              </RequireAuth>
-            }
-          />
-        </Routes>
-      </ToastProvider>
-    </AuthProvider>
-  )
-}
+export const router = createBrowserRouter([
+  {
+    element: <RootLayout />,
+    children: [
+      {
+        element: <SiteLayout />,
+        children: [
+          { path: '/', element: <HomePage /> },
+          { path: '/login', element: <LoginPage /> },
+          { path: '/forgot-password', element: <ForgotPasswordPage /> },
+          { path: '/reset-password', element: <ResetPasswordPage /> },
+          { path: '/contact', element: <ContactPage /> },
+          { path: '/uyelik-basvurusu', element: <MembershipApplicationPage /> },
+        ],
+      },
+      { path: '/firma-rehberi', element: <FirmaRehberiPage /> },
+      {
+        path: '/dashboard/*',
+        element: (
+          <RequireAuth>
+            <RoleDashboardRouter />
+          </RequireAuth>
+        ),
+      },
+    ],
+  },
+])
