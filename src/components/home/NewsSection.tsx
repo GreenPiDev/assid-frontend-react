@@ -9,7 +9,7 @@ export default function NewsSection() {
   if (news.length === 0) return null;
 
   return (
-    <section className="bg-white py-17 md:py-24">
+    <section id="haberler" className="scroll-mt-[78px] bg-white py-17 md:py-24">
       <div className="mx-auto w-[min(calc(100%-40px),1240px)]">
         <div className="mb-9 flex flex-col items-start justify-between gap-5 md:flex-row md:items-end">
           <div>

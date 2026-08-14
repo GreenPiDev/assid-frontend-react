@@ -15,6 +15,7 @@ export interface MemberContact {
 export interface Member {
   id: string;
   name: string;
+  logo?: string;
   sectors: string[];
   activityAreas: string[];
   productsAndServices: string[];
