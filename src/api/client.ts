@@ -79,6 +79,10 @@ export interface BackendOrganizationSettings {
     twitter?: string;
   };
   footerText?: string;
+  kvkkText?: string;
+  bylawsText?: string;
+  cookiePolicyText?: string;
+  privacyPolicyText?: string;
 }
 
 // Yönetim panelinden onaylanmamış (isApproved:false) üyeler herkese açık

@@ -3,15 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { scrollToId } from "../../utils/scroll";
 import { useOrganizationSettings } from "../../api/resources/organizationSettings";
 import TextModal from "../ui/TextModal";
-import { COOKIE_POLICY_TEXT, KVKK_TEXT, PRIVACY_POLICY_TEXT } from "../../constants/legalTexts";
 
 type LegalModalKey = "kvkk" | "cookies" | "privacy";
-
-const legalModals: Record<LegalModalKey, { title: string; text: string }> = {
-  kvkk: { title: "KVKK Aydınlatma Metni", text: KVKK_TEXT },
-  cookies: { title: "Çerez Politikası", text: COOKIE_POLICY_TEXT },
-  privacy: { title: "Gizlilik Politikası", text: PRIVACY_POLICY_TEXT },
-};
 
 const corporateLinks = ["Hakkımızda", "Yönetim Kurulu", "Faaliyetler", "Basın Merkezi"];
 
@@ -54,6 +47,12 @@ export default function Footer() {
   const [openModal, setOpenModal] = useState<LegalModalKey | null>(null);
   const navigate = useNavigate();
 
+  const legalModals: Record<LegalModalKey, { title: string; text: string }> = {
+    kvkk: { title: "KVKK Aydınlatma Metni", text: settings?.kvkkText ?? "" },
+    cookies: { title: "Çerez Politikası", text: settings?.cookiePolicyText ?? "" },
+    privacy: { title: "Gizlilik Politikası", text: settings?.privacyPolicyText ?? "" },
+  };
+
   const socialPlatforms = [
     { key: "instagram", label: "Instagram", url: settings?.socialLinks?.instagram, Icon: InstagramIcon },
     { key: "facebook", label: "Facebook", url: settings?.socialLinks?.facebook, Icon: FacebookIcon },
@@ -65,7 +64,7 @@ export default function Footer() {
     <footer className="bg-[#0a2540] pt-16 text-white/74">
       <div className="mx-auto grid w-[min(calc(100%-40px),1240px)] grid-cols-1 gap-7 pb-12 sm:grid-cols-3 lg:grid-cols-[1.2fr_.7fr_.7fr_1fr]">
         <div className="sm:col-span-3 lg:col-span-1">
-          <button type="button" className="flex cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-left text-white" onClick={() => navigate("/")}>
+          <button type="button" className="flex cursor-pointer flex-col items-start gap-2.5 border-0 bg-transparent p-0 text-left text-white" onClick={() => navigate("/")}>
             {settings?.logo && <img src={settings.logo} alt={settings.shortName || settings.name || "Logo"} className="h-[43px] w-auto object-contain" />}
             <span>
               <b className="block text-base leading-none tracking-tight">{settings?.shortName}</b>
@@ -77,30 +76,6 @@ export default function Footer() {
           <p className="my-4 max-w-[310px] text-[0.86rem]">
             {settings?.description}
           </p>
-          <div className="flex gap-2.5">
-            {socialPlatforms.map(({ key, label, url, Icon }) =>
-              url ? (
-                <a
-                  key={key}
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  className="grid h-9 w-9 place-items-center rounded-full border border-white/15 text-white/74 transition-colors hover:border-assid-lime hover:text-assid-lime"
-                >
-                  <Icon />
-                </a>
-              ) : (
-                <span
-                  key={key}
-                  aria-hidden="true"
-                  className="grid h-9 w-9 cursor-not-allowed place-items-center rounded-full border border-white/8 text-white/25"
-                >
-                  <Icon />
-                </span>
-              ),
-            )}
-          </div>
         </div>
         <div>
           <h4 className="mb-3 text-[0.79rem] tracking-wide text-assid-lime uppercase">Kurumsal</h4>
@@ -126,24 +101,48 @@ export default function Footer() {
               href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(settings.address)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="mb-2.5 flex gap-2.5 text-[0.84rem] hover:text-white"
+              className="mb-2.5 flex text-[0.84rem] hover:text-white"
             >
-              ⌖ {settings.address}
+              {settings.address}
             </a>
           )}
           {settings?.phone && (
-            <div className="mb-2.5 flex gap-2.5 text-[0.84rem]">☎ {settings.phone}</div>
+            <div className="mb-2.5 flex text-[0.84rem]">{settings.phone}</div>
           )}
           {settings?.email && (
             <a
               href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(settings.email)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="mb-2.5 flex gap-2.5 text-[0.84rem] hover:text-white"
+              className="mb-2.5 flex text-[0.84rem] hover:text-white"
             >
-              ✉ {settings.email}
+              {settings.email}
             </a>
           )}
+          <div className="mt-3 flex gap-2.5">
+            {socialPlatforms.map(({ key, label, url, Icon }) =>
+              url ? (
+                <a
+                  key={key}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="grid h-9 w-9 place-items-center rounded-full border border-white/15 text-white/74 transition-colors hover:border-assid-lime hover:text-assid-lime"
+                >
+                  <Icon />
+                </a>
+              ) : (
+                <span
+                  key={key}
+                  aria-hidden="true"
+                  className="grid h-9 w-9 cursor-not-allowed place-items-center rounded-full border border-white/8 text-white/25"
+                >
+                  <Icon />
+                </span>
+              ),
+            )}
+          </div>
         </div>
       </div>
       <div className="mx-auto flex w-[min(calc(100%-40px),1240px)] flex-col justify-between gap-5 border-t border-white/11 py-5 text-[0.76rem] sm:flex-row">

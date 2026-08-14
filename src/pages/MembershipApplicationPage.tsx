@@ -11,9 +11,9 @@ import {
   membershipTypeOptions,
   sectorStatusOptions,
 } from "../constants/memberEnums";
-import { BYLAWS_TEXT, KVKK_TEXT } from "../constants/legalTexts";
 import { SECTORS } from "../constants/sectors";
 import { useToast } from "../context/ToastContext";
+import { useOrganizationSettings } from "../api/resources/organizationSettings";
 
 function RequiredMark() {
   return (
@@ -86,6 +86,7 @@ const initialFiles: MembershipApplicationFiles = {
 
 export default function MembershipApplicationPage() {
   const showToast = useToast();
+  const { data: settings } = useOrganizationSettings();
   const [form, setForm] = useState(initialForm);
   const [sectors, setSectors] = useState<string[]>([]);
   const [businessActivityTypes, setBusinessActivityTypes] = useState<string[]>([]);
@@ -457,14 +458,14 @@ export default function MembershipApplicationPage() {
           <Section title="Onaylar">
             <LegalConsentBox
               title="KVKK Aydınlatma Metni"
-              text={KVKK_TEXT}
+              text={settings?.kvkkText ?? ""}
               checked={kvkkConsent}
               onChange={setKvkkConsent}
               checkboxLabel="KVKK Aydınlatma Metni'ni okudum, anladım."
             />
             <LegalConsentBox
               title="Dernek Tüzüğü"
-              text={BYLAWS_TEXT}
+              text={settings?.bylawsText ?? ""}
               checked={bylawsAcknowledged}
               onChange={setBylawsAcknowledged}
               checkboxLabel="Dernek tüzüğünü okudum, anladım."
