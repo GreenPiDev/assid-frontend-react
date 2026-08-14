@@ -118,8 +118,12 @@ export default function MembershipApplicationPage() {
       showToast("Lütfen üyelik tipini seçin.");
       return;
     }
-    if (!kvkkConsent || !bylawsAcknowledged) {
-      showToast("Devam etmek için KVKK metnini ve dernek tüzüğünü onaylamanız gerekiyor.");
+    if ((settings?.requireKvkkConsent ?? true) && !kvkkConsent) {
+      showToast("Devam etmek için KVKK metnini onaylamanız gerekiyor.");
+      return;
+    }
+    if ((settings?.requireBylawsConsent ?? true) && !bylawsAcknowledged) {
+      showToast("Devam etmek için dernek tüzüğünü onaylamanız gerekiyor.");
       return;
     }
     setIsSubmitting(true);
@@ -455,22 +459,28 @@ export default function MembershipApplicationPage() {
             )}
           </Section>
 
-          <Section title="Onaylar">
-            <LegalConsentBox
-              title="KVKK Aydınlatma Metni"
-              text={settings?.kvkkText ?? ""}
-              checked={kvkkConsent}
-              onChange={setKvkkConsent}
-              checkboxLabel="KVKK Aydınlatma Metni'ni okudum, anladım."
-            />
-            <LegalConsentBox
-              title="Dernek Tüzüğü"
-              text={settings?.bylawsText ?? ""}
-              checked={bylawsAcknowledged}
-              onChange={setBylawsAcknowledged}
-              checkboxLabel="Dernek tüzüğünü okudum, anladım."
-            />
-          </Section>
+          {((settings?.showKvkkConsent ?? true) || (settings?.showBylawsConsent ?? true)) && (
+            <Section title="Onaylar">
+              {(settings?.showKvkkConsent ?? true) && (
+                <LegalConsentBox
+                  title="KVKK Aydınlatma Metni"
+                  text={settings?.kvkkText ?? ""}
+                  checked={kvkkConsent}
+                  onChange={setKvkkConsent}
+                  checkboxLabel="KVKK Aydınlatma Metni'ni okudum, anladım."
+                />
+              )}
+              {(settings?.showBylawsConsent ?? true) && (
+                <LegalConsentBox
+                  title="Dernek Tüzüğü"
+                  text={settings?.bylawsText ?? ""}
+                  checked={bylawsAcknowledged}
+                  onChange={setBylawsAcknowledged}
+                  checkboxLabel="Dernek tüzüğünü okudum, anladım."
+                />
+              )}
+            </Section>
+          )}
 
           <div className="flex justify-end">
             <Button type="submit" variant="primary" disabled={isSubmitting}>

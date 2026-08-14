@@ -2,13 +2,13 @@ import { useState, type ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import {
+  BuildingIcon,
   CalendarIcon,
   CloseIcon,
   ListIcon,
   LogoutIcon,
   MenuIcon,
   NewsIcon,
-  SettingsIcon,
   UserCogIcon,
   UsersIcon,
 } from "./icons";
@@ -19,7 +19,7 @@ const navItems = [
   { to: "/dashboard/etkinlikler", label: "Etkinlikler", icon: CalendarIcon },
   { to: "/dashboard/haberler", label: "Sektörel Haberler", icon: NewsIcon },
   { to: "/dashboard/kullanicilar", label: "Kullanıcılar", icon: UserCogIcon },
-  { to: "/dashboard/ayarlar", label: "Kurum Ayarları", icon: SettingsIcon },
+  { to: "/dashboard/organizasyon-bilgileri", label: "Organizasyon Bilgileri", icon: BuildingIcon },
 ];
 
 function NavList({ onNavigate, collapsed = false }: { onNavigate?: () => void; collapsed?: boolean }) {

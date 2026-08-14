@@ -83,6 +83,10 @@ export interface BackendOrganizationSettings {
   bylawsText?: string;
   cookiePolicyText?: string;
   privacyPolicyText?: string;
+  showKvkkConsent?: boolean;
+  requireKvkkConsent?: boolean;
+  showBylawsConsent?: boolean;
+  requireBylawsConsent?: boolean;
 }
 
 // Yönetim panelinden onaylanmamış (isApproved:false) üyeler herkese açık
