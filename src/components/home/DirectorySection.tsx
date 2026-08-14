@@ -14,7 +14,7 @@ export default function DirectorySection() {
         <div className="mb-5 flex items-end justify-between gap-5">
           <div>
             <div className="inline-flex items-center gap-2 text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-lime before:h-0.5 before:w-5 before:bg-assid-lime">
-              Dijital firma rehberi
+              Firma rehberi
             </div>
             <h2 className="mt-2.5 max-w-3xl text-[clamp(1.5rem,2.6vw,2.35rem)] leading-[1.07] tracking-[-.045em] text-white">
               İhtiyacınız olan üreticiye, tedarikçiye veya iş ortağına ulaşın.

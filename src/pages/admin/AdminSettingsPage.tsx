@@ -82,7 +82,7 @@ export default function AdminSettingsPage() {
     try {
       await updateOrganizationSettings({
         name: form.name,
-        shortName: form.shortName || undefined,
+        shortName: form.shortName,
         description: form.description || undefined,
         address: form.address || undefined,
         phone: form.phone || undefined,
@@ -155,7 +155,6 @@ export default function AdminSettingsPage() {
                 <label className="grid gap-1.5">
                   <span className="text-[0.78rem] font-bold text-assid-muted">Kurum Adı</span>
                   <input
-                    required
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"

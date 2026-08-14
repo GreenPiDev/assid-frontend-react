@@ -9,6 +9,7 @@ export const Paths = {
   News: "/news",
   Events: "/events",
   Stats: "/stats",
+  OrganizationSettings: "/organization-settings",
 };
 
 interface GetOptions extends Partial<Omit<UseQueryOptions, "queryKey" | "queryFn">> {

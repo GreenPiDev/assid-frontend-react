@@ -25,6 +25,41 @@ KVKK'nın 11. maddesi kapsamında; kişisel verilerinize ilişkin bilgi talep et
 
 Başvuru İletişimi: info@assid.com.tr`;
 
+export const COOKIE_POLICY_TEXT = `ÇEREZ POLİTİKASI
+
+1) Çerez Nedir?
+Çerezler, bir web sitesini ziyaret ettiğinizde tarayıcınız aracılığıyla cihazınıza kaydedilen küçük metin dosyalarıdır. Sitenin düzgün çalışmasını sağlamak, tercihlerinizi hatırlamak ve deneyiminizi iyileştirmek amacıyla kullanılır.
+
+2) Kullanılan Çerez Türleri
+Zorunlu Çerezler: Sitenin temel işlevlerinin (oturum yönetimi, güvenlik vb.) çalışması için gereklidir, devre dışı bırakılamaz.
+Performans/Analitik Çerezler: Ziyaretçilerin siteyi nasıl kullandığını anlamamıza ve deneyimi iyileştirmemize yardımcı olur.
+İşlevsellik Çerezleri: Dil ve görünüm gibi tercihlerinizi hatırlamak için kullanılır.
+
+3) Çerezlerin Yönetimi
+Tarayıcı ayarlarınız üzerinden çerezleri kabul etme, reddetme veya silme imkanınız bulunmaktadır. Zorunlu çerezlerin devre dışı bırakılması sitenin bazı bölümlerinin düzgün çalışmamasına neden olabilir.
+
+4) Değişiklikler
+Bu politika, yasal veya teknik gereklilikler doğrultusunda zaman zaman güncellenebilir. Güncel sürüm her zaman bu sayfada yayınlanır.`;
+
+export const PRIVACY_POLICY_TEXT = `GİZLİLİK POLİTİKASI
+
+1) Genel
+Ankara Siteler Sanayici ve İş İnsanları Derneği (ASSİD) olarak, internet sitemiz üzerinden elde edilen bilgilerin gizliliğine ve güvenliğine önem veriyoruz. Bu politika, sitemizi kullanırken kişisel verilerinizin nasıl işlendiğini açıklar.
+
+2) Toplanan Bilgiler
+Site üzerinden iletişim formları, üyelik başvuruları veya benzeri kanallarla bizimle paylaştığınız ad-soyad, e-posta, telefon, şirket bilgileri gibi veriler ile sitenin teknik kullanımına ilişkin sınırlı veriler (tarayıcı, IP vb.) toplanabilir.
+
+3) Bilgilerin Kullanımı
+Toplanan bilgiler; taleplerinizin yanıtlanması, üyelik ve iş birliği süreçlerinin yürütülmesi, sitenin geliştirilmesi ve yasal yükümlülüklerin yerine getirilmesi amaçlarıyla kullanılır. Bilgileriniz, açık rızanız veya yasal bir zorunluluk olmadıkça üçüncü taraflarla paylaşılmaz.
+
+4) Veri Güvenliği
+Kişisel verilerinizin güvenliğini sağlamak için makul teknik ve idari tedbirler alınmaktadır.
+
+5) İletişim
+Gizlilik politikamızla ilgili sorularınız için footer bölümünde yer alan iletişim bilgilerimizden bize ulaşabilirsiniz.
+
+Kişisel verilerin işlenmesine ilişkin detaylı bilgi için KVKK Aydınlatma Metni'ni inceleyebilirsiniz.`;
+
 export const BYLAWS_TEXT = `DERNEK TÜZÜĞÜ (ÖZET)
 
 Madde 1 — Derneğin Adı: Derneğin adı Ankara Siteler Sanayici ve İş İnsanları Derneği'dir. (Kısaca: ASSİD)
