@@ -93,8 +93,12 @@ export default function MemberProfilePage() {
           </span>
           <h1 className="mt-1 text-[1.5rem] tracking-[-.03em] text-assid-ink">Profilim</h1>
         </div>
-        <Badge variant={profile.isApproved ? "success" : "pending"}>
-          {profile.isApproved ? "Onaylı Üye" : "Onay Bekliyor"}
+        <Badge variant={profile.applicationStatus === "approved" ? "success" : profile.applicationStatus === "rejected" ? "danger" : "pending"}>
+          {profile.applicationStatus === "approved"
+            ? "Onaylı Üye"
+            : profile.applicationStatus === "rejected"
+              ? "Başvurusu Reddedildi"
+              : "Onay Bekliyor"}
         </Badge>
       </div>
 

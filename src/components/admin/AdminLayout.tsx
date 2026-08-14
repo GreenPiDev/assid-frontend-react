@@ -21,7 +21,7 @@ const contentChildren = [
 ];
 
 const navItems = [
-  { type: "link" as const, to: "/dashboard/uyeler", label: "Üye Başvuruları", icon: UsersIcon },
+  { type: "link" as const, to: "/dashboard/uye-basvurulari", label: "Üye Başvuruları", icon: UsersIcon },
   { type: "link" as const, to: "/dashboard/uyelikler", label: "Üyelikler", icon: ListIcon },
   { type: "link" as const, to: "/dashboard/kullanicilar", label: "Kullanıcılar", icon: UserCogIcon },
   { type: "link" as const, to: "/dashboard/organizasyon-bilgileri", label: "Organizasyon Bilgileri", icon: BuildingIcon },

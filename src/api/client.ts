@@ -28,7 +28,7 @@ interface BackendMember {
   companyAddress?: string;
   logo?: string;
   notes?: Record<string, string>;
-  isApproved: boolean;
+  applicationStatus: "pending" | "approved" | "rejected";
 }
 
 export interface BackendNews {
@@ -99,8 +99,9 @@ export interface BackendOrganizationSettings {
   showMembershipClassSection?: boolean;
 }
 
-// Yönetim panelinden onaylanmamış (isApproved:false) üyeler herkese açık
-// sitede hiçbir yerde görünmemeli; bu yüzden filtre burada, tek noktada uygulanır.
+// Yönetim panelinden onaylanmamış (applicationStatus !== "approved") üyeler
+// herkese açık sitede hiçbir yerde görünmemeli; bu yüzden filtre burada, tek
+// noktada uygulanır.
 function toFrontendMember(m: BackendMember): Member {
   return {
     id: m._id,
@@ -150,12 +151,12 @@ export async function get({
       if (id) {
         try {
           const member = await request<BackendMember>(`/members/${id}`);
-          return member.isApproved ? toFrontendMember(member) : null;
+          return member.applicationStatus === "approved" ? toFrontendMember(member) : null;
         } catch {
           return null;
         }
       }
-      const list = await request<BackendMember[]>("/members", { ...params, isApproved: true });
+      const list = await request<BackendMember[]>("/members", params);
       return list.map(toFrontendMember);
     }
 

@@ -12,7 +12,7 @@ export interface AdminMember {
   sectors: string[];
   businessActivityTypes: string[];
   references?: string;
-  membershipType: "individual" | "corporate";
+  membershipType?: "individual" | "corporate";
   sectorStatus?: string;
   birthPlace?: string;
   birthDate?: string;
@@ -23,7 +23,7 @@ export interface AdminMember {
   affiliatedOrganizations?: string;
   contactPreference?: string;
   applicationDate: string;
-  isApproved: boolean;
+  applicationStatus: "pending" | "approved" | "rejected";
   approvedAt?: string;
   isActive: boolean;
   logo?: string;
@@ -32,6 +32,7 @@ export interface AdminMember {
   documents: { label: string; url: string }[];
   kvkkConsentAt?: string;
   bylawsAcknowledgedAt?: string;
+  infoAccuracyConfirmedAt?: string;
   createdAt: string;
 }
 
@@ -120,9 +121,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 // --- Members ---
-export function fetchAdminMembers(params?: { isApproved?: boolean; q?: string }) {
+export function fetchAdminMembers(params?: {
+  status?: "pending" | "approved" | "rejected";
+  q?: string;
+}) {
   const search = new URLSearchParams();
-  if (params?.isApproved !== undefined) search.set("isApproved", String(params.isApproved));
+  if (params?.status) search.set("status", params.status);
   if (params?.q) search.set("q", params.q);
   const qs = search.toString();
   return request<AdminMember[]>(`/members/admin${qs ? `?${qs}` : ""}`);
@@ -132,10 +136,14 @@ export function fetchAdminMember(id: string) {
   return request<AdminMember>(`/members/${id}`);
 }
 
-export function setMemberApproval(id: string, isApproved: boolean) {
-  return request<AdminMember>(`/members/${id}/approval`, {
+export function fetchMemberMaskedNationalId(id: string) {
+  return request<{ maskedNationalId: string | null }>(`/members/${id}/national-id`);
+}
+
+export function setMemberApplicationStatus(id: string, applicationStatus: "pending" | "approved" | "rejected") {
+  return request<AdminMember>(`/members/${id}/status`, {
     method: "PATCH",
-    body: JSON.stringify({ isApproved }),
+    body: JSON.stringify({ applicationStatus }),
   });
 }
 

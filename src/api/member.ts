@@ -12,7 +12,7 @@ export interface MyMemberProfile {
   sectors: string[];
   businessActivityTypes: string[];
   membershipType: "individual" | "corporate";
-  isApproved: boolean;
+  applicationStatus: "pending" | "approved" | "rejected";
   logo?: string;
   activityAreas: string[];
   productsAndServices: string[];

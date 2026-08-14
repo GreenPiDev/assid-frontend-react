@@ -24,7 +24,7 @@ export default function AdminMembershipsPage() {
   useEffect(() => {
     setIsLoading(true);
     fetchAdminMembers({
-      isApproved: filter === "all" ? undefined : filter === "approved",
+      status: filter === "all" ? undefined : filter,
       q: debouncedQ || undefined,
     })
       .then(setMembers)
@@ -116,18 +116,24 @@ export default function AdminMembershipsPage() {
                     </div>
                   </td>
                   <td className="px-5 py-3.5">
-                    <div className="font-bold text-assid-ink">{m.companyName || m.fullName}</div>
+                    <div className="font-bold text-[#2563eb]">{m.companyName || m.fullName}</div>
                     <div className="text-[0.78rem] text-assid-muted">{m.fullName}</div>
                   </td>
                   <td className="px-5 py-3.5 text-assid-muted">
                     {m.sectors.map((s) => getSectorName(s)).join(", ") || "—"}
                   </td>
                   <td className="px-5 py-3.5 text-assid-muted">
-                    {m.membershipType === "corporate" ? "Kurumsal" : "Bireysel"}
+                    {m.membershipType === "corporate" ? "Kurumsal" : m.membershipType === "individual" ? "Bireysel" : "—"}
                   </td>
                   <td className="px-5 py-3.5 text-assid-muted">{m.phone || m.mobilePhone || "—"}</td>
                   <td className="px-5 py-3.5">
-                    {m.isApproved ? <Badge variant="success">Onaylı</Badge> : <Badge variant="pending">Bekliyor</Badge>}
+                    {m.applicationStatus === "approved" ? (
+                      <Badge variant="success">Onaylı</Badge>
+                    ) : m.applicationStatus === "rejected" ? (
+                      <Badge variant="danger">Reddedildi</Badge>
+                    ) : (
+                      <Badge variant="pending">Bekliyor</Badge>
+                    )}
                   </td>
                   <td className="px-5 py-3.5 text-assid-muted">
                     {m.approvedAt ? new Date(m.approvedAt).toLocaleDateString("tr-TR") : "—"}
