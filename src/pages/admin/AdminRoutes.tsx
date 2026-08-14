@@ -19,7 +19,7 @@ export default function AdminRoutes() {
         <Route path="etkinlikler" element={<AdminEventsPage />} />
         <Route path="haberler" element={<AdminNewsPage />} />
         <Route path="kullanicilar" element={<AdminUsersPage />} />
-        <Route path="ayarlar" element={<AdminSettingsPage />} />
+        <Route path="organizasyon-bilgileri" element={<AdminSettingsPage />} />
         <Route path="*" element={<Navigate to="/dashboard/uyeler" replace />} />
       </Routes>
     </AdminLayout>

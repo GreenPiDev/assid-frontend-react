@@ -6,6 +6,7 @@ import {
   type AdminOrganizationSettings,
 } from "../../api/admin";
 import { useToast } from "../../context/ToastContext";
+import FooterPreview from "../../components/admin/FooterPreview";
 
 type FormState = {
   name: string;
@@ -122,7 +123,7 @@ export default function AdminSettingsPage() {
         <span className="text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-green">
           Yönetim Paneli
         </span>
-        <h1 className="mt-1 text-[1.5rem] tracking-[-.03em] text-assid-ink">Kurum Ayarları</h1>
+        <h1 className="mt-1 text-[1.5rem] tracking-[-.03em] text-assid-ink">Organizasyon Bilgileri</h1>
       </div>
 
       {isLoading || !form ? (
@@ -130,7 +131,8 @@ export default function AdminSettingsPage() {
       ) : (
         <form onSubmit={handleSubmit} className="grid gap-5">
           <div className="rounded-[20px] border border-assid-line bg-white p-6 md:p-7">
-            <h2 className="mb-4 text-[1.02rem] font-bold text-assid-ink">Logo</h2>
+            <h2 className="text-[1.02rem] font-bold text-assid-ink">Organizasyon Logosu</h2>
+            <p className="mb-4 mt-1 text-[0.78rem] text-assid-muted">Web sayfasında üst ve alt çubuklarında görüntülenecektir</p>
             <div className="flex flex-wrap items-center gap-5">
               <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full border border-assid-line bg-assid-paper">
                 {logoUrl ? (
@@ -162,7 +164,10 @@ export default function AdminSettingsPage() {
 
           <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
             <div className="grid gap-4 rounded-[20px] border border-assid-line bg-white p-6 md:p-7">
-              <h2 className="text-[1.02rem] font-bold text-assid-ink">Genel Bilgiler</h2>
+              <div>
+                <h2 className="text-[1.02rem] font-bold text-assid-ink">Genel Bilgiler</h2>
+                <p className="mt-1 text-[0.78rem] text-assid-muted">Web sayfasının alt bilgi (footer) bölümünde görüntülenecektir</p>
+              </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <label className="grid gap-1.5">
                   <span className="text-[0.78rem] font-bold text-assid-muted">Kurum Adı</span>
@@ -173,7 +178,7 @@ export default function AdminSettingsPage() {
                   />
                 </label>
                 <label className="grid gap-1.5">
-                  <span className="text-[0.78rem] font-bold text-assid-muted">Kısa Ad</span>
+                  <span className="text-[0.78rem] font-bold text-assid-muted">Kısaltma</span>
                   <input
                     value={form.shortName}
                     onChange={(e) => setForm({ ...form, shortName: e.target.value })}
@@ -212,7 +217,10 @@ export default function AdminSettingsPage() {
             </div>
 
             <div className="grid gap-4 rounded-[20px] border border-assid-line bg-white p-6 md:p-7">
-              <h2 className="text-[1.02rem] font-bold text-assid-ink">İletişim</h2>
+              <div>
+                <h2 className="text-[1.02rem] font-bold text-assid-ink">İletişim</h2>
+                <p className="mt-1 text-[0.78rem] text-assid-muted">Web sayfasının alt bilgi (footer) bölümünde görüntülenecektir</p>
+              </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <label className="grid gap-1.5">
                   <span className="text-[0.78rem] font-bold text-assid-muted">Telefon</span>
@@ -272,6 +280,20 @@ export default function AdminSettingsPage() {
               </div>
             </div>
           </div>
+
+          <FooterPreview
+            logoUrl={logoUrl}
+            shortName={form.shortName}
+            name={form.name}
+            description={form.description}
+            address={form.address}
+            phone={form.phone}
+            email={form.email}
+            footerText={form.footerText}
+            instagram={form.instagram}
+            facebook={form.facebook}
+            linkedin={form.linkedin}
+          />
 
           <div className="grid gap-4 rounded-[20px] border border-assid-line bg-white p-6 md:p-7">
             <h2 className="text-[1.02rem] font-bold text-assid-ink">Yasal Metinler</h2>

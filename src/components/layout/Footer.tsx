@@ -8,7 +8,7 @@ type LegalModalKey = "kvkk" | "cookies" | "privacy";
 
 const corporateLinks = ["Hakkımızda", "Yönetim Kurulu", "Faaliyetler", "Basın Merkezi"];
 
-function InstagramIcon() {
+export function InstagramIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4">
       <rect x="3" y="3" width="18" height="18" rx="5" />
@@ -18,7 +18,7 @@ function InstagramIcon() {
   );
 }
 
-function FacebookIcon() {
+export function FacebookIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
       <path d="M13.5 21v-7.6h2.6l.4-3h-3v-1.9c0-.9.25-1.5 1.55-1.5h1.65V4.3c-.3-.05-1.25-.13-2.37-.13-2.35 0-3.96 1.43-3.96 4.06v2.27H7.75v3h2.66V21h3.09Z" />
@@ -34,7 +34,7 @@ function XIcon() {
   );
 }
 
-function LinkedInIcon() {
+export function LinkedInIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
       <path d="M6.94 8.5H3.56V21h3.38V8.5ZM5.25 3.25a1.96 1.96 0 1 0 0 3.92 1.96 1.96 0 0 0 0-3.92ZM20.44 21h-3.38v-6.4c0-1.53-.03-3.49-2.13-3.49-2.14 0-2.47 1.67-2.47 3.38V21H9.08V8.5h3.24v1.71h.05c.45-.85 1.56-1.75 3.21-1.75 3.43 0 4.86 2.26 4.86 5.98V21Z" />

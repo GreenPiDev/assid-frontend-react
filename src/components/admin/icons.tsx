@@ -72,6 +72,22 @@ export function SettingsIcon({ className = base }: IconProps) {
   );
 }
 
+export function BuildingIcon({ className = base }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <rect x="4" y="3" width="12" height="18" rx="1.5" />
+      <path d="M16 9.5h3.5A1.5 1.5 0 0 1 21 11v8.5a.5.5 0 0 1-.5.5H16" />
+      <line x1="7.5" y1="7" x2="7.5" y2="7.01" />
+      <line x1="12.5" y1="7" x2="12.5" y2="7.01" />
+      <line x1="7.5" y1="11" x2="7.5" y2="11.01" />
+      <line x1="12.5" y1="11" x2="12.5" y2="11.01" />
+      <line x1="7.5" y1="15" x2="7.5" y2="15.01" />
+      <line x1="12.5" y1="15" x2="12.5" y2="15.01" />
+      <path d="M9 21v-3.5h2V21" />
+    </svg>
+  );
+}
+
 export function UserCogIcon({ className = base }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}>
