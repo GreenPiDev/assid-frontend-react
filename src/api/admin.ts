@@ -18,6 +18,8 @@ export interface AdminMember {
   birthDate?: string;
   nationality?: string;
   maritalStatus?: string;
+  faxPhone?: string;
+  personalMobilePhone?: string;
   affiliatedOrganizations?: string;
   contactPreference?: string;
   applicationDate: string;

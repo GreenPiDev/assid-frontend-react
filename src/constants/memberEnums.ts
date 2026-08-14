@@ -30,11 +30,21 @@ export const contactPreferenceOptions = Object.entries(contactPreferenceLabels).
 }));
 
 export const membershipTypeLabels: Record<string, string> = {
-  individual: "Gerçek",
-  corporate: "Tüzel",
+  individual: "Bireysel",
+  corporate: "Kurumsal",
 };
 
 export const membershipTypeOptions = Object.entries(membershipTypeLabels).map(([value, label]) => ({
+  value,
+  label,
+}));
+
+export const maritalStatusLabels: Record<string, string> = {
+  married: "Evli",
+  single: "Bekar",
+};
+
+export const maritalStatusOptions = Object.entries(maritalStatusLabels).map(([value, label]) => ({
   value,
   label,
 }));

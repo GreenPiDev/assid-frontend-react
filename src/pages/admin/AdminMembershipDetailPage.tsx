@@ -3,7 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { fetchAdminMember, type AdminMember } from "../../api/admin";
 import Badge from "../../components/admin/Badge";
 import { ArrowLeftIcon } from "../../components/admin/icons";
-import { businessActivityLabels, contactPreferenceLabels, sectorStatusLabels } from "../../constants/memberEnums";
+import {
+  businessActivityLabels,
+  contactPreferenceLabels,
+  maritalStatusLabels,
+  sectorStatusLabels,
+} from "../../constants/memberEnums";
 import { useToast } from "../../context/ToastContext";
 import { getSectorName } from "../../utils/directory";
 
@@ -91,7 +96,7 @@ export default function AdminMembershipDetailPage() {
         </Section>
 
         <Section title="Üyelik Sınıfı">
-          <Field label="Üyelik Tipi" value={member.membershipType === "corporate" ? "Tüzel" : "Gerçek"} />
+          <Field label="Üyelik Tipi" value={member.membershipType === "corporate" ? "Kurumsal" : "Bireysel"} />
           <Field label="Sektör Durumu" value={member.sectorStatus ? sectorStatusLabels[member.sectorStatus] : undefined} />
         </Section>
 
@@ -102,7 +107,9 @@ export default function AdminMembershipDetailPage() {
             value={member.birthDate ? new Date(member.birthDate).toLocaleDateString("tr-TR") : undefined}
           />
           <Field label="Uyruk" value={member.nationality} />
-          <Field label="Medeni Hal" value={member.maritalStatus} />
+          <Field label="Medeni Hal" value={member.maritalStatus ? maritalStatusLabels[member.maritalStatus] : undefined} />
+          <Field label="Telefon / Faks" value={member.faxPhone} />
+          <Field label="Cep Telefonu" value={member.personalMobilePhone} />
           <Field label="Bağlı Olduğu Kuruluşlar" value={member.affiliatedOrganizations} />
           <Field
             label="İletişim Tercihi"

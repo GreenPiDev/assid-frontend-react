@@ -123,7 +123,7 @@ export default function AdminMembershipsPage() {
                     {m.sectors.map((s) => getSectorName(s)).join(", ") || "—"}
                   </td>
                   <td className="px-5 py-3.5 text-assid-muted">
-                    {m.membershipType === "corporate" ? "Tüzel" : "Gerçek"}
+                    {m.membershipType === "corporate" ? "Kurumsal" : "Bireysel"}
                   </td>
                   <td className="px-5 py-3.5 text-assid-muted">{m.phone || m.mobilePhone || "—"}</td>
                   <td className="px-5 py-3.5">

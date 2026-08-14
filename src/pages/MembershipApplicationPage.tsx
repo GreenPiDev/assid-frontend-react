@@ -5,9 +5,10 @@ import Button from "../components/ui/Button";
 import TagEditor from "../components/forms/TagEditor";
 import FileUploadField from "../components/forms/FileUploadField";
 import LegalConsentBox from "../components/forms/LegalConsentBox";
+import PhoneInput from "../components/forms/PhoneInput";
 import {
   businessActivityOptions,
-  contactPreferenceOptions,
+  maritalStatusOptions,
   membershipTypeOptions,
   sectorStatusOptions,
 } from "../constants/memberEnums";
@@ -70,9 +71,11 @@ const initialForm = {
   birthPlace: "",
   birthDate: "",
   nationality: "",
+  nationalId: "",
   maritalStatus: "",
+  faxPhone: "",
+  personalMobilePhone: "",
   affiliatedOrganizations: "",
-  contactPreference: "",
 };
 
 const initialFiles: MembershipApplicationFiles = {
@@ -95,6 +98,7 @@ export default function MembershipApplicationPage() {
   const [files, setFiles] = useState<MembershipApplicationFiles>(initialFiles);
   const [kvkkConsent, setKvkkConsent] = useState(false);
   const [bylawsAcknowledged, setBylawsAcknowledged] = useState(false);
+  const [infoAccuracyConfirmed, setInfoAccuracyConfirmed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSent, setIsSent] = useState(false);
 
@@ -126,6 +130,10 @@ export default function MembershipApplicationPage() {
       showToast("Devam etmek için dernek tüzüğünü onaylamanız gerekiyor.");
       return;
     }
+    if (!infoAccuracyConfirmed) {
+      showToast("Devam etmek için belirttiğiniz bilgilerin doğruluğunu onaylamanız gerekiyor.");
+      return;
+    }
     setIsSubmitting(true);
     try {
       await applyForMembership(
@@ -145,13 +153,16 @@ export default function MembershipApplicationPage() {
           birthPlace: form.birthPlace || undefined,
           birthDate: form.birthDate || undefined,
           nationality: form.nationality || undefined,
+          nationalId: form.nationalId || undefined,
           maritalStatus: form.maritalStatus || undefined,
+          faxPhone: form.faxPhone || undefined,
+          personalMobilePhone: form.personalMobilePhone || undefined,
           affiliatedOrganizations: form.affiliatedOrganizations || undefined,
-          contactPreference: form.contactPreference || undefined,
           activityAreas: activityAreas.length ? activityAreas : undefined,
           productsAndServices: productsAndServices.length ? productsAndServices : undefined,
           kvkkConsent,
           bylawsAcknowledged,
+          infoAccuracyConfirmed,
         },
         files,
       );
@@ -230,18 +241,10 @@ export default function MembershipApplicationPage() {
               />
             </Field>
             <Field label="Telefon">
-              <input
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                className={inputClass}
-              />
+              <PhoneInput value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
             </Field>
             <Field label="Cep Telefonu">
-              <input
-                value={form.mobilePhone}
-                onChange={(e) => setForm({ ...form, mobilePhone: e.target.value })}
-                className={inputClass}
-              />
+              <PhoneInput value={form.mobilePhone} onChange={(v) => setForm({ ...form, mobilePhone: v })} />
             </Field>
             <div className="sm:col-span-2">
               <Field label="Firma Adresi">
@@ -383,11 +386,36 @@ export default function MembershipApplicationPage() {
                 className={inputClass}
               />
             </Field>
-            <Field label="Medeni Hal">
+            <Field label="TC Kimlik No">
               <input
+                inputMode="numeric"
+                maxLength={11}
+                value={form.nationalId}
+                onChange={(e) => setForm({ ...form, nationalId: e.target.value.replace(/\D/g, "").slice(0, 11) })}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Medeni Hal">
+              <select
                 value={form.maritalStatus}
                 onChange={(e) => setForm({ ...form, maritalStatus: e.target.value })}
                 className={inputClass}
+              >
+                <option value="">Seçiniz</option>
+                {maritalStatusOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Telefon / Faks">
+              <PhoneInput value={form.faxPhone} onChange={(v) => setForm({ ...form, faxPhone: v })} />
+            </Field>
+            <Field label="Cep Telefonu">
+              <PhoneInput
+                value={form.personalMobilePhone}
+                onChange={(v) => setForm({ ...form, personalMobilePhone: v })}
               />
             </Field>
             <Field label="Bağlı Olduğu Kuruluşlar">
@@ -397,20 +425,16 @@ export default function MembershipApplicationPage() {
                 className={inputClass}
               />
             </Field>
-            <Field label="İletişim Tercihi">
-              <select
-                value={form.contactPreference}
-                onChange={(e) => setForm({ ...form, contactPreference: e.target.value })}
-                className={inputClass}
-              >
-                <option value="">Seçiniz</option>
-                {contactPreferenceOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </Field>
+            <div className="sm:col-span-2">
+              <label className="flex cursor-pointer items-center gap-2 text-[0.85rem] text-assid-ink">
+                <input
+                  type="checkbox"
+                  checked={infoAccuracyConfirmed}
+                  onChange={(e) => setInfoAccuracyConfirmed(e.target.checked)}
+                />
+                Belirttiğim bilgilerimin doğru olduğunu kabul ediyorum
+              </label>
+            </div>
           </Section>
 
           <Section title="Ekler">

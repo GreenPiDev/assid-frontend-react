@@ -141,7 +141,7 @@ export default function MemberProfilePage() {
             <Field label="Telefon" value={profile.phone} />
             <Field label="Cep Telefonu" value={profile.mobilePhone} />
             <Field label="Firma Adresi" value={profile.companyAddress} />
-            <Field label="Üyelik Tipi" value={profile.membershipType === "corporate" ? "Tüzel" : "Gerçek"} />
+            <Field label="Üyelik Tipi" value={profile.membershipType === "corporate" ? "Kurumsal" : "Bireysel"} />
             <Field label="Sektörler" value={profile.sectors.map((s) => getSectorName(s)).join(", ")} />
             <Field
               label="Faaliyet Türleri"
@@ -196,7 +196,7 @@ export default function MemberProfilePage() {
               activityAreas,
               productsAndServices,
               contact: {
-                memberType: profile.membershipType === "corporate" ? "Tüzel" : "Gerçek",
+                memberType: profile.membershipType === "corporate" ? "Kurumsal" : "Bireysel",
                 representative: profile.fullName,
                 phone: profile.phone || profile.mobilePhone || "",
                 address: profile.companyAddress || "",

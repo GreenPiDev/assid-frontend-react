@@ -101,7 +101,7 @@ function toFrontendMember(m: BackendMember): Member {
     activityAreas: m.activityAreas ?? [],
     productsAndServices: m.productsAndServices ?? [],
     contact: {
-      memberType: m.membershipType === "corporate" ? "Tüzel" : "Gerçek",
+      memberType: m.membershipType === "corporate" ? "Kurumsal" : "Bireysel",
       representative: m.fullName,
       phone: m.phone || m.mobilePhone || "",
       address: m.companyAddress || "",
