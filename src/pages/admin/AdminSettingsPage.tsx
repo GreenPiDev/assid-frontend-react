@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   fetchOrganizationSettings,
   updateOrganizationSettings,
@@ -7,6 +8,13 @@ import {
 } from "../../api/admin";
 import { useToast } from "../../context/ToastContext";
 import FooterPreview from "../../components/admin/FooterPreview";
+
+const orgSettingsQueryKey = ["admin", "organization-settings"];
+
+function invalidateOrgSettings(queryClient: ReturnType<typeof useQueryClient>) {
+  queryClient.invalidateQueries({ queryKey: orgSettingsQueryKey });
+  queryClient.invalidateQueries({ queryKey: ["/organization-settings"] });
+}
 
 type FormState = {
   name: string;
@@ -58,46 +66,57 @@ function toForm(s: AdminOrganizationSettings): FormState {
 
 export default function AdminSettingsPage() {
   const showToast = useToast();
+  const queryClient = useQueryClient();
   const [form, setForm] = useState<FormState | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const { data: settings, isLoading, isError } = useQuery({
+    queryKey: orgSettingsQueryKey,
+    queryFn: fetchOrganizationSettings,
+  });
+
   useEffect(() => {
-    fetchOrganizationSettings()
-      .then((s) => {
-        setForm(toForm(s));
-        setLogoUrl(s.logo);
-      })
-      .catch(() => showToast("Ayarlar yüklenemedi."))
-      .finally(() => setIsLoading(false));
+    if (isError) showToast("Ayarlar yüklenemedi.");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isError]);
+
+  useEffect(() => {
+    if (!settings) return;
+    setForm(toForm(settings));
+    setLogoUrl(settings.logo);
+  }, [settings]);
+
+  const uploadLogoMutation = useMutation({
+    mutationFn: uploadOrganizationLogo,
+    onSuccess: (updated) => {
+      setLogoUrl(updated.logo);
+      invalidateOrgSettings(queryClient);
+    },
+  });
 
   async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    setIsUploadingLogo(true);
     try {
-      const updated = await uploadOrganizationLogo(file);
-      setLogoUrl(updated.logo);
+      await uploadLogoMutation.mutateAsync(file);
       showToast("Logo güncellendi.");
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Logo yüklenemedi.");
-    } finally {
-      setIsUploadingLogo(false);
     }
   }
+
+  const saveMutation = useMutation({
+    mutationFn: updateOrganizationSettings,
+    onSuccess: () => invalidateOrgSettings(queryClient),
+  });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form) return;
-    setIsSaving(true);
     try {
-      await updateOrganizationSettings({
+      await saveMutation.mutateAsync({
         name: form.name,
         shortName: form.shortName,
         description: form.description || undefined,
@@ -124,8 +143,6 @@ export default function AdminSettingsPage() {
       showToast("Kurum ayarları güncellendi.");
     } catch {
       showToast("Güncelleme başarısız oldu.");
-    } finally {
-      setIsSaving(false);
     }
   }
 
@@ -163,11 +180,11 @@ export default function AdminSettingsPage() {
                 />
                 <button
                   type="button"
-                  disabled={isUploadingLogo}
+                  disabled={uploadLogoMutation.isPending}
                   onClick={() => fileInputRef.current?.click()}
                   className="cursor-pointer rounded-full border border-assid-line bg-transparent px-5 py-2.5 text-[0.85rem] font-bold text-assid-ink disabled:opacity-60"
                 >
-                  {isUploadingLogo ? "Yükleniyor..." : "Logo Yükle"}
+                  {uploadLogoMutation.isPending ? "Yükleniyor..." : "Logo Yükle"}
                 </button>
                 <p className="mt-2 text-[0.78rem] text-assid-muted">PNG, JPEG, WEBP veya SVG — en fazla 5MB.</p>
               </div>
@@ -406,10 +423,10 @@ export default function AdminSettingsPage() {
           <div className="flex justify-end">
             <button
               type="submit"
-              disabled={isSaving}
+              disabled={saveMutation.isPending}
               className="cursor-pointer rounded-full border-0 bg-assid-green px-6 py-3 text-[0.88rem] font-bold text-white disabled:opacity-60"
             >
-              {isSaving ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
+              {saveMutation.isPending ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
             </button>
           </div>
         </form>

@@ -1,86 +1,85 @@
 import { useEffect, useState } from "react";
-import {
-  createAdminUser,
-  deleteAdminMember,
-  fetchAdminMembers,
-  setMemberApproval,
-  updateAdminMember,
-  type AdminMember,
-} from "../../api/admin";
+import { useNavigate } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { fetchAdminMembers, setMemberApplicationStatus, type AdminMember } from "../../api/admin";
 import Badge from "../../components/admin/Badge";
 import ConfirmModal from "../../components/admin/ConfirmModal";
-import Modal from "../../components/admin/Modal";
 import Tooltip from "../../components/admin/Tooltip";
-import { PencilIcon, TrashIcon, UserCogIcon } from "../../components/admin/icons";
+import { BanIcon, CheckIcon, UndoIcon } from "../../components/admin/icons";
 import { useToast } from "../../context/ToastContext";
 import { getSectorName } from "../../utils/directory";
 
-type Filter = "pending" | "approved" | "all";
+type Filter = "pending" | "rejected";
+type Action = "approve" | "reject" | "restore";
 
 export default function AdminMembersPage() {
   const showToast = useToast();
-  const [members, setMembers] = useState<AdminMember[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [filter, setFilter] = useState<Filter>("pending");
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
 
-  const [editTarget, setEditTarget] = useState<AdminMember | null>(null);
-  const [approvalTarget, setApprovalTarget] = useState<{ member: AdminMember; nextValue: boolean } | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<AdminMember | null>(null);
-  const [credentialsTarget, setCredentialsTarget] = useState<AdminMember | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  function load() {
-    setIsLoading(true);
-    fetchAdminMembers({
-      isApproved: filter === "all" ? undefined : filter === "approved",
-      q: debouncedQ || undefined,
-    })
-      .then(setMembers)
-      .catch(() => showToast("Üyeler yüklenemedi."))
-      .finally(() => setIsLoading(false));
-  }
+  const [actionTarget, setActionTarget] = useState<{ member: AdminMember; action: Action } | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedQ(q), 400);
     return () => clearTimeout(timer);
   }, [q]);
 
+  const { data: members = [], isLoading, isError } = useQuery({
+    queryKey: ["admin", "members", filter, debouncedQ],
+    queryFn: () => fetchAdminMembers({ status: filter, q: debouncedQ || undefined }),
+  });
   useEffect(() => {
-    load();
+    if (isError) showToast("Üyeler yüklenemedi.");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, debouncedQ]);
+  }, [isError]);
 
-  async function handleApprovalConfirm() {
-    if (!approvalTarget) return;
-    setIsSubmitting(true);
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: "pending" | "approved" | "rejected" }) =>
+      setMemberApplicationStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "members"] });
+    },
+  });
+
+  async function handleActionConfirm() {
+    if (!actionTarget) return;
+    const status = actionTarget.action === "approve" ? "approved" : actionTarget.action === "reject" ? "rejected" : "pending";
     try {
-      await setMemberApproval(approvalTarget.member._id, approvalTarget.nextValue);
-      showToast(approvalTarget.nextValue ? "Üye onaylandı." : "Üye onayı kaldırıldı.");
-      setApprovalTarget(null);
-      load();
+      await statusMutation.mutateAsync({ id: actionTarget.member._id, status });
+      showToast(
+        actionTarget.action === "approve"
+          ? "Üye onaylandı."
+          : actionTarget.action === "reject"
+            ? "Başvuru reddedildi."
+            : "Başvuru bekleyenlere alındı.",
+      );
+      setActionTarget(null);
     } catch {
       showToast("İşlem başarısız oldu.");
-    } finally {
-      setIsSubmitting(false);
     }
   }
 
-  async function handleDeleteConfirm() {
-    if (!deleteTarget) return;
-    setIsSubmitting(true);
-    try {
-      await deleteAdminMember(deleteTarget._id);
-      showToast("Üye silindi.");
-      setDeleteTarget(null);
-      load();
-    } catch {
-      showToast("Silme işlemi başarısız oldu.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
+  const actionCopy: Record<Action, { title: string; message: (name: string) => string; confirmLabel: string; isDanger?: boolean }> = {
+    approve: {
+      title: "Üyeyi onayla",
+      message: (name) => `${name} firma rehberinde görünür hale gelecek. Onaylamak istiyor musunuz?`,
+      confirmLabel: "Onayla",
+    },
+    reject: {
+      title: "Başvuruyu reddet",
+      message: (name) => `${name} başvurusu reddedilecek. Devam edilsin mi?`,
+      confirmLabel: "Reddet",
+      isDanger: true,
+    },
+    restore: {
+      title: "Bekleyenlere al",
+      message: (name) => `${name} başvurusu tekrar onay bekleyen listesine alınacak. Devam edilsin mi?`,
+      confirmLabel: "Bekleyenlere Al",
+    },
+  };
 
   return (
     <div>
@@ -89,7 +88,7 @@ export default function AdminMembersPage() {
           <span className="text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-green">
             Yönetim Paneli
           </span>
-          <h1 className="mt-1 text-[1.5rem] tracking-[-.03em] text-assid-ink">Üye Başvuruları</h1>
+          <h1 className="mt-1 text-[1.5rem] tracking-[-.03em] text-assid-ink">Onay Bekleyen Üye Başvuruları</h1>
         </div>
         <input
           value={q}
@@ -100,7 +99,7 @@ export default function AdminMembersPage() {
       </div>
 
       <div className="mb-5 flex gap-2">
-        {(["pending", "approved", "all"] as Filter[]).map((f) => (
+        {(["pending", "rejected"] as Filter[]).map((f) => (
           <button
             key={f}
             type="button"
@@ -111,7 +110,7 @@ export default function AdminMembersPage() {
                 : "border-assid-line bg-white text-assid-ink"
             }`}
           >
-            {f === "pending" ? "Onay Bekleyen" : f === "approved" ? "Onaylı" : "Tümü"}
+            {f === "pending" ? "Onay Bekleyen" : "Reddedilen"}
           </button>
         ))}
       </div>
@@ -143,9 +142,13 @@ export default function AdminMembersPage() {
               </tr>
             ) : (
               members.map((m) => (
-                <tr key={m._id} className="border-b border-assid-line last:border-0">
+                <tr
+                  key={m._id}
+                  onClick={() => navigate(`/dashboard/uye-basvurulari/${m._id}`)}
+                  className="cursor-pointer border-b border-assid-line last:border-0 hover:bg-assid-paper"
+                >
                   <td className="px-5 py-3.5">
-                    <div className="font-bold text-assid-ink">{m.companyName || m.fullName}</div>
+                    <div className="font-bold text-[#2563eb]">{m.companyName || m.fullName}</div>
                     <div className="text-[0.78rem] text-assid-muted">{m.fullName}</div>
                   </td>
                   <td className="px-5 py-3.5 text-assid-muted">{m.email}</td>
@@ -156,49 +159,49 @@ export default function AdminMembersPage() {
                     {new Date(m.applicationDate).toLocaleDateString("tr-TR")}
                   </td>
                   <td className="px-5 py-3.5">
-                    {m.isApproved ? <Badge variant="success">Onaylı</Badge> : <Badge variant="pending">Bekliyor</Badge>}
+                    {m.applicationStatus === "rejected" ? (
+                      <Badge variant="danger">Reddedildi</Badge>
+                    ) : (
+                      <Badge variant="pending">Bekliyor</Badge>
+                    )}
                   </td>
-                  <td className="px-5 py-3.5">
+                  <td className="px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setApprovalTarget({ member: m, nextValue: !m.isApproved })}
-                        className={`cursor-pointer rounded-full border-0 px-3.5 py-2 text-[0.78rem] font-bold text-white ${
-                          m.isApproved ? "bg-[#c0392b]" : "bg-assid-green"
-                        }`}
-                      >
-                        {m.isApproved ? "Onayı Kaldır" : "Onayla"}
-                      </button>
-                      <Tooltip label="Giriş bilgisi oluştur">
-                        <button
-                          type="button"
-                          onClick={() => setCredentialsTarget(m)}
-                          aria-label="Giriş bilgisi oluştur"
-                          className="grid h-8 w-8 cursor-pointer place-items-center rounded-full border border-assid-line bg-transparent text-assid-ink"
-                        >
-                          <UserCogIcon className="h-4 w-4" />
-                        </button>
-                      </Tooltip>
-                      <Tooltip label="Düzenle">
-                        <button
-                          type="button"
-                          onClick={() => setEditTarget(m)}
-                          aria-label="Düzenle"
-                          className="grid h-8 w-8 cursor-pointer place-items-center rounded-full border border-assid-line bg-transparent text-assid-ink"
-                        >
-                          <PencilIcon className="h-4 w-4" />
-                        </button>
-                      </Tooltip>
-                      <Tooltip label="Sil">
-                        <button
-                          type="button"
-                          onClick={() => setDeleteTarget(m)}
-                          aria-label="Sil"
-                          className="grid h-8 w-8 cursor-pointer place-items-center rounded-full border border-assid-line bg-transparent text-[#c0392b]"
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                        </button>
-                      </Tooltip>
+                      {filter === "pending" ? (
+                        <>
+                          <Tooltip label="Onayla">
+                            <button
+                              type="button"
+                              onClick={() => setActionTarget({ member: m, action: "approve" })}
+                              aria-label="Onayla"
+                              className="grid h-8 w-8 cursor-pointer place-items-center rounded-full border-0 bg-assid-green text-white"
+                            >
+                              <CheckIcon className="h-4 w-4" />
+                            </button>
+                          </Tooltip>
+                          <Tooltip label="Reddet">
+                            <button
+                              type="button"
+                              onClick={() => setActionTarget({ member: m, action: "reject" })}
+                              aria-label="Reddet"
+                              className="grid h-8 w-8 cursor-pointer place-items-center rounded-full border-0 bg-[#c0392b] text-white"
+                            >
+                              <BanIcon className="h-4 w-4" />
+                            </button>
+                          </Tooltip>
+                        </>
+                      ) : (
+                        <Tooltip label="Bekleyen'e Al">
+                          <button
+                            type="button"
+                            onClick={() => setActionTarget({ member: m, action: "restore" })}
+                            aria-label="Bekleyen'e Al"
+                            className="grid h-8 w-8 cursor-pointer place-items-center rounded-full border-0 bg-assid-green text-white"
+                          >
+                            <UndoIcon className="h-4 w-4" />
+                          </button>
+                        </Tooltip>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -208,227 +211,17 @@ export default function AdminMembersPage() {
         </table>
       </div>
 
-      {approvalTarget && (
+      {actionTarget && (
         <ConfirmModal
-          title={approvalTarget.nextValue ? "Üyeyi onayla" : "Onayı kaldır"}
-          message={
-            approvalTarget.nextValue
-              ? `${approvalTarget.member.companyName || approvalTarget.member.fullName} firma rehberinde görünür hale gelecek. Onaylamak istiyor musunuz?`
-              : `${approvalTarget.member.companyName || approvalTarget.member.fullName} firma rehberinden kaldırılacak. Devam edilsin mi?`
-          }
-          confirmLabel={approvalTarget.nextValue ? "Onayla" : "Onayı Kaldır"}
-          isDanger={!approvalTarget.nextValue}
-          isLoading={isSubmitting}
-          onConfirm={handleApprovalConfirm}
-          onClose={() => setApprovalTarget(null)}
+          title={actionCopy[actionTarget.action].title}
+          message={actionCopy[actionTarget.action].message(actionTarget.member.companyName || actionTarget.member.fullName)}
+          confirmLabel={actionCopy[actionTarget.action].confirmLabel}
+          isDanger={actionCopy[actionTarget.action].isDanger}
+          isLoading={statusMutation.isPending}
+          onConfirm={handleActionConfirm}
+          onClose={() => setActionTarget(null)}
         />
-      )}
-
-      {deleteTarget && (
-        <ConfirmModal
-          title="Üyeyi sil"
-          message={`${deleteTarget.companyName || deleteTarget.fullName} kalıcı olarak silinecek. Bu işlem geri alınamaz.`}
-          confirmLabel="Sil"
-          isDanger
-          isLoading={isSubmitting}
-          onConfirm={handleDeleteConfirm}
-          onClose={() => setDeleteTarget(null)}
-        />
-      )}
-
-      {editTarget && (
-        <EditMemberModal
-          member={editTarget}
-          onClose={() => setEditTarget(null)}
-          onSaved={() => {
-            setEditTarget(null);
-            load();
-          }}
-        />
-      )}
-
-      {credentialsTarget && (
-        <CreateCredentialsModal member={credentialsTarget} onClose={() => setCredentialsTarget(null)} />
       )}
     </div>
-  );
-}
-
-function EditMemberModal({
-  member,
-  onClose,
-  onSaved,
-}: {
-  member: AdminMember;
-  onClose: () => void;
-  onSaved: () => void;
-}) {
-  const showToast = useToast();
-  const [form, setForm] = useState({
-    fullName: member.fullName,
-    companyName: member.companyName ?? "",
-    email: member.email,
-    phone: member.phone ?? "",
-    mobilePhone: member.mobilePhone ?? "",
-    companyAddress: member.companyAddress ?? "",
-  });
-  const [isSaving, setIsSaving] = useState(false);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setIsSaving(true);
-    try {
-      await updateAdminMember(member._id, form);
-      showToast("Üye bilgileri güncellendi.");
-      onSaved();
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : "Güncelleme başarısız oldu.");
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
-  return (
-    <Modal title="Üyeyi Düzenle" onClose={onClose}>
-      <form onSubmit={handleSubmit} className="grid gap-4">
-        <label className="grid gap-1.5">
-          <span className="text-[0.78rem] font-bold text-assid-muted">Ad Soyad</span>
-          <input
-            required
-            value={form.fullName}
-            onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-            className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
-          />
-        </label>
-        <label className="grid gap-1.5">
-          <span className="text-[0.78rem] font-bold text-assid-muted">Firma Adı</span>
-          <input
-            value={form.companyName}
-            onChange={(e) => setForm({ ...form, companyName: e.target.value })}
-            className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
-          />
-        </label>
-        <label className="grid gap-1.5">
-          <span className="text-[0.78rem] font-bold text-assid-muted">E-posta</span>
-          <input
-            required
-            type="email"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
-          />
-        </label>
-        <div className="grid grid-cols-2 gap-4">
-          <label className="grid gap-1.5">
-            <span className="text-[0.78rem] font-bold text-assid-muted">Telefon</span>
-            <input
-              value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
-            />
-          </label>
-          <label className="grid gap-1.5">
-            <span className="text-[0.78rem] font-bold text-assid-muted">Cep Telefonu</span>
-            <input
-              value={form.mobilePhone}
-              onChange={(e) => setForm({ ...form, mobilePhone: e.target.value })}
-              className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
-            />
-          </label>
-        </div>
-        <label className="grid gap-1.5">
-          <span className="text-[0.78rem] font-bold text-assid-muted">Firma Adresi</span>
-          <textarea
-            value={form.companyAddress}
-            onChange={(e) => setForm({ ...form, companyAddress: e.target.value })}
-            rows={2}
-            className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
-          />
-        </label>
-        <div className="mt-2 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="cursor-pointer rounded-full border border-assid-line bg-transparent px-5 py-2.5 text-[0.85rem] font-bold text-assid-ink"
-          >
-            Vazgeç
-          </button>
-          <button
-            type="submit"
-            disabled={isSaving}
-            className="cursor-pointer rounded-full border-0 bg-assid-green px-5 py-2.5 text-[0.85rem] font-bold text-white disabled:opacity-60"
-          >
-            {isSaving ? "Kaydediliyor..." : "Kaydet"}
-          </button>
-        </div>
-      </form>
-    </Modal>
-  );
-}
-
-function CreateCredentialsModal({ member, onClose }: { member: AdminMember; onClose: () => void }) {
-  const showToast = useToast();
-  const [password, setPassword] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setIsSaving(true);
-    try {
-      await createAdminUser({ email: member.email, password, role: "member", memberId: member._id });
-      showToast(`${member.email} için giriş bilgisi oluşturuldu.`);
-      onClose();
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : "Giriş bilgisi oluşturulamadı.");
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
-  return (
-    <Modal title="Giriş Bilgisi Oluştur" onClose={onClose}>
-      <form onSubmit={handleSubmit} className="grid gap-4">
-        <p className="text-[0.88rem] text-assid-muted">
-          <strong className="text-assid-ink">{member.companyName || member.fullName}</strong> için üye paneli giriş
-          bilgisi oluşturuluyor. Belirlediğiniz şifreyi üyeye iletmeniz gerekir.
-        </p>
-        <label className="grid gap-1.5">
-          <span className="text-[0.78rem] font-bold text-assid-muted">E-posta</span>
-          <input
-            disabled
-            value={member.email}
-            className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 text-assid-muted outline-none"
-          />
-        </label>
-        <label className="grid gap-1.5">
-          <span className="text-[0.78rem] font-bold text-assid-muted">Şifre</span>
-          <input
-            required
-            minLength={8}
-            type="text"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="En az 8 karakter"
-            className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
-          />
-        </label>
-        <div className="mt-2 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="cursor-pointer rounded-full border border-assid-line bg-transparent px-5 py-2.5 text-[0.85rem] font-bold text-assid-ink"
-          >
-            Vazgeç
-          </button>
-          <button
-            type="submit"
-            disabled={isSaving}
-            className="cursor-pointer rounded-full border-0 bg-assid-green px-5 py-2.5 text-[0.85rem] font-bold text-white disabled:opacity-60"
-          >
-            {isSaving ? "Oluşturuluyor..." : "Oluştur"}
-          </button>
-        </div>
-      </form>
-    </Modal>
   );
 }

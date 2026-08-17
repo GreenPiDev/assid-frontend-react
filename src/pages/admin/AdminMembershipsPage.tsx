@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchAdminMembers, type AdminMember } from "../../api/admin";
+import { useQuery } from "@tanstack/react-query";
+import { fetchAdminMembers } from "../../api/admin";
 import Badge from "../../components/admin/Badge";
 import { useToast } from "../../context/ToastContext";
 import { getSectorName } from "../../utils/directory";
@@ -10,8 +11,6 @@ type Filter = "approved" | "pending" | "all";
 export default function AdminMembershipsPage() {
   const showToast = useToast();
   const navigate = useNavigate();
-  const [members, setMembers] = useState<AdminMember[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("approved");
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
@@ -21,17 +20,14 @@ export default function AdminMembershipsPage() {
     return () => clearTimeout(timer);
   }, [q]);
 
+  const { data: members = [], isLoading, isError } = useQuery({
+    queryKey: ["admin", "memberships", filter, debouncedQ],
+    queryFn: () => fetchAdminMembers({ status: filter === "all" ? undefined : filter, q: debouncedQ || undefined }),
+  });
   useEffect(() => {
-    setIsLoading(true);
-    fetchAdminMembers({
-      isApproved: filter === "all" ? undefined : filter === "approved",
-      q: debouncedQ || undefined,
-    })
-      .then(setMembers)
-      .catch(() => showToast("Üyelikler yüklenemedi."))
-      .finally(() => setIsLoading(false));
+    if (isError) showToast("Üyelikler yüklenemedi.");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, debouncedQ]);
+  }, [isError]);
 
   return (
     <div>
@@ -116,18 +112,24 @@ export default function AdminMembershipsPage() {
                     </div>
                   </td>
                   <td className="px-5 py-3.5">
-                    <div className="font-bold text-assid-ink">{m.companyName || m.fullName}</div>
+                    <div className="font-bold text-[#2563eb]">{m.companyName || m.fullName}</div>
                     <div className="text-[0.78rem] text-assid-muted">{m.fullName}</div>
                   </td>
                   <td className="px-5 py-3.5 text-assid-muted">
                     {m.sectors.map((s) => getSectorName(s)).join(", ") || "—"}
                   </td>
                   <td className="px-5 py-3.5 text-assid-muted">
-                    {m.membershipType === "corporate" ? "Tüzel" : "Gerçek"}
+                    {m.membershipType === "corporate" ? "Kurumsal" : m.membershipType === "individual" ? "Bireysel" : "—"}
                   </td>
                   <td className="px-5 py-3.5 text-assid-muted">{m.phone || m.mobilePhone || "—"}</td>
                   <td className="px-5 py-3.5">
-                    {m.isApproved ? <Badge variant="success">Onaylı</Badge> : <Badge variant="pending">Bekliyor</Badge>}
+                    {m.applicationStatus === "approved" ? (
+                      <Badge variant="success">Onaylı</Badge>
+                    ) : m.applicationStatus === "rejected" ? (
+                      <Badge variant="danger">Reddedildi</Badge>
+                    ) : (
+                      <Badge variant="pending">Bekliyor</Badge>
+                    )}
                   </td>
                   <td className="px-5 py-3.5 text-assid-muted">
                     {m.approvedAt ? new Date(m.approvedAt).toLocaleDateString("tr-TR") : "—"}

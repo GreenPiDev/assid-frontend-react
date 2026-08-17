@@ -17,7 +17,7 @@ export default function DirectorySection() {
               Firma rehberi
             </div>
             <h2 className="mt-2.5 max-w-3xl text-[clamp(1.5rem,2.6vw,2.35rem)] leading-[1.07] tracking-[-.045em] text-white">
-              İhtiyacınız olan üreticiye, tedarikçiye veya iş ortağına ulaşın.
+              İhtiyacınız olan üreticiye, tedarikçiye veya iş ortağına&nbsp;ulaşın.
             </h2>
           </div>
         </div>

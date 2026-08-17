@@ -1,24 +1,23 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
 import { forgotPassword } from "../api/auth";
 import AuthShell from "../components/auth/AuthShell";
 import Button from "../components/ui/Button";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const forgotPasswordMutation = useMutation({ mutationFn: forgotPassword });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setIsSubmitting(true);
     try {
-      await forgotPassword(email);
+      await forgotPasswordMutation.mutateAsync(email);
     } finally {
       // Backend always resolves the same way regardless of whether the
       // email exists, so the UI can't leak that info either.
       setIsSent(true);
-      setIsSubmitting(false);
     }
   }
 
@@ -56,8 +55,8 @@ export default function ForgotPasswordPage() {
             </span>
           </label>
 
-          <Button type="submit" variant="primary" className="mt-2 w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Gönderiliyor..." : "Sıfırlama Bağlantısı Gönder"}
+          <Button type="submit" variant="primary" className="mt-2 w-full" disabled={forgotPasswordMutation.isPending}>
+            {forgotPasswordMutation.isPending ? "Gönderiliyor..." : "Sıfırlama Bağlantısı Gönder"}
           </Button>
 
           <Link
