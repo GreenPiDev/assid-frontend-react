@@ -2,7 +2,6 @@ import { createBrowserRouter, Outlet, ScrollRestoration } from 'react-router-dom
 import RequireAuth from './components/auth/RequireAuth'
 import Footer from './components/layout/Footer'
 import Header from './components/layout/Header'
-import LoadingScreen from './components/ui/LoadingScreen'
 import { AuthProvider } from './context/AuthContext'
 import { ToastProvider } from './context/ToastContext'
 import ContactPage from './pages/ContactPage'
@@ -18,7 +17,6 @@ function RootLayout() {
   return (
     <AuthProvider>
       <ToastProvider>
-        <LoadingScreen />
         <Outlet />
         <ScrollRestoration />
       </ToastProvider>

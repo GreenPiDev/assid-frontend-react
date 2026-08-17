@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { changeMyPassword } from "../../api/member";
 import { useToast } from "../../context/ToastContext";
 
@@ -8,10 +7,7 @@ export default function MemberPasswordPage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
-  const changePasswordMutation = useMutation({
-    mutationFn: ({ current, next }: { current: string; next: string }) => changeMyPassword(current, next),
-  });
+  const [isSaving, setIsSaving] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -19,14 +15,17 @@ export default function MemberPasswordPage() {
       showToast("Yeni şifreler eşleşmiyor.");
       return;
     }
+    setIsSaving(true);
     try {
-      await changePasswordMutation.mutateAsync({ current: currentPassword, next: newPassword });
+      await changeMyPassword(currentPassword, newPassword);
       showToast("Şifreniz güncellendi.");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Şifre güncellenemedi.");
+    } finally {
+      setIsSaving(false);
     }
   }
 
@@ -79,10 +78,10 @@ export default function MemberPasswordPage() {
         <div className="mt-2 flex justify-end">
           <button
             type="submit"
-            disabled={changePasswordMutation.isPending}
+            disabled={isSaving}
             className="cursor-pointer rounded-full border-0 bg-assid-green px-6 py-3 text-[0.88rem] font-bold text-white disabled:opacity-60"
           >
-            {changePasswordMutation.isPending ? "Kaydediliyor..." : "Şifreyi Güncelle"}
+            {isSaving ? "Kaydediliyor..." : "Şifreyi Güncelle"}
           </button>
         </div>
       </form>

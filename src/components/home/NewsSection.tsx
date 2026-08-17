@@ -17,7 +17,7 @@ export default function NewsSection() {
               Gündem ve duyurular
             </div>
             <h2 className="mt-2.5 max-w-3xl text-[clamp(2rem,4vw,3.4rem)] leading-[1.07] tracking-[-.045em]">
-              Sektörel Haberler ve Duyurular
+              Derneğimizden haberler
             </h2>
           </div>
           <Button

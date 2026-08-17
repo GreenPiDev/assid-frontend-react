@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
 import { resetPassword } from "../api/auth";
 import AuthShell from "../components/auth/AuthShell";
 import Button from "../components/ui/Button";
@@ -13,9 +12,7 @@ export default function ResetPasswordPage() {
   const token = searchParams.get("token") ?? "";
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const resetPasswordMutation = useMutation({
-    mutationFn: (password: string) => resetPassword(token, password),
-  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -23,12 +20,15 @@ export default function ResetPasswordPage() {
       showToast("Şifreler eşleşmiyor.");
       return;
     }
+    setIsSubmitting(true);
     try {
-      await resetPasswordMutation.mutateAsync(newPassword);
+      await resetPassword(token, newPassword);
       showToast("Şifreniz güncellendi, giriş yapabilirsiniz.");
       navigate("/login", { replace: true });
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Bağlantının süresi dolmuş olabilir.");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -78,8 +78,8 @@ export default function ResetPasswordPage() {
           </span>
         </label>
 
-        <Button type="submit" variant="primary" className="mt-2 w-full" disabled={resetPasswordMutation.isPending}>
-          {resetPasswordMutation.isPending ? "Kaydediliyor..." : "Şifreyi Güncelle"}
+        <Button type="submit" variant="primary" className="mt-2 w-full" disabled={isSubmitting}>
+          {isSubmitting ? "Kaydediliyor..." : "Şifreyi Güncelle"}
         </Button>
       </form>
     </AuthShell>

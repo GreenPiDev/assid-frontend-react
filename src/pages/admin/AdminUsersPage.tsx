@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createAdminUser, fetchAdminUsers, resetUserPassword, setUserActive, type AdminUser } from "../../api/admin";
 import Badge from "../../components/admin/Badge";
 import ConfirmModal from "../../components/admin/ConfirmModal";
@@ -9,38 +8,41 @@ import { BanIcon, CheckIcon, KeyIcon, PlusIcon } from "../../components/admin/ic
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 
-const usersQueryKey = ["admin", "users"];
-
 export default function AdminUsersPage() {
   const showToast = useToast();
-  const queryClient = useQueryClient();
   const { user: currentUser } = useAuth();
-  const { data: users = [], isLoading, isError } = useQuery({ queryKey: usersQueryKey, queryFn: fetchAdminUsers });
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [q, setQ] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [resetTarget, setResetTarget] = useState<AdminUser | null>(null);
   const [toggleTarget, setToggleTarget] = useState<AdminUser | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (isError) showToast("Kullanıcılar yüklenemedi.");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isError]);
+  function load() {
+    setIsLoading(true);
+    fetchAdminUsers()
+      .then(setUsers)
+      .catch(() => showToast("Kullanıcılar yüklenemedi."))
+      .finally(() => setIsLoading(false));
+  }
+
+  useEffect(load, []);
 
   const filteredUsers = users.filter((u) => u.email.toLocaleLowerCase("tr").includes(q.trim().toLocaleLowerCase("tr")));
 
-  const toggleActiveMutation = useMutation({
-    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) => setUserActive(id, isActive),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: usersQueryKey }),
-  });
-
   async function handleToggleConfirm() {
     if (!toggleTarget) return;
+    setIsSubmitting(true);
     try {
-      await toggleActiveMutation.mutateAsync({ id: toggleTarget.id, isActive: !toggleTarget.isActive });
+      await setUserActive(toggleTarget.id, !toggleTarget.isActive);
       showToast(toggleTarget.isActive ? "Kullanıcı pasif hale getirildi." : "Kullanıcı aktif hale getirildi.");
       setToggleTarget(null);
+      load();
     } catch {
       showToast("İşlem başarısız oldu.");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -135,7 +137,15 @@ export default function AdminUsersPage() {
         </table>
       </div>
 
-      {isCreateOpen && <CreateUserModal onClose={() => setIsCreateOpen(false)} onCreated={() => setIsCreateOpen(false)} />}
+      {isCreateOpen && (
+        <CreateUserModal
+          onClose={() => setIsCreateOpen(false)}
+          onCreated={() => {
+            setIsCreateOpen(false);
+            load();
+          }}
+        />
+      )}
 
       {resetTarget && <ResetPasswordModal user={resetTarget} onClose={() => setResetTarget(null)} />}
 
@@ -149,7 +159,7 @@ export default function AdminUsersPage() {
           }
           confirmLabel={toggleTarget.isActive ? "Pasif Yap" : "Aktif Yap"}
           isDanger={toggleTarget.isActive}
-          isLoading={toggleActiveMutation.isPending}
+          isLoading={isSubmitting}
           onConfirm={handleToggleConfirm}
           onClose={() => setToggleTarget(null)}
         />
@@ -160,25 +170,23 @@ export default function AdminUsersPage() {
 
 function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
   const showToast = useToast();
-  const queryClient = useQueryClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"admin" | "member">("admin");
   const [memberId, setMemberId] = useState("");
-
-  const createMutation = useMutation({
-    mutationFn: createAdminUser,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: usersQueryKey }),
-  });
+  const [isSaving, setIsSaving] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setIsSaving(true);
     try {
-      await createMutation.mutateAsync({ email, password, role, memberId: role === "member" ? memberId || undefined : undefined });
+      await createAdminUser({ email, password, role, memberId: role === "member" ? memberId || undefined : undefined });
       showToast("Kullanıcı oluşturuldu.");
       onCreated();
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Kullanıcı oluşturulamadı.");
+    } finally {
+      setIsSaving(false);
     }
   }
 
@@ -238,10 +246,10 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
           </button>
           <button
             type="submit"
-            disabled={createMutation.isPending}
+            disabled={isSaving}
             className="cursor-pointer rounded-full border-0 bg-assid-green px-5 py-2.5 text-[0.85rem] font-bold text-white disabled:opacity-60"
           >
-            {createMutation.isPending ? "Oluşturuluyor..." : "Oluştur"}
+            {isSaving ? "Oluşturuluyor..." : "Oluştur"}
           </button>
         </div>
       </form>
@@ -252,18 +260,19 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
 function ResetPasswordModal({ user, onClose }: { user: AdminUser; onClose: () => void }) {
   const showToast = useToast();
   const [password, setPassword] = useState("");
-  const resetMutation = useMutation({
-    mutationFn: (newPassword: string) => resetUserPassword(user.id, newPassword),
-  });
+  const [isSaving, setIsSaving] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setIsSaving(true);
     try {
-      await resetMutation.mutateAsync(password);
+      await resetUserPassword(user.id, password);
       showToast(`${user.email} için şifre sıfırlandı.`);
       onClose();
     } catch {
       showToast("Şifre sıfırlanamadı.");
+    } finally {
+      setIsSaving(false);
     }
   }
 
@@ -294,10 +303,10 @@ function ResetPasswordModal({ user, onClose }: { user: AdminUser; onClose: () =>
           </button>
           <button
             type="submit"
-            disabled={resetMutation.isPending}
+            disabled={isSaving}
             className="cursor-pointer rounded-full border-0 bg-assid-green px-5 py-2.5 text-[0.85rem] font-bold text-white disabled:opacity-60"
           >
-            {resetMutation.isPending ? "Kaydediliyor..." : "Sıfırla"}
+            {isSaving ? "Kaydediliyor..." : "Sıfırla"}
           </button>
         </div>
       </form>

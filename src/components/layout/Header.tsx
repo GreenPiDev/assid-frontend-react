@@ -1,7 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Button from "../ui/Button";
-import { useOrganizationSettings } from "../../api/resources/organizationSettings";
-import { goToHeroCarouselSlide, HERO_CAROUSEL_SLIDES, type HeroCarouselSlideId } from "../../utils/heroCarouselBus";
+import { useOrganizationLogo } from "../../hooks/useOrganizationLogo";
 import { scrollToId, scrollToTop } from "../../utils/scroll";
 
 const navLinks = [
@@ -16,8 +15,7 @@ export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const isHome = location.pathname === "/";
-  const { data: settings } = useOrganizationSettings();
-  const logoUrl = settings?.logo;
+  const logoUrl = useOrganizationLogo();
 
   function goHome() {
     if (isHome) scrollToTop();
@@ -25,15 +23,6 @@ export default function Header() {
   }
 
   function goToSection(id: string) {
-    if (id in HERO_CAROUSEL_SLIDES) {
-      if (isHome) {
-        scrollToId("anasayfa");
-        goToHeroCarouselSlide(id as HeroCarouselSlideId);
-      } else {
-        navigate("/", { state: { scrollTo: "anasayfa", heroSlide: id } });
-      }
-      return;
-    }
     if (isHome) scrollToId(id);
     else navigate("/", { state: { scrollTo: id } });
   }

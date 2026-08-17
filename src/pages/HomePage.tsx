@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import HeroCarousel from "../carousels/HeroCarousel";
 import DirectorySection from "../components/home/DirectorySection";
+import EventsSection from "../components/home/EventsSection";
+import Hero from "../components/home/Hero";
+import JoinSection from "../components/home/JoinSection";
 import NewsSection from "../components/home/NewsSection";
-import { goToHeroCarouselSlide, type HeroCarouselSlideId } from "../utils/heroCarouselBus";
 import { scrollToId } from "../utils/scroll";
 
 export default function HomePage() {
@@ -11,19 +12,20 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const state = location.state as { scrollTo?: string; heroSlide?: HeroCarouselSlideId } | null;
-    if (!state?.scrollTo) return;
-    scrollToId(state.scrollTo);
-    if (state.heroSlide) goToHeroCarouselSlide(state.heroSlide);
+    const scrollTo = (location.state as { scrollTo?: string } | null)?.scrollTo;
+    if (!scrollTo) return;
+    scrollToId(scrollTo);
     navigate(location.pathname, { replace: true, state: null });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state]);
 
   return (
     <main>
-      <HeroCarousel />
+      <Hero />
+      <EventsSection />
       <DirectorySection />
       <NewsSection />
+      <JoinSection />
     </main>
   );
 }

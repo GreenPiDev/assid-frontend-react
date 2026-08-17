@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchMyMemberProfile, updateMyMemberProfile, uploadMyLogo } from "../../api/member";
+import { fetchMyMemberProfile, updateMyMemberProfile, uploadMyLogo, type MyMemberProfile } from "../../api/member";
 import Badge from "../../components/admin/Badge";
 import MemberCardContent from "../../components/directory/MemberCardContent";
 import TagEditor from "../../components/forms/TagEditor";
@@ -26,58 +25,54 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-const profileQueryKey = ["member", "profile"];
-
 export default function MemberProfilePage() {
   const showToast = useToast();
-  const queryClient = useQueryClient();
-  const { data: profile, isLoading, isError } = useQuery({
-    queryKey: profileQueryKey,
-    queryFn: fetchMyMemberProfile,
-  });
+  const [profile, setProfile] = useState<MyMemberProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [activityAreas, setActivityAreas] = useState<string[]>([]);
   const [productsAndServices, setProductsAndServices] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (isError) showToast("Profil bilgileri yüklenemedi.");
+    fetchMyMemberProfile()
+      .then((p) => {
+        setProfile(p);
+        setActivityAreas(p.activityAreas);
+        setProductsAndServices(p.productsAndServices);
+      })
+      .catch(() => showToast("Profil bilgileri yüklenemedi."))
+      .finally(() => setIsLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isError]);
-
-  useEffect(() => {
-    if (!profile) return;
-    setActivityAreas(profile.activityAreas);
-    setProductsAndServices(profile.productsAndServices);
-  }, [profile]);
-
-  const saveMutation = useMutation({
-    mutationFn: updateMyMemberProfile,
-    onSuccess: (updated) => queryClient.setQueryData(profileQueryKey, updated),
-  });
+  }, []);
 
   async function handleSave() {
+    setIsSaving(true);
     try {
-      await saveMutation.mutateAsync({ activityAreas, productsAndServices });
+      const updated = await updateMyMemberProfile({ activityAreas, productsAndServices });
+      setProfile(updated);
       showToast("Profil güncellendi.");
     } catch {
       showToast("Güncelleme başarısız oldu.");
+    } finally {
+      setIsSaving(false);
     }
   }
-
-  const uploadLogoMutation = useMutation({
-    mutationFn: uploadMyLogo,
-    onSuccess: (updated) => queryClient.setQueryData(profileQueryKey, updated),
-  });
 
   async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
+    setIsUploadingLogo(true);
     try {
-      await uploadLogoMutation.mutateAsync(file);
+      const updated = await uploadMyLogo(file);
+      setProfile(updated);
       showToast("Logo güncellendi.");
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Logo yüklenemedi.");
+    } finally {
+      setIsUploadingLogo(false);
     }
   }
 
@@ -125,11 +120,11 @@ export default function MemberProfilePage() {
             />
             <button
               type="button"
-              disabled={uploadLogoMutation.isPending}
+              disabled={isUploadingLogo}
               onClick={() => fileInputRef.current?.click()}
               className="cursor-pointer rounded-full border border-assid-line bg-transparent px-5 py-2.5 text-[0.85rem] font-bold text-assid-ink disabled:opacity-60"
             >
-              {uploadLogoMutation.isPending ? "Yükleniyor..." : "Logo Yükle"}
+              {isUploadingLogo ? "Yükleniyor..." : "Logo Yükle"}
             </button>
             <p className="mt-2 text-[0.78rem] text-assid-muted">PNG, JPEG, WEBP veya SVG — en fazla 5MB.</p>
           </div>
@@ -178,10 +173,10 @@ export default function MemberProfilePage() {
             <button
               type="button"
               onClick={handleSave}
-              disabled={saveMutation.isPending || !isDirty}
+              disabled={isSaving || !isDirty}
               className="cursor-pointer rounded-full border-0 bg-assid-green px-6 py-3 text-[0.88rem] font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {saveMutation.isPending ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
+              {isSaving ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
             </button>
           </div>
         </Section>

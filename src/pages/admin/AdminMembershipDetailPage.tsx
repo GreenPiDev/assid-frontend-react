@@ -1,15 +1,9 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { fetchAdminMember, fetchMemberMaskedNationalId } from "../../api/admin";
+import { fetchAdminMember, type AdminMember } from "../../api/admin";
 import Badge from "../../components/admin/Badge";
 import { ArrowLeftIcon } from "../../components/admin/icons";
-import {
-  businessActivityLabels,
-  contactPreferenceLabels,
-  maritalStatusLabels,
-  sectorStatusLabels,
-} from "../../constants/memberEnums";
+import { businessActivityLabels, contactPreferenceLabels, sectorStatusLabels } from "../../constants/memberEnums";
 import { useToast } from "../../context/ToastContext";
 import { getSectorName } from "../../utils/directory";
 
@@ -35,23 +29,17 @@ export default function AdminMembershipDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const showToast = useToast();
-
-  const { data: member, isLoading, isError } = useQuery({
-    queryKey: ["admin", "member", id],
-    queryFn: () => fetchAdminMember(id as string),
-    enabled: !!id,
-  });
-  const { data: nationalIdResult } = useQuery({
-    queryKey: ["admin", "member", id, "national-id"],
-    queryFn: () => fetchMemberMaskedNationalId(id as string),
-    enabled: !!id,
-  });
-  const maskedNationalId = nationalIdResult?.maskedNationalId ?? null;
+  const [member, setMember] = useState<AdminMember | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (isError) showToast("Üye bilgileri yüklenemedi.");
+    if (!id) return;
+    fetchAdminMember(id)
+      .then(setMember)
+      .catch(() => showToast("Üye bilgileri yüklenemedi."))
+      .finally(() => setIsLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isError]);
+  }, [id]);
 
   if (isLoading) {
     return <p className="text-assid-muted">Yükleniyor...</p>;
@@ -65,10 +53,10 @@ export default function AdminMembershipDetailPage() {
     <div>
       <button
         type="button"
-        onClick={() => navigate(-1)}
+        onClick={() => navigate("/dashboard/uyelikler")}
         className="mb-5 flex cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-[0.85rem] font-bold text-assid-green"
       >
-        <ArrowLeftIcon className="h-4 w-4" /> Geri Dön
+        <ArrowLeftIcon className="h-4 w-4" /> Üyeliklere dön
       </button>
 
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
@@ -80,16 +68,8 @@ export default function AdminMembershipDetailPage() {
             {member.companyName || member.fullName}
           </h1>
         </div>
-        <Badge
-          variant={
-            member.applicationStatus === "approved" ? "success" : member.applicationStatus === "rejected" ? "danger" : "pending"
-          }
-        >
-          {member.applicationStatus === "approved"
-            ? "Onaylı Üye"
-            : member.applicationStatus === "rejected"
-              ? "Başvurusu Reddedildi"
-              : "Onay Bekliyor"}
+        <Badge variant={member.isApproved ? "success" : "pending"}>
+          {member.isApproved ? "Onaylı Üye" : "Onay Bekliyor"}
         </Badge>
       </div>
 
@@ -111,16 +91,7 @@ export default function AdminMembershipDetailPage() {
         </Section>
 
         <Section title="Üyelik Sınıfı">
-          <Field
-            label="Üyelik Tipi"
-            value={
-              member.membershipType === "corporate"
-                ? "Kurumsal"
-                : member.membershipType === "individual"
-                  ? "Bireysel"
-                  : undefined
-            }
-          />
+          <Field label="Üyelik Tipi" value={member.membershipType === "corporate" ? "Tüzel" : "Gerçek"} />
           <Field label="Sektör Durumu" value={member.sectorStatus ? sectorStatusLabels[member.sectorStatus] : undefined} />
         </Section>
 
@@ -131,10 +102,7 @@ export default function AdminMembershipDetailPage() {
             value={member.birthDate ? new Date(member.birthDate).toLocaleDateString("tr-TR") : undefined}
           />
           <Field label="Uyruk" value={member.nationality} />
-          <Field label="TC Kimlik No" value={maskedNationalId} />
-          <Field label="Medeni Hal" value={member.maritalStatus ? maritalStatusLabels[member.maritalStatus] : undefined} />
-          <Field label="Telefon / Faks" value={member.faxPhone} />
-          <Field label="Cep Telefonu" value={member.personalMobilePhone} />
+          <Field label="Medeni Hal" value={member.maritalStatus} />
           <Field label="Bağlı Olduğu Kuruluşlar" value={member.affiliatedOrganizations} />
           <Field
             label="İletişim Tercihi"
@@ -170,55 +138,24 @@ export default function AdminMembershipDetailPage() {
                 : undefined
             }
           />
-          <Field
-            label="Bilgi Doğruluğu Onayı"
-            value={
-              member.infoAccuracyConfirmedAt
-                ? `Onaylandı — ${new Date(member.infoAccuracyConfirmedAt).toLocaleDateString("tr-TR")}`
-                : undefined
-            }
-          />
         </Section>
 
-        <Section title="Ekler">
-          {(
-            [
-              ["2 Adet Fotoğraf", "Fotoğraf"],
-              ["Adli Sicil Kaydı", "Adli Sicil Kaydı"],
-              ["Kimlik Fotokopisi", "Kimlik Fotokopisi"],
-              ["Ticaret Sicil Gazetesi (Kurumsal)", "Ticaret Sicil Gazetesi"],
-              ["Vergi Levhası (Kurumsal)", "Vergi Levhası"],
-              ["İmza Sirküleri (Kurumsal)", "İmza Sirküleri"],
-            ] as const
-          ).map(([displayLabel, docLabel]) => {
-            const docs = member.documents.filter((d) => d.label === docLabel);
-            return (
-              <div key={displayLabel}>
-                <div className="text-[0.74rem] font-bold uppercase tracking-wide text-assid-muted">
-                  {displayLabel}
-                </div>
-                {docs.length === 0 ? (
-                  <div className="mt-1 text-[0.92rem] text-assid-ink">—</div>
-                ) : (
-                  <div className="mt-1 grid gap-1.5">
-                    {docs.map((doc, index) => (
-                      <a
-                        key={`${doc.url}-${index}`}
-                        href={doc.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-between gap-2 rounded-[12px] border border-assid-line bg-assid-paper px-4 py-3 text-[0.85rem] font-bold text-assid-green hover:underline"
-                      >
-                        {docs.length > 1 ? `${displayLabel} ${index + 1}` : displayLabel}
-                        <span aria-hidden="true">↗</span>
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </Section>
+        {member.documents.length > 0 && (
+          <Section title="Ekler">
+            {member.documents.map((doc, index) => (
+              <a
+                key={`${doc.url}-${index}`}
+                href={doc.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between gap-2 rounded-[12px] border border-assid-line bg-assid-paper px-4 py-3 text-[0.85rem] font-bold text-assid-green hover:underline"
+              >
+                {doc.label}
+                <span aria-hidden="true">↗</span>
+              </a>
+            ))}
+          </Section>
+        )}
       </div>
     </div>
   );
