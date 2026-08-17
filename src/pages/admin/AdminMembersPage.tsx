@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchAdminMembers, setMemberApplicationStatus, type AdminMember } from "../../api/admin";
 import Badge from "../../components/admin/Badge";
 import ConfirmModal from "../../components/admin/ConfirmModal";
@@ -14,56 +15,50 @@ type Action = "approve" | "reject" | "restore";
 export default function AdminMembersPage() {
   const showToast = useToast();
   const navigate = useNavigate();
-  const [members, setMembers] = useState<AdminMember[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [filter, setFilter] = useState<Filter>("pending");
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
 
   const [actionTarget, setActionTarget] = useState<{ member: AdminMember; action: Action } | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  function load() {
-    setIsLoading(true);
-    fetchAdminMembers({
-      status: filter,
-      q: debouncedQ || undefined,
-    })
-      .then(setMembers)
-      .catch(() => showToast("Üyeler yüklenemedi."))
-      .finally(() => setIsLoading(false));
-  }
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedQ(q), 400);
     return () => clearTimeout(timer);
   }, [q]);
 
+  const { data: members = [], isLoading, isError } = useQuery({
+    queryKey: ["admin", "members", filter, debouncedQ],
+    queryFn: () => fetchAdminMembers({ status: filter, q: debouncedQ || undefined }),
+  });
   useEffect(() => {
-    load();
+    if (isError) showToast("Üyeler yüklenemedi.");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, debouncedQ]);
+  }, [isError]);
+
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: "pending" | "approved" | "rejected" }) =>
+      setMemberApplicationStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "members"] });
+    },
+  });
 
   async function handleActionConfirm() {
     if (!actionTarget) return;
-    setIsSubmitting(true);
+    const status = actionTarget.action === "approve" ? "approved" : actionTarget.action === "reject" ? "rejected" : "pending";
     try {
-      if (actionTarget.action === "approve") {
-        await setMemberApplicationStatus(actionTarget.member._id, "approved");
-        showToast("Üye onaylandı.");
-      } else if (actionTarget.action === "reject") {
-        await setMemberApplicationStatus(actionTarget.member._id, "rejected");
-        showToast("Başvuru reddedildi.");
-      } else {
-        await setMemberApplicationStatus(actionTarget.member._id, "pending");
-        showToast("Başvuru bekleyenlere alındı.");
-      }
+      await statusMutation.mutateAsync({ id: actionTarget.member._id, status });
+      showToast(
+        actionTarget.action === "approve"
+          ? "Üye onaylandı."
+          : actionTarget.action === "reject"
+            ? "Başvuru reddedildi."
+            : "Başvuru bekleyenlere alındı.",
+      );
       setActionTarget(null);
-      load();
     } catch {
       showToast("İşlem başarısız oldu.");
-    } finally {
-      setIsSubmitting(false);
     }
   }
 
@@ -75,7 +70,7 @@ export default function AdminMembersPage() {
     },
     reject: {
       title: "Başvuruyu reddet",
-      message: (name) => `${name} başvurusu reddedilen başvurular listesine aktarılacak. Devam edilsin mi?`,
+      message: (name) => `${name} başvurusu reddedilecek. Devam edilsin mi?`,
       confirmLabel: "Reddet",
       isDanger: true,
     },
@@ -222,7 +217,7 @@ export default function AdminMembersPage() {
           message={actionCopy[actionTarget.action].message(actionTarget.member.companyName || actionTarget.member.fullName)}
           confirmLabel={actionCopy[actionTarget.action].confirmLabel}
           isDanger={actionCopy[actionTarget.action].isDanger}
-          isLoading={isSubmitting}
+          isLoading={statusMutation.isPending}
           onConfirm={handleActionConfirm}
           onClose={() => setActionTarget(null)}
         />

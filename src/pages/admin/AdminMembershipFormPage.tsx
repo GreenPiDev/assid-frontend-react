@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createMembershipFee,
   deleteMembershipFee,
@@ -7,6 +8,7 @@ import {
   updateMembershipFee,
   updateOrganizationSettings,
   type AdminMembershipFee,
+  type AdminOrganizationSettings,
 } from "../../api/admin";
 import ConfirmModal from "../../components/admin/ConfirmModal";
 import Modal from "../../components/admin/Modal";
@@ -17,13 +19,28 @@ function formatAmount(amount: number) {
   return `${amount.toLocaleString("tr-TR")}₺`;
 }
 
+const feesQueryKey = ["admin", "membership-fees"];
+const orgSettingsQueryKey = ["admin", "organization-settings"];
+
+function invalidateOrgSettings(queryClient: ReturnType<typeof useQueryClient>) {
+  queryClient.invalidateQueries({ queryKey: orgSettingsQueryKey });
+  queryClient.invalidateQueries({ queryKey: ["/organization-settings"] });
+}
+
 export default function AdminMembershipFormPage() {
   const showToast = useToast();
-  const [fees, setFees] = useState<AdminMembershipFee[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: fees = [], isLoading, isError: isFeesError } = useQuery({
+    queryKey: feesQueryKey,
+    queryFn: fetchMembershipFees,
+  });
+  const { data: settings, isError: isSettingsError } = useQuery({
+    queryKey: orgSettingsQueryKey,
+    queryFn: fetchOrganizationSettings,
+  });
   const [formTarget, setFormTarget] = useState<AdminMembershipFee | "new" | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AdminMembershipFee | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [showMembershipFeesTable, setShowMembershipFeesTable] = useState(true);
   const [showAttachmentsSection, setShowAttachmentsSection] = useState(true);
   const [showMembershipClassSection, setShowMembershipClassSection] = useState(true);
@@ -31,32 +48,28 @@ export default function AdminMembershipFormPage() {
   const [requireKvkkConsent, setRequireKvkkConsent] = useState(true);
   const [showBylawsConsent, setShowBylawsConsent] = useState(true);
   const [requireBylawsConsent, setRequireBylawsConsent] = useState(true);
-  const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
-
-  function load() {
-    setIsLoading(true);
-    fetchMembershipFees()
-      .then(setFees)
-      .catch(() => showToast("Ücretler yüklenemedi."))
-      .finally(() => setIsLoading(false));
-  }
-
-  useEffect(load, []);
 
   useEffect(() => {
-    fetchOrganizationSettings()
-      .then((s) => {
-        setShowMembershipFeesTable(s.showMembershipFeesTable ?? true);
-        setShowAttachmentsSection(s.showAttachmentsSection ?? true);
-        setShowMembershipClassSection(s.showMembershipClassSection ?? true);
-        setShowKvkkConsent(s.showKvkkConsent ?? true);
-        setRequireKvkkConsent(s.requireKvkkConsent ?? true);
-        setShowBylawsConsent(s.showBylawsConsent ?? true);
-        setRequireBylawsConsent(s.requireBylawsConsent ?? true);
-      })
-      .catch(() => showToast("Ayarlar yüklenemedi."));
+    if (isFeesError) showToast("Ücretler yüklenemedi.");
+    if (isSettingsError) showToast("Ayarlar yüklenemedi.");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isFeesError, isSettingsError]);
+
+  useEffect(() => {
+    if (!settings) return;
+    setShowMembershipFeesTable(settings.showMembershipFeesTable ?? true);
+    setShowAttachmentsSection(settings.showAttachmentsSection ?? true);
+    setShowMembershipClassSection(settings.showMembershipClassSection ?? true);
+    setShowKvkkConsent(settings.showKvkkConsent ?? true);
+    setRequireKvkkConsent(settings.requireKvkkConsent ?? true);
+    setShowBylawsConsent(settings.showBylawsConsent ?? true);
+    setRequireBylawsConsent(settings.requireBylawsConsent ?? true);
+  }, [settings]);
+
+  const settingsMutation = useMutation({
+    mutationFn: (dto: Partial<AdminOrganizationSettings>) => updateOrganizationSettings(dto),
+    onSuccess: () => invalidateOrgSettings(queryClient),
+  });
 
   async function handleToggleVisibility(
     field: "showMembershipFeesTable" | "showAttachmentsSection" | "showMembershipClassSection",
@@ -69,15 +82,12 @@ export default function AdminMembershipFormPage() {
           ? setShowAttachmentsSection
           : setShowMembershipClassSection;
     setState(checked);
-    setIsTogglingVisibility(true);
     try {
-      await updateOrganizationSettings({ [field]: checked });
+      await settingsMutation.mutateAsync({ [field]: checked });
       showToast("Ayarlar güncellendi.");
     } catch {
       showToast("Güncelleme başarısız oldu.");
       setState(!checked);
-    } finally {
-      setIsTogglingVisibility(false);
     }
   }
 
@@ -85,30 +95,24 @@ export default function AdminMembershipFormPage() {
     const nextRequire = checked && requireKvkkConsent;
     setShowKvkkConsent(checked);
     setRequireKvkkConsent(nextRequire);
-    setIsTogglingVisibility(true);
     try {
-      await updateOrganizationSettings({ showKvkkConsent: checked, requireKvkkConsent: nextRequire });
+      await settingsMutation.mutateAsync({ showKvkkConsent: checked, requireKvkkConsent: nextRequire });
       showToast("Ayarlar güncellendi.");
     } catch {
       showToast("Güncelleme başarısız oldu.");
       setShowKvkkConsent(!checked);
       setRequireKvkkConsent(requireKvkkConsent);
-    } finally {
-      setIsTogglingVisibility(false);
     }
   }
 
   async function handleRequireKvkkChange(checked: boolean) {
     setRequireKvkkConsent(checked);
-    setIsTogglingVisibility(true);
     try {
-      await updateOrganizationSettings({ requireKvkkConsent: checked });
+      await settingsMutation.mutateAsync({ requireKvkkConsent: checked });
       showToast("Ayarlar güncellendi.");
     } catch {
       showToast("Güncelleme başarısız oldu.");
       setRequireKvkkConsent(!checked);
-    } finally {
-      setIsTogglingVisibility(false);
     }
   }
 
@@ -116,45 +120,40 @@ export default function AdminMembershipFormPage() {
     const nextRequire = checked && requireBylawsConsent;
     setShowBylawsConsent(checked);
     setRequireBylawsConsent(nextRequire);
-    setIsTogglingVisibility(true);
     try {
-      await updateOrganizationSettings({ showBylawsConsent: checked, requireBylawsConsent: nextRequire });
+      await settingsMutation.mutateAsync({ showBylawsConsent: checked, requireBylawsConsent: nextRequire });
       showToast("Ayarlar güncellendi.");
     } catch {
       showToast("Güncelleme başarısız oldu.");
       setShowBylawsConsent(!checked);
       setRequireBylawsConsent(requireBylawsConsent);
-    } finally {
-      setIsTogglingVisibility(false);
     }
   }
 
   async function handleRequireBylawsChange(checked: boolean) {
     setRequireBylawsConsent(checked);
-    setIsTogglingVisibility(true);
     try {
-      await updateOrganizationSettings({ requireBylawsConsent: checked });
+      await settingsMutation.mutateAsync({ requireBylawsConsent: checked });
       showToast("Ayarlar güncellendi.");
     } catch {
       showToast("Güncelleme başarısız oldu.");
       setRequireBylawsConsent(!checked);
-    } finally {
-      setIsTogglingVisibility(false);
     }
   }
 
+  const deleteFeeMutation = useMutation({
+    mutationFn: (id: string) => deleteMembershipFee(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: feesQueryKey }),
+  });
+
   async function handleDeleteConfirm() {
     if (!deleteTarget) return;
-    setIsSubmitting(true);
     try {
-      await deleteMembershipFee(deleteTarget._id);
+      await deleteFeeMutation.mutateAsync(deleteTarget._id);
       showToast("Ücret kaydı silindi.");
       setDeleteTarget(null);
-      load();
     } catch {
       showToast("Silme işlemi başarısız oldu.");
-    } finally {
-      setIsSubmitting(false);
     }
   }
 
@@ -188,7 +187,6 @@ export default function AdminMembershipFormPage() {
           <input
             type="checkbox"
             checked={showMembershipFeesTable}
-            disabled={isTogglingVisibility}
             onChange={(e) => handleToggleVisibility("showMembershipFeesTable", e.target.checked)}
           />
           Üyelik başvuru formunda göster
@@ -258,7 +256,6 @@ export default function AdminMembershipFormPage() {
           <input
             type="checkbox"
             checked={showMembershipClassSection}
-            disabled={isTogglingVisibility}
             onChange={(e) => handleToggleVisibility("showMembershipClassSection", e.target.checked)}
           />
           Üyelik başvuru formunda göster
@@ -274,7 +271,6 @@ export default function AdminMembershipFormPage() {
           <input
             type="checkbox"
             checked={showAttachmentsSection}
-            disabled={isTogglingVisibility}
             onChange={(e) => handleToggleVisibility("showAttachmentsSection", e.target.checked)}
           />
           Üyelik başvuru formunda göster
@@ -294,7 +290,6 @@ export default function AdminMembershipFormPage() {
               <input
                 type="checkbox"
                 checked={showKvkkConsent}
-                disabled={isTogglingVisibility}
                 onChange={(e) => handleShowKvkkChange(e.target.checked)}
               />
               Üye başvuru formunda görünsün
@@ -303,7 +298,7 @@ export default function AdminMembershipFormPage() {
               <input
                 type="checkbox"
                 checked={requireKvkkConsent}
-                disabled={!showKvkkConsent || isTogglingVisibility}
+                disabled={!showKvkkConsent}
                 onChange={(e) => handleRequireKvkkChange(e.target.checked)}
               />
               Üyelik başvurusu için zorunlu
@@ -315,7 +310,6 @@ export default function AdminMembershipFormPage() {
               <input
                 type="checkbox"
                 checked={showBylawsConsent}
-                disabled={isTogglingVisibility}
                 onChange={(e) => handleShowBylawsChange(e.target.checked)}
               />
               Üye başvuru formunda görünsün
@@ -324,7 +318,7 @@ export default function AdminMembershipFormPage() {
               <input
                 type="checkbox"
                 checked={requireBylawsConsent}
-                disabled={!showBylawsConsent || isTogglingVisibility}
+                disabled={!showBylawsConsent}
                 onChange={(e) => handleRequireBylawsChange(e.target.checked)}
               />
               Üyelik başvurusu için zorunlu
@@ -337,10 +331,7 @@ export default function AdminMembershipFormPage() {
         <MembershipFeeFormModal
           fee={formTarget === "new" ? null : formTarget}
           onClose={() => setFormTarget(null)}
-          onSaved={() => {
-            setFormTarget(null);
-            load();
-          }}
+          onSaved={() => setFormTarget(null)}
         />
       )}
 
@@ -350,7 +341,7 @@ export default function AdminMembershipFormPage() {
           message={`"${deleteTarget.label}" kalıcı olarak silinecek. Bu işlem geri alınamaz.`}
           confirmLabel="Sil"
           isDanger
-          isLoading={isSubmitting}
+          isLoading={deleteFeeMutation.isPending}
           onConfirm={handleDeleteConfirm}
           onClose={() => setDeleteTarget(null)}
         />
@@ -369,29 +360,26 @@ function MembershipFeeFormModal({
   onSaved: () => void;
 }) {
   const showToast = useToast();
+  const queryClient = useQueryClient();
   const [form, setForm] = useState({
     label: fee?.label ?? "",
     amount: fee?.amount !== undefined ? String(fee.amount) : "",
   });
-  const [isSaving, setIsSaving] = useState(false);
+
+  const saveMutation = useMutation({
+    mutationFn: (dto: { label: string; amount: number }) =>
+      fee ? updateMembershipFee(fee._id, dto) : createMembershipFee(dto),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: feesQueryKey }),
+  });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setIsSaving(true);
     try {
-      const dto = { label: form.label, amount: Number(form.amount) };
-      if (fee) {
-        await updateMembershipFee(fee._id, dto);
-        showToast("Ücret kaydı güncellendi.");
-      } else {
-        await createMembershipFee(dto);
-        showToast("Ücret kaydı oluşturuldu.");
-      }
+      await saveMutation.mutateAsync({ label: form.label, amount: Number(form.amount) });
+      showToast(fee ? "Ücret kaydı güncellendi." : "Ücret kaydı oluşturuldu.");
       onSaved();
     } catch {
       showToast("Kaydetme işlemi başarısız oldu.");
-    } finally {
-      setIsSaving(false);
     }
   }
 
@@ -429,10 +417,10 @@ function MembershipFeeFormModal({
           </button>
           <button
             type="submit"
-            disabled={isSaving}
+            disabled={saveMutation.isPending}
             className="cursor-pointer rounded-full border-0 bg-assid-green px-5 py-2.5 text-[0.85rem] font-bold text-white disabled:opacity-60"
           >
-            {isSaving ? "Kaydediliyor..." : "Kaydet"}
+            {saveMutation.isPending ? "Kaydediliyor..." : "Kaydet"}
           </button>
         </div>
       </form>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createAdminNews, deleteAdminNews, fetchAdminNews, updateAdminNews, type AdminNews } from "../../api/admin";
 import Badge from "../../components/admin/Badge";
 import ConfirmModal from "../../components/admin/ConfirmModal";
@@ -7,36 +8,33 @@ import { PencilIcon, PlusIcon, TrashIcon } from "../../components/admin/icons";
 import { SECTORS } from "../../constants/sectors";
 import { useToast } from "../../context/ToastContext";
 
+const newsQueryKey = ["admin", "news"];
+
 export default function AdminNewsPage() {
   const showToast = useToast();
-  const [news, setNews] = useState<AdminNews[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: news = [], isLoading, isError } = useQuery({ queryKey: newsQueryKey, queryFn: fetchAdminNews });
   const [formTarget, setFormTarget] = useState<AdminNews | "new" | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AdminNews | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function load() {
-    setIsLoading(true);
-    fetchAdminNews()
-      .then(setNews)
-      .catch(() => showToast("Haberler yüklenemedi."))
-      .finally(() => setIsLoading(false));
-  }
+  useEffect(() => {
+    if (isError) showToast("Haberler yüklenemedi.");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isError]);
 
-  useEffect(load, []);
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteAdminNews(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: newsQueryKey }),
+  });
 
   async function handleDeleteConfirm() {
     if (!deleteTarget) return;
-    setIsSubmitting(true);
     try {
-      await deleteAdminNews(deleteTarget._id);
+      await deleteMutation.mutateAsync(deleteTarget._id);
       showToast("Haber silindi.");
       setDeleteTarget(null);
-      load();
     } catch {
       showToast("Silme işlemi başarısız oldu.");
-    } finally {
-      setIsSubmitting(false);
     }
   }
 
@@ -128,10 +126,7 @@ export default function AdminNewsPage() {
         <NewsFormModal
           news={formTarget === "new" ? null : formTarget}
           onClose={() => setFormTarget(null)}
-          onSaved={() => {
-            setFormTarget(null);
-            load();
-          }}
+          onSaved={() => setFormTarget(null)}
         />
       )}
 
@@ -141,7 +136,7 @@ export default function AdminNewsPage() {
           message={`"${deleteTarget.title}" kalıcı olarak silinecek. Bu işlem geri alınamaz.`}
           confirmLabel="Sil"
           isDanger
-          isLoading={isSubmitting}
+          isLoading={deleteMutation.isPending}
           onConfirm={handleDeleteConfirm}
           onClose={() => setDeleteTarget(null)}
         />
@@ -160,6 +155,7 @@ function NewsFormModal({
   onSaved: () => void;
 }) {
   const showToast = useToast();
+  const queryClient = useQueryClient();
   const [form, setForm] = useState({
     title: news?.title ?? "",
     summary: news?.summary ?? "",
@@ -170,7 +166,11 @@ function NewsFormModal({
     isFeatured: news?.isFeatured ?? false,
     isPublished: news?.isPublished ?? true,
   });
-  const [isSaving, setIsSaving] = useState(false);
+
+  const saveMutation = useMutation({
+    mutationFn: (dto: Partial<AdminNews>) => (news ? updateAdminNews(news._id, dto) : createAdminNews(dto)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: newsQueryKey }),
+  });
 
   function toggleSector(slug: string) {
     setForm((prev) => ({
@@ -181,7 +181,6 @@ function NewsFormModal({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setIsSaving(true);
     try {
       const dto = {
         title: form.title,
@@ -193,18 +192,11 @@ function NewsFormModal({
         isFeatured: form.isFeatured,
         isPublished: form.isPublished,
       };
-      if (news) {
-        await updateAdminNews(news._id, dto);
-        showToast("Haber güncellendi.");
-      } else {
-        await createAdminNews(dto);
-        showToast("Haber oluşturuldu.");
-      }
+      await saveMutation.mutateAsync(dto);
+      showToast(news ? "Haber güncellendi." : "Haber oluşturuldu.");
       onSaved();
     } catch {
       showToast("Kaydetme işlemi başarısız oldu.");
-    } finally {
-      setIsSaving(false);
     }
   }
 
@@ -305,10 +297,10 @@ function NewsFormModal({
           </button>
           <button
             type="submit"
-            disabled={isSaving}
+            disabled={saveMutation.isPending}
             className="cursor-pointer rounded-full border-0 bg-assid-green px-5 py-2.5 text-[0.85rem] font-bold text-white disabled:opacity-60"
           >
-            {isSaving ? "Kaydediliyor..." : "Kaydet"}
+            {saveMutation.isPending ? "Kaydediliyor..." : "Kaydet"}
           </button>
         </div>
       </form>

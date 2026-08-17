@@ -1,6 +1,11 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { applyForMembership, type MembershipApplicationFiles } from "../api/membershipApplication";
+import { useMutation } from "@tanstack/react-query";
+import {
+  applyForMembership,
+  type MembershipApplicationFiles,
+  type MembershipApplicationPayload,
+} from "../api/membershipApplication";
 import Button from "../components/ui/Button";
 import TagEditor from "../components/forms/TagEditor";
 import FileUploadField from "../components/forms/FileUploadField";
@@ -101,8 +106,12 @@ export default function MembershipApplicationPage() {
   const [kvkkConsent, setKvkkConsent] = useState(false);
   const [bylawsAcknowledged, setBylawsAcknowledged] = useState(false);
   const [infoAccuracyConfirmed, setInfoAccuracyConfirmed] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSent, setIsSent] = useState(false);
+
+  const applyMutation = useMutation({
+    mutationFn: ({ payload, files: applicationFiles }: { payload: MembershipApplicationPayload; files: MembershipApplicationFiles }) =>
+      applyForMembership(payload, applicationFiles),
+  });
 
   function toggleSector(slug: string) {
     setSectors((prev) => (prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]));
@@ -130,10 +139,9 @@ export default function MembershipApplicationPage() {
       showToast("Devam etmek için belirttiğiniz bilgilerin doğruluğunu onaylamanız gerekiyor.");
       return;
     }
-    setIsSubmitting(true);
     try {
-      await applyForMembership(
-        {
+      await applyMutation.mutateAsync({
+        payload: {
           fullName: form.fullName,
           companyName: form.companyName || undefined,
           title: form.title || undefined,
@@ -161,12 +169,10 @@ export default function MembershipApplicationPage() {
           infoAccuracyConfirmed,
         },
         files,
-      );
+      });
       setIsSent(true);
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Başvuru gönderilemedi.");
-    } finally {
-      setIsSubmitting(false);
     }
   }
 
@@ -543,8 +549,8 @@ export default function MembershipApplicationPage() {
           )}
 
           <div className="flex justify-end">
-            <Button type="submit" variant="primary" disabled={isSubmitting}>
-              {isSubmitting ? "Gönderiliyor..." : "Başvuruyu Gönder"}
+            <Button type="submit" variant="primary" disabled={applyMutation.isPending}>
+              {applyMutation.isPending ? "Gönderiliyor..." : "Başvuruyu Gönder"}
             </Button>
           </div>
         </form>

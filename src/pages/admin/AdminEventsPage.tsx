@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createAdminEvent,
   deleteAdminEvent,
@@ -17,36 +18,36 @@ function toDateInputValue(iso?: string) {
   return iso.slice(0, 10);
 }
 
+const eventsQueryKey = ["admin", "events"];
+
 export default function AdminEventsPage() {
   const showToast = useToast();
-  const [events, setEvents] = useState<AdminEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: events = [], isLoading, isError } = useQuery({
+    queryKey: eventsQueryKey,
+    queryFn: fetchAdminEvents,
+  });
   const [formTarget, setFormTarget] = useState<AdminEvent | "new" | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AdminEvent | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function load() {
-    setIsLoading(true);
-    fetchAdminEvents()
-      .then(setEvents)
-      .catch(() => showToast("Etkinlikler yüklenemedi."))
-      .finally(() => setIsLoading(false));
-  }
+  useEffect(() => {
+    if (isError) showToast("Etkinlikler yüklenemedi.");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isError]);
 
-  useEffect(load, []);
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteAdminEvent(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: eventsQueryKey }),
+  });
 
   async function handleDeleteConfirm() {
     if (!deleteTarget) return;
-    setIsSubmitting(true);
     try {
-      await deleteAdminEvent(deleteTarget._id);
+      await deleteMutation.mutateAsync(deleteTarget._id);
       showToast("Etkinlik silindi.");
       setDeleteTarget(null);
-      load();
     } catch {
       showToast("Silme işlemi başarısız oldu.");
-    } finally {
-      setIsSubmitting(false);
     }
   }
 
@@ -134,10 +135,7 @@ export default function AdminEventsPage() {
         <EventFormModal
           event={formTarget === "new" ? null : formTarget}
           onClose={() => setFormTarget(null)}
-          onSaved={() => {
-            setFormTarget(null);
-            load();
-          }}
+          onSaved={() => setFormTarget(null)}
         />
       )}
 
@@ -147,7 +145,7 @@ export default function AdminEventsPage() {
           message={`"${deleteTarget.title}" kalıcı olarak silinecek. Bu işlem geri alınamaz.`}
           confirmLabel="Sil"
           isDanger
-          isLoading={isSubmitting}
+          isLoading={deleteMutation.isPending}
           onConfirm={handleDeleteConfirm}
           onClose={() => setDeleteTarget(null)}
         />
@@ -166,6 +164,7 @@ function EventFormModal({
   onSaved: () => void;
 }) {
   const showToast = useToast();
+  const queryClient = useQueryClient();
   const [form, setForm] = useState({
     title: event?.title ?? "",
     description: event?.description ?? "",
@@ -175,11 +174,15 @@ function EventFormModal({
     imageUrl: event?.imageUrl ?? "",
     isFeatured: event?.isFeatured ?? false,
   });
-  const [isSaving, setIsSaving] = useState(false);
+
+  const saveMutation = useMutation({
+    mutationFn: (dto: Partial<AdminEvent>) =>
+      event ? updateAdminEvent(event._id, dto) : createAdminEvent(dto),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: eventsQueryKey }),
+  });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setIsSaving(true);
     try {
       const dto = {
         title: form.title,
@@ -190,18 +193,11 @@ function EventFormModal({
         imageUrl: form.imageUrl || undefined,
         isFeatured: form.isFeatured,
       };
-      if (event) {
-        await updateAdminEvent(event._id, dto);
-        showToast("Etkinlik güncellendi.");
-      } else {
-        await createAdminEvent(dto);
-        showToast("Etkinlik oluşturuldu.");
-      }
+      await saveMutation.mutateAsync(dto);
+      showToast(event ? "Etkinlik güncellendi." : "Etkinlik oluşturuldu.");
       onSaved();
     } catch {
       showToast("Kaydetme işlemi başarısız oldu.");
-    } finally {
-      setIsSaving(false);
     }
   }
 
@@ -282,10 +278,10 @@ function EventFormModal({
           </button>
           <button
             type="submit"
-            disabled={isSaving}
+            disabled={saveMutation.isPending}
             className="cursor-pointer rounded-full border-0 bg-assid-green px-5 py-2.5 text-[0.85rem] font-bold text-white disabled:opacity-60"
           >
-            {isSaving ? "Kaydediliyor..." : "Kaydet"}
+            {saveMutation.isPending ? "Kaydediliyor..." : "Kaydet"}
           </button>
         </div>
       </form>

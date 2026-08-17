@@ -1,6 +1,7 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchAdminMember, fetchMemberMaskedNationalId, type AdminMember } from "../../api/admin";
+import { useQuery } from "@tanstack/react-query";
+import { fetchAdminMember, fetchMemberMaskedNationalId } from "../../api/admin";
 import Badge from "../../components/admin/Badge";
 import { ArrowLeftIcon } from "../../components/admin/icons";
 import {
@@ -34,21 +35,23 @@ export default function AdminMembershipDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const showToast = useToast();
-  const [member, setMember] = useState<AdminMember | null>(null);
-  const [maskedNationalId, setMaskedNationalId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+
+  const { data: member, isLoading, isError } = useQuery({
+    queryKey: ["admin", "member", id],
+    queryFn: () => fetchAdminMember(id as string),
+    enabled: !!id,
+  });
+  const { data: nationalIdResult } = useQuery({
+    queryKey: ["admin", "member", id, "national-id"],
+    queryFn: () => fetchMemberMaskedNationalId(id as string),
+    enabled: !!id,
+  });
+  const maskedNationalId = nationalIdResult?.maskedNationalId ?? null;
 
   useEffect(() => {
-    if (!id) return;
-    fetchAdminMember(id)
-      .then(setMember)
-      .catch(() => showToast("Üye bilgileri yüklenemedi."))
-      .finally(() => setIsLoading(false));
-    fetchMemberMaskedNationalId(id)
-      .then((res) => setMaskedNationalId(res.maskedNationalId))
-      .catch(() => {});
+    if (isError) showToast("Üye bilgileri yüklenemedi.");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [isError]);
 
   if (isLoading) {
     return <p className="text-assid-muted">Yükleniyor...</p>;

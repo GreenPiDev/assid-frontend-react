@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchAdminMembers, type AdminMember } from "../../api/admin";
+import { useQuery } from "@tanstack/react-query";
+import { fetchAdminMembers } from "../../api/admin";
 import Badge from "../../components/admin/Badge";
 import { useToast } from "../../context/ToastContext";
 import { getSectorName } from "../../utils/directory";
@@ -10,8 +11,6 @@ type Filter = "approved" | "pending" | "all";
 export default function AdminMembershipsPage() {
   const showToast = useToast();
   const navigate = useNavigate();
-  const [members, setMembers] = useState<AdminMember[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("approved");
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
@@ -21,17 +20,14 @@ export default function AdminMembershipsPage() {
     return () => clearTimeout(timer);
   }, [q]);
 
+  const { data: members = [], isLoading, isError } = useQuery({
+    queryKey: ["admin", "memberships", filter, debouncedQ],
+    queryFn: () => fetchAdminMembers({ status: filter === "all" ? undefined : filter, q: debouncedQ || undefined }),
+  });
   useEffect(() => {
-    setIsLoading(true);
-    fetchAdminMembers({
-      status: filter === "all" ? undefined : filter,
-      q: debouncedQ || undefined,
-    })
-      .then(setMembers)
-      .catch(() => showToast("Üyelikler yüklenemedi."))
-      .finally(() => setIsLoading(false));
+    if (isError) showToast("Üyelikler yüklenemedi.");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, debouncedQ]);
+  }, [isError]);
 
   return (
     <div>
