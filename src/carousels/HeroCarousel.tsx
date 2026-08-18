@@ -37,7 +37,7 @@ function HeroSlide() {
   return (
     <section className="relative flex flex-col overflow-hidden bg-[linear-gradient(105deg,rgba(8,28,48,.97)_0%,rgba(10,35,58,.89)_53%,rgba(9,30,46,.77)_100%),url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1900&q=85')] bg-cover bg-center text-white before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_82%_20%,rgba(142,202,230,.34),transparent_23%),radial-gradient(circle_at_78%_85%,rgba(233,120,60,.24),transparent_24%)] lg:h-full">
       <div className="flex flex-1 flex-col justify-center">
-        <div className="relative z-10 mx-auto grid w-[min(calc(100%-40px),1240px)] grid-cols-1 items-end gap-10 py-16 pl-24 md:py-22 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,.75fr)] lg:pl-32">
+        <div className="relative z-10 mx-auto grid w-[min(calc(100%-40px),1240px)] grid-cols-1 items-end gap-10 py-16 pl-24 md:py-22 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,.75fr)] lg:items-stretch lg:pl-32">
           <div>
             <h1 className="my-4 max-w-3xl text-[clamp(3rem,6vw,5.75rem)] leading-[.92] tracking-[-.07em]">
               Birlikte büyüyen <em>güçlü</em> bir sanayi ekosistemi.
@@ -51,17 +51,19 @@ function HeroSlide() {
               </Button>
             </div>
           </div>
-          <aside className="rounded-[32px] border border-white/18 bg-white/9 p-6 backdrop-blur-md">
-            <span className="text-[0.75rem] font-extrabold uppercase tracking-[.12em] text-assid-lime">
-              Başkanın mesajı
-            </span>
-            <h3 className="my-3 text-[1.55rem] leading-[1.1] tracking-tight">
-              "Gücümüz, birbirimizi tanımaktan ve birlikte üretmekten gelir."
-            </h3>
-            <p className="m-0 text-[0.92rem] text-white/73">
-              ASSİD, Ankara Siteler'in üretim ve ticaret potansiyelini dijital dünyaya taşımak için çalışır.
-            </p>
-            <div className="mt-5 flex items-center gap-2.5">
+          <aside className="flex flex-col justify-between gap-6 rounded-[32px] border border-white/18 bg-white/9 p-7 backdrop-blur-md lg:p-8">
+            <div>
+              <span className="text-[0.75rem] font-extrabold uppercase tracking-[.12em] text-assid-lime">
+                Başkanın mesajı
+              </span>
+              <h3 className="mt-4 mb-4 text-[1.7rem] leading-[1.15] tracking-tight">
+                "Gücümüz, birbirimizi tanımaktan ve birlikte üretmekten gelir."
+              </h3>
+              <p className="m-0 text-[0.95rem] text-white/73">
+                ASSİD, Ankara Siteler'in üretim ve ticaret potansiyelini dijital dünyaya taşımak için çalışır.
+              </p>
+            </div>
+            <div className="flex items-center gap-2.5">
               <span className="grid h-10 w-10 place-items-center rounded-full bg-[linear-gradient(135deg,var(--color-assid-lime),#fff)] text-[0.8rem] font-black text-assid-green-dark">
                 AŞ
               </span>
@@ -132,7 +134,7 @@ function EventsSlide() {
 
   return (
     <section className="relative flex h-full flex-col justify-center overflow-hidden bg-[linear-gradient(105deg,rgba(8,28,48,.97)_0%,rgba(10,35,58,.89)_53%,rgba(9,30,46,.77)_100%),url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1900&q=85')] bg-cover bg-center py-17 text-white before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_82%_20%,rgba(142,202,230,.34),transparent_23%),radial-gradient(circle_at_78%_85%,rgba(233,120,60,.24),transparent_24%)] md:py-24 lg:pb-11 lg:pt-28">
-      <div className="relative z-10 mx-auto flex h-auto w-[min(calc(100%-40px),1240px)] flex-col pl-24 lg:h-full lg:pl-32">
+      <div className="relative z-10 mx-auto flex h-auto w-[min(calc(100%-40px),1240px)] flex-col pl-24 lg:pl-32">
         <div className="mb-9 flex flex-none flex-col items-start justify-between gap-5 md:flex-row md:items-end">
           <div>
             <div className="inline-flex items-center gap-2 text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-lime before:h-0.5 before:w-5 before:bg-assid-lime">
@@ -146,8 +148,8 @@ function EventsSlide() {
             Tüm Etkinlikler →
           </Button>
         </div>
-        <div className="grid min-h-0 flex-1 grid-cols-1 gap-6.5 lg:grid-cols-[1.12fr_.88fr]">
-          <article className="relative isolate flex min-h-80 flex-col justify-end overflow-hidden rounded-[32px] p-6 text-white md:min-h-[320px] md:p-8.5 lg:h-[260px] lg:min-h-0 lg:p-6">
+        <div className="grid grid-cols-1 gap-6.5 lg:grid-cols-[1.12fr_.88fr]">
+          <article className="relative isolate flex min-h-80 flex-col justify-end overflow-hidden rounded-[32px] p-6 text-white md:min-h-[320px] md:p-8.5 lg:h-[340px] lg:min-h-0">
             <div
               className="absolute inset-0 -z-10 bg-cover bg-center"
               style={{
@@ -162,11 +164,11 @@ function EventsSlide() {
             </h3>
             <p className="m-0 text-white/73">{featuredEvent.location}</p>
           </article>
-          <div className="grid grid-rows-3 gap-2.5 lg:h-[260px]">
+          <div className="grid grid-rows-3 gap-2.5 lg:h-[340px]">
             {restEvents.map((event) => (
               <article
                 key={event._id}
-                className="grid grid-cols-[74px_1fr_auto] items-center gap-4 rounded-[17px] border border-white/18 bg-white/9 p-4.5 backdrop-blur-md transition duration-250 hover:translate-x-1 hover:bg-white/14 lg:p-3.5"
+                className="grid grid-cols-[74px_1fr_auto] items-center gap-4 rounded-[17px] border border-white/18 bg-white/9 p-4.5 backdrop-blur-md transition duration-250 hover:translate-x-1 hover:bg-white/14"
               >
                 <div className="rounded-xl bg-assid-lime/90 px-1.5 py-2.5 text-center text-assid-green-dark">
                   <strong className="block text-[1.46rem] leading-none tracking-[-.05em]">
