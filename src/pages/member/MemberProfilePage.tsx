@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { fetchMyMemberProfile, updateMyMemberProfile, uploadMyLogo, type MyMemberProfile } from "../../api/member";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { fetchMyMemberProfile, updateMyMemberProfile, uploadMyLogo } from "../../api/member";
 import Badge from "../../components/admin/Badge";
 import MemberCardContent from "../../components/directory/MemberCardContent";
 import TagEditor from "../../components/forms/TagEditor";
@@ -25,54 +26,58 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
+const profileQueryKey = ["member", "profile"];
+
 export default function MemberProfilePage() {
   const showToast = useToast();
-  const [profile, setProfile] = useState<MyMemberProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: profile, isLoading, isError } = useQuery({
+    queryKey: profileQueryKey,
+    queryFn: fetchMyMemberProfile,
+  });
   const [activityAreas, setActivityAreas] = useState<string[]>([]);
   const [productsAndServices, setProductsAndServices] = useState<string[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetchMyMemberProfile()
-      .then((p) => {
-        setProfile(p);
-        setActivityAreas(p.activityAreas);
-        setProductsAndServices(p.productsAndServices);
-      })
-      .catch(() => showToast("Profil bilgileri yüklenemedi."))
-      .finally(() => setIsLoading(false));
+    if (isError) showToast("Profil bilgileri yüklenemedi.");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isError]);
+
+  useEffect(() => {
+    if (!profile) return;
+    setActivityAreas(profile.activityAreas);
+    setProductsAndServices(profile.productsAndServices);
+  }, [profile]);
+
+  const saveMutation = useMutation({
+    mutationFn: updateMyMemberProfile,
+    onSuccess: (updated) => queryClient.setQueryData(profileQueryKey, updated),
+  });
 
   async function handleSave() {
-    setIsSaving(true);
     try {
-      const updated = await updateMyMemberProfile({ activityAreas, productsAndServices });
-      setProfile(updated);
+      await saveMutation.mutateAsync({ activityAreas, productsAndServices });
       showToast("Profil güncellendi.");
     } catch {
       showToast("Güncelleme başarısız oldu.");
-    } finally {
-      setIsSaving(false);
     }
   }
+
+  const uploadLogoMutation = useMutation({
+    mutationFn: uploadMyLogo,
+    onSuccess: (updated) => queryClient.setQueryData(profileQueryKey, updated),
+  });
 
   async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    setIsUploadingLogo(true);
     try {
-      const updated = await uploadMyLogo(file);
-      setProfile(updated);
+      await uploadLogoMutation.mutateAsync(file);
       showToast("Logo güncellendi.");
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Logo yüklenemedi.");
-    } finally {
-      setIsUploadingLogo(false);
     }
   }
 
@@ -93,8 +98,12 @@ export default function MemberProfilePage() {
           </span>
           <h1 className="mt-1 text-[1.5rem] tracking-[-.03em] text-assid-ink">Profilim</h1>
         </div>
-        <Badge variant={profile.isApproved ? "success" : "pending"}>
-          {profile.isApproved ? "Onaylı Üye" : "Onay Bekliyor"}
+        <Badge variant={profile.applicationStatus === "approved" ? "success" : profile.applicationStatus === "rejected" ? "danger" : "pending"}>
+          {profile.applicationStatus === "approved"
+            ? "Onaylı Üye"
+            : profile.applicationStatus === "rejected"
+              ? "Başvurusu Reddedildi"
+              : "Onay Bekliyor"}
         </Badge>
       </div>
 
@@ -120,11 +129,11 @@ export default function MemberProfilePage() {
             />
             <button
               type="button"
-              disabled={isUploadingLogo}
+              disabled={uploadLogoMutation.isPending}
               onClick={() => fileInputRef.current?.click()}
               className="cursor-pointer rounded-full border border-assid-line bg-transparent px-5 py-2.5 text-[0.85rem] font-bold text-assid-ink disabled:opacity-60"
             >
-              {isUploadingLogo ? "Yükleniyor..." : "Logo Yükle"}
+              {uploadLogoMutation.isPending ? "Yükleniyor..." : "Logo Yükle"}
             </button>
             <p className="mt-2 text-[0.78rem] text-assid-muted">PNG, JPEG, WEBP veya SVG — en fazla 5MB.</p>
           </div>
@@ -141,7 +150,7 @@ export default function MemberProfilePage() {
             <Field label="Telefon" value={profile.phone} />
             <Field label="Cep Telefonu" value={profile.mobilePhone} />
             <Field label="Firma Adresi" value={profile.companyAddress} />
-            <Field label="Üyelik Tipi" value={profile.membershipType === "corporate" ? "Tüzel" : "Gerçek"} />
+            <Field label="Üyelik Tipi" value={profile.membershipType === "corporate" ? "Kurumsal" : "Bireysel"} />
             <Field label="Sektörler" value={profile.sectors.map((s) => getSectorName(s)).join(", ")} />
             <Field
               label="Faaliyet Türleri"
@@ -173,10 +182,10 @@ export default function MemberProfilePage() {
             <button
               type="button"
               onClick={handleSave}
-              disabled={isSaving || !isDirty}
+              disabled={saveMutation.isPending || !isDirty}
               className="cursor-pointer rounded-full border-0 bg-assid-green px-6 py-3 text-[0.88rem] font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {isSaving ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
+              {saveMutation.isPending ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
             </button>
           </div>
         </Section>
@@ -196,7 +205,7 @@ export default function MemberProfilePage() {
               activityAreas,
               productsAndServices,
               contact: {
-                memberType: profile.membershipType === "corporate" ? "Tüzel" : "Gerçek",
+                memberType: profile.membershipType === "corporate" ? "Kurumsal" : "Bireysel",
                 representative: profile.fullName,
                 phone: profile.phone || profile.mobilePhone || "",
                 address: profile.companyAddress || "",

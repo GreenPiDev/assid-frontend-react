@@ -11,18 +11,22 @@ export interface MembershipApplicationPayload {
   sectors: string[];
   businessActivityTypes?: string[];
   references?: string;
-  membershipType: "individual" | "corporate";
+  membershipType?: "individual" | "corporate";
   sectorStatus?: string;
   birthPlace?: string;
   birthDate?: string;
   nationality?: string;
+  nationalId?: string;
   maritalStatus?: string;
+  faxPhone?: string;
+  personalMobilePhone?: string;
   affiliatedOrganizations?: string;
   contactPreference?: string;
   activityAreas?: string[];
   productsAndServices?: string[];
   kvkkConsent: boolean;
   bylawsAcknowledged: boolean;
+  infoAccuracyConfirmed: boolean;
 }
 
 export interface MembershipApplicationFiles {

@@ -1,48 +1,106 @@
 import { useState, type ReactNode } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import {
   BuildingIcon,
-  CalendarIcon,
+  ChevronDownIcon,
   CloseIcon,
+  FolderIcon,
   ListIcon,
   LogoutIcon,
   MenuIcon,
-  NewsIcon,
   UserCogIcon,
   UsersIcon,
 } from "./icons";
 
+const contentChildren = [
+  { to: "/dashboard/etkinlikler", label: "Etkinlikler" },
+  { to: "/dashboard/haberler", label: "Sektörel Haberler" },
+  { to: "/dashboard/uye-girisi-sayfasi", label: "Üye Girişi Sayfası" },
+  { to: "/dashboard/uye-kayit-formu", label: "Üye Kayıt Formu" },
+];
+
 const navItems = [
-  { to: "/dashboard/uyeler", label: "Üye Başvuruları", icon: UsersIcon },
-  { to: "/dashboard/uyelikler", label: "Üyelikler", icon: ListIcon },
-  { to: "/dashboard/etkinlikler", label: "Etkinlikler", icon: CalendarIcon },
-  { to: "/dashboard/haberler", label: "Sektörel Haberler", icon: NewsIcon },
-  { to: "/dashboard/kullanicilar", label: "Kullanıcılar", icon: UserCogIcon },
-  { to: "/dashboard/organizasyon-bilgileri", label: "Organizasyon Bilgileri", icon: BuildingIcon },
+  { type: "link" as const, to: "/dashboard/uye-basvurulari", label: "Üye Başvuruları", icon: UsersIcon },
+  { type: "link" as const, to: "/dashboard/uyelikler", label: "Üyelikler", icon: ListIcon },
+  { type: "link" as const, to: "/dashboard/kullanicilar", label: "Kullanıcılar", icon: UserCogIcon },
+  { type: "link" as const, to: "/dashboard/organizasyon-bilgileri", label: "Organizasyon Bilgileri", icon: BuildingIcon },
+  { type: "group" as const, label: "İçerik Yönetimi", icon: FolderIcon, children: contentChildren },
 ];
 
 function NavList({ onNavigate, collapsed = false }: { onNavigate?: () => void; collapsed?: boolean }) {
+  const location = useLocation();
+  const [openGroup, setOpenGroup] = useState<string | null>(() => {
+    const activeGroup = navItems.find(
+      (item) => item.type === "group" && item.children.some((child) => location.pathname.startsWith(child.to)),
+    );
+    return activeGroup?.label ?? null;
+  });
+
   return (
     <nav className="grid gap-1">
-      {navItems.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          onClick={onNavigate}
-          title={collapsed ? item.label : undefined}
-          className={({ isActive }) =>
-            `flex items-center gap-3 overflow-hidden rounded-[12px] px-4 py-3 text-[0.88rem] font-bold whitespace-nowrap transition ${
-              isActive ? "bg-assid-green text-white" : "text-assid-ink hover:bg-assid-paper"
-            }`
-          }
-        >
-          <item.icon className="h-5 w-5 shrink-0" />
-          <span className={`transition-opacity duration-150 ${collapsed ? "opacity-0" : "opacity-100"}`}>
-            {item.label}
-          </span>
-        </NavLink>
-      ))}
+      {navItems.map((item) => {
+        if (item.type === "group") {
+          const isOpen = openGroup === item.label && !collapsed;
+          return (
+            <div key={item.label}>
+              <button
+                type="button"
+                title={collapsed ? item.label : undefined}
+                onClick={() => setOpenGroup(isOpen ? null : item.label)}
+                className="flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-[12px] border-0 bg-transparent px-4 py-3 text-[0.88rem] font-bold whitespace-nowrap text-assid-ink transition hover:bg-assid-paper"
+              >
+                <item.icon className="h-5 w-5 shrink-0" />
+                <span
+                  className={`flex-1 text-left transition-opacity duration-150 ${collapsed ? "opacity-0" : "opacity-100"}`}
+                >
+                  {item.label}
+                </span>
+                {!collapsed && (
+                  <ChevronDownIcon className={`h-4 w-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                )}
+              </button>
+              {isOpen && (
+                <div className="ml-4 grid gap-1 border-l border-assid-line pl-4">
+                  {item.children.map((child) => (
+                    <NavLink
+                      key={child.to}
+                      to={child.to}
+                      onClick={onNavigate}
+                      className={({ isActive }) =>
+                        `overflow-hidden rounded-[12px] px-4 py-2.5 text-[0.86rem] font-bold whitespace-nowrap transition ${
+                          isActive ? "bg-assid-green text-white" : "text-assid-ink hover:bg-assid-paper"
+                        }`
+                      }
+                    >
+                      {child.label}
+                    </NavLink>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        return (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            onClick={onNavigate}
+            title={collapsed ? item.label : undefined}
+            className={({ isActive }) =>
+              `flex items-center gap-3 overflow-hidden rounded-[12px] px-4 py-3 text-[0.88rem] font-bold whitespace-nowrap transition ${
+                isActive ? "bg-assid-green text-white" : "text-assid-ink hover:bg-assid-paper"
+              }`
+            }
+          >
+            <item.icon className="h-5 w-5 shrink-0" />
+            <span className={`transition-opacity duration-150 ${collapsed ? "opacity-0" : "opacity-100"}`}>
+              {item.label}
+            </span>
+          </NavLink>
+        );
+      })}
     </nav>
   );
 }

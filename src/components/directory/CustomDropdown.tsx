@@ -43,8 +43,8 @@ export default function CustomDropdown({ items, value, onChange, placeholder }: 
   return (
     <div className="relative" ref={rootRef}>
       <div
-        className={`flex items-center justify-between gap-2.5 rounded-xl border px-3.5 py-3 transition duration-200 ${
-          open ? "border-white bg-[rgba(30,155,255,.38)]" : "border-white/50 bg-[rgba(30,155,255,.22)] hover:bg-[rgba(30,155,255,.38)] hover:border-white"
+        className={`flex items-center justify-between gap-2.5 rounded-lg border px-3.5 py-3 transition duration-200 ${
+          open ? "border-white bg-[rgba(8,31,56,.75)]" : "border-white/40 bg-[rgba(8,31,56,.45)] hover:bg-[rgba(8,31,56,.65)] hover:border-white"
         }`}
       >
         <input
@@ -96,7 +96,7 @@ export default function CustomDropdown({ items, value, onChange, placeholder }: 
         </button>
       </div>
       <div
-        className={`absolute inset-x-0 top-[calc(100%+8px)] z-25 max-h-65 overflow-y-auto rounded-xl border border-white/35 bg-[rgba(9,34,58,.94)] shadow-[0_18px_40px_rgba(6,18,30,.4)] backdrop-blur-md transition duration-180 ${
+        className={`absolute inset-x-0 top-[calc(100%+8px)] z-25 max-h-65 overflow-y-auto rounded-lg border border-white/30 bg-[rgba(6,18,30,.96)] shadow-[0_18px_40px_rgba(6,18,30,.4)] backdrop-blur-md transition duration-180 ${
           open ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none -translate-y-1.5 opacity-0"
         }`}
       >

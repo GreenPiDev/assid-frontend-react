@@ -1,8 +1,10 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
 import AdminEventsPage from "./AdminEventsPage";
+import AdminLoginPageSettingsPage from "./AdminLoginPageSettingsPage";
 import AdminMembersPage from "./AdminMembersPage";
 import AdminMembershipDetailPage from "./AdminMembershipDetailPage";
+import AdminMembershipFormPage from "./AdminMembershipFormPage";
 import AdminMembershipsPage from "./AdminMembershipsPage";
 import AdminNewsPage from "./AdminNewsPage";
 import AdminSettingsPage from "./AdminSettingsPage";
@@ -12,15 +14,18 @@ export default function AdminRoutes() {
   return (
     <AdminLayout>
       <Routes>
-        <Route index element={<Navigate to="/dashboard/uyeler" replace />} />
-        <Route path="uyeler" element={<AdminMembersPage />} />
+        <Route index element={<Navigate to="/dashboard/uye-basvurulari" replace />} />
+        <Route path="uye-basvurulari" element={<AdminMembersPage />} />
+        <Route path="uye-basvurulari/:id" element={<AdminMembershipDetailPage />} />
         <Route path="uyelikler" element={<AdminMembershipsPage />} />
         <Route path="uyelikler/:id" element={<AdminMembershipDetailPage />} />
         <Route path="etkinlikler" element={<AdminEventsPage />} />
         <Route path="haberler" element={<AdminNewsPage />} />
         <Route path="kullanicilar" element={<AdminUsersPage />} />
         <Route path="organizasyon-bilgileri" element={<AdminSettingsPage />} />
-        <Route path="*" element={<Navigate to="/dashboard/uyeler" replace />} />
+        <Route path="uye-girisi-sayfasi" element={<AdminLoginPageSettingsPage />} />
+        <Route path="uye-kayit-formu" element={<AdminMembershipFormPage />} />
+        <Route path="*" element={<Navigate to="/dashboard/uye-basvurulari" replace />} />
       </Routes>
     </AdminLayout>
   );

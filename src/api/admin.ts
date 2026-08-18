@@ -12,16 +12,18 @@ export interface AdminMember {
   sectors: string[];
   businessActivityTypes: string[];
   references?: string;
-  membershipType: "individual" | "corporate";
+  membershipType?: "individual" | "corporate";
   sectorStatus?: string;
   birthPlace?: string;
   birthDate?: string;
   nationality?: string;
   maritalStatus?: string;
+  faxPhone?: string;
+  personalMobilePhone?: string;
   affiliatedOrganizations?: string;
   contactPreference?: string;
   applicationDate: string;
-  isApproved: boolean;
+  applicationStatus: "pending" | "approved" | "rejected";
   approvedAt?: string;
   isActive: boolean;
   logo?: string;
@@ -30,6 +32,7 @@ export interface AdminMember {
   documents: { label: string; url: string }[];
   kvkkConsentAt?: string;
   bylawsAcknowledgedAt?: string;
+  infoAccuracyConfirmedAt?: string;
   createdAt: string;
 }
 
@@ -82,6 +85,16 @@ export interface AdminOrganizationSettings {
   requireKvkkConsent?: boolean;
   showBylawsConsent?: boolean;
   requireBylawsConsent?: boolean;
+  showLoginMembershipCta?: boolean;
+  showMembershipFeesTable?: boolean;
+  showAttachmentsSection?: boolean;
+  showMembershipClassSection?: boolean;
+}
+
+export interface AdminMembershipFee {
+  _id: string;
+  label: string;
+  amount: number;
 }
 
 export interface AdminUser {
@@ -108,9 +121,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 // --- Members ---
-export function fetchAdminMembers(params?: { isApproved?: boolean; q?: string }) {
+export function fetchAdminMembers(params?: {
+  status?: "pending" | "approved" | "rejected";
+  q?: string;
+}) {
   const search = new URLSearchParams();
-  if (params?.isApproved !== undefined) search.set("isApproved", String(params.isApproved));
+  if (params?.status) search.set("status", params.status);
   if (params?.q) search.set("q", params.q);
   const qs = search.toString();
   return request<AdminMember[]>(`/members/admin${qs ? `?${qs}` : ""}`);
@@ -120,10 +136,14 @@ export function fetchAdminMember(id: string) {
   return request<AdminMember>(`/members/${id}`);
 }
 
-export function setMemberApproval(id: string, isApproved: boolean) {
-  return request<AdminMember>(`/members/${id}/approval`, {
+export function fetchMemberMaskedNationalId(id: string) {
+  return request<{ maskedNationalId: string | null }>(`/members/${id}/national-id`);
+}
+
+export function setMemberApplicationStatus(id: string, applicationStatus: "pending" | "approved" | "rejected") {
+  return request<AdminMember>(`/members/${id}/status`, {
     method: "PATCH",
-    body: JSON.stringify({ isApproved }),
+    body: JSON.stringify({ applicationStatus }),
   });
 }
 
@@ -195,6 +215,23 @@ export async function uploadOrganizationLogo(file: File): Promise<AdminOrganizat
     throw new Error(message ?? `İstek başarısız (${res.status})`);
   }
   return res.json() as Promise<AdminOrganizationSettings>;
+}
+
+// --- Membership fees ---
+export function fetchMembershipFees() {
+  return request<AdminMembershipFee[]>("/membership-fees");
+}
+
+export function createMembershipFee(dto: { label: string; amount: number }) {
+  return request<AdminMembershipFee>("/membership-fees", { method: "POST", body: JSON.stringify(dto) });
+}
+
+export function updateMembershipFee(id: string, dto: Partial<{ label: string; amount: number }>) {
+  return request<AdminMembershipFee>(`/membership-fees/${id}`, { method: "PATCH", body: JSON.stringify(dto) });
+}
+
+export function deleteMembershipFee(id: string) {
+  return request<void>(`/membership-fees/${id}`, { method: "DELETE" });
 }
 
 // --- Users (login credentials) ---

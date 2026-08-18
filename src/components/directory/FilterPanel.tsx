@@ -36,7 +36,7 @@ export default function FilterPanel({
 
   return (
     <aside
-      className={`fixed bottom-0 right-0 top-0 z-16 flex w-[min(420px,92vw)] flex-col border-l border-white/50 bg-[rgba(30,155,255,.28)] text-white shadow-[-18px_0_48px_rgba(6,18,30,.35)] backdrop-blur-xl transition-transform duration-350 [transition-timing-function:cubic-bezier(.22,.9,.3,1)] ${
+      className={`fixed bottom-0 right-0 top-0 z-16 flex w-[min(420px,92vw)] flex-col rounded-l-2xl border-l border-white/35 bg-[rgba(8,31,56,.68)] text-white shadow-[-18px_0_48px_rgba(6,18,30,.4)] backdrop-blur-xl transition-transform duration-350 [transition-timing-function:cubic-bezier(.22,.9,.3,1)] ${
         open ? "translate-x-0" : "translate-x-full"
       }`}
       aria-hidden={!open}
@@ -47,7 +47,7 @@ export default function FilterPanel({
           <h2 className="mt-1.5 text-[1.35rem] tracking-tight text-white">{sectorName || "—"}</h2>
         </div>
         <button
-          className="flex-none grid h-8.5 w-8.5 place-items-center rounded-full border border-white/50 bg-[rgba(30,155,255,.28)] text-white transition duration-250 hover:bg-[rgba(30,155,255,.42)]"
+          className="flex-none grid h-8.5 w-8.5 place-items-center rounded-lg border border-white/35 bg-[rgba(8,31,56,.55)] text-white transition duration-250 hover:bg-[rgba(8,31,56,.8)]"
           aria-label="Paneli kapat"
           onClick={onClose}
         >

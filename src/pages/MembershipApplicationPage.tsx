@@ -1,19 +1,26 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { applyForMembership, type MembershipApplicationFiles } from "../api/membershipApplication";
+import { useMutation } from "@tanstack/react-query";
+import {
+  applyForMembership,
+  type MembershipApplicationFiles,
+  type MembershipApplicationPayload,
+} from "../api/membershipApplication";
 import Button from "../components/ui/Button";
 import TagEditor from "../components/forms/TagEditor";
 import FileUploadField from "../components/forms/FileUploadField";
 import LegalConsentBox from "../components/forms/LegalConsentBox";
+import PhoneInput from "../components/forms/PhoneInput";
 import {
   businessActivityOptions,
-  contactPreferenceOptions,
+  maritalStatusOptions,
   membershipTypeOptions,
   sectorStatusOptions,
 } from "../constants/memberEnums";
 import { SECTORS } from "../constants/sectors";
 import { useToast } from "../context/ToastContext";
 import { useOrganizationSettings } from "../api/resources/organizationSettings";
+import { useMembershipFees } from "../api/resources/membershipFees";
 
 function RequiredMark() {
   return (
@@ -70,9 +77,11 @@ const initialForm = {
   birthPlace: "",
   birthDate: "",
   nationality: "",
+  nationalId: "",
   maritalStatus: "",
+  faxPhone: "",
+  personalMobilePhone: "",
   affiliatedOrganizations: "",
-  contactPreference: "",
 };
 
 const initialFiles: MembershipApplicationFiles = {
@@ -87,6 +96,7 @@ const initialFiles: MembershipApplicationFiles = {
 export default function MembershipApplicationPage() {
   const showToast = useToast();
   const { data: settings } = useOrganizationSettings();
+  const { data: membershipFees } = useMembershipFees();
   const [form, setForm] = useState(initialForm);
   const [sectors, setSectors] = useState<string[]>([]);
   const [businessActivityTypes, setBusinessActivityTypes] = useState<string[]>([]);
@@ -95,10 +105,13 @@ export default function MembershipApplicationPage() {
   const [files, setFiles] = useState<MembershipApplicationFiles>(initialFiles);
   const [kvkkConsent, setKvkkConsent] = useState(false);
   const [bylawsAcknowledged, setBylawsAcknowledged] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [infoAccuracyConfirmed, setInfoAccuracyConfirmed] = useState(false);
   const [isSent, setIsSent] = useState(false);
 
-  const isCorporate = form.membershipType === "corporate";
+  const applyMutation = useMutation({
+    mutationFn: ({ payload, files: applicationFiles }: { payload: MembershipApplicationPayload; files: MembershipApplicationFiles }) =>
+      applyForMembership(payload, applicationFiles),
+  });
 
   function toggleSector(slug: string) {
     setSectors((prev) => (prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]));
@@ -114,10 +127,6 @@ export default function MembershipApplicationPage() {
       showToast("Lütfen en az bir sektör seçin.");
       return;
     }
-    if (!form.membershipType) {
-      showToast("Lütfen üyelik tipini seçin.");
-      return;
-    }
     if ((settings?.requireKvkkConsent ?? true) && !kvkkConsent) {
       showToast("Devam etmek için KVKK metnini onaylamanız gerekiyor.");
       return;
@@ -126,10 +135,13 @@ export default function MembershipApplicationPage() {
       showToast("Devam etmek için dernek tüzüğünü onaylamanız gerekiyor.");
       return;
     }
-    setIsSubmitting(true);
+    if (!infoAccuracyConfirmed) {
+      showToast("Devam etmek için belirttiğiniz bilgilerin doğruluğunu onaylamanız gerekiyor.");
+      return;
+    }
     try {
-      await applyForMembership(
-        {
+      await applyMutation.mutateAsync({
+        payload: {
           fullName: form.fullName,
           companyName: form.companyName || undefined,
           title: form.title || undefined,
@@ -140,26 +152,27 @@ export default function MembershipApplicationPage() {
           sectors,
           businessActivityTypes: businessActivityTypes.length ? businessActivityTypes : undefined,
           references: form.references || undefined,
-          membershipType: form.membershipType,
+          membershipType: form.membershipType || undefined,
           sectorStatus: form.sectorStatus || undefined,
           birthPlace: form.birthPlace || undefined,
           birthDate: form.birthDate || undefined,
           nationality: form.nationality || undefined,
+          nationalId: form.nationalId || undefined,
           maritalStatus: form.maritalStatus || undefined,
+          faxPhone: form.faxPhone || undefined,
+          personalMobilePhone: form.personalMobilePhone || undefined,
           affiliatedOrganizations: form.affiliatedOrganizations || undefined,
-          contactPreference: form.contactPreference || undefined,
           activityAreas: activityAreas.length ? activityAreas : undefined,
           productsAndServices: productsAndServices.length ? productsAndServices : undefined,
           kvkkConsent,
           bylawsAcknowledged,
+          infoAccuracyConfirmed,
         },
         files,
-      );
+      });
       setIsSent(true);
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Başvuru gönderilemedi.");
-    } finally {
-      setIsSubmitting(false);
     }
   }
 
@@ -187,149 +200,143 @@ export default function MembershipApplicationPage() {
     <main className="py-17 md:py-24">
       <div className="mx-auto w-[min(calc(100%-40px),1320px)]">
         <div className="mb-8 max-w-2xl">
-          <span className="text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-green">
-            Üyelik Başvurusu
-          </span>
+
           <h1 className="mt-3 text-[clamp(1.8rem,3.2vw,2.6rem)] leading-[1.05] tracking-[-.03em] text-assid-ink">
-            ASSİD ailesine katılın
+            Üyelik Başvurusu
           </h1>
           <p className="mt-3 text-[0.95rem] text-[#5d665f]">
-            Aşağıdaki formu doldurun, başvurunuz incelendikten sonra sizinle iletişime geçilecek.
+            Aşağıdaki formu eksiksiz olarak doldurmanızın ardından başvurunuz değerlendirmeye alınacak ve sonuç hakkında tarafınıza geri dönüş sağlanacaktır.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="grid gap-5">
-          <Section title="Genel Bilgiler">
-            <Field label="Ad Soyad" required>
-              <input
-                required
-                value={form.fullName}
-                onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                className={inputClass}
-              />
-            </Field>
-            <Field label="Firma Adı">
-              <input
-                value={form.companyName}
-                onChange={(e) => setForm({ ...form, companyName: e.target.value })}
-                className={inputClass}
-              />
-            </Field>
-            <Field label="Unvan">
-              <input
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                className={inputClass}
-              />
-            </Field>
-            <Field label="E-posta" required>
-              <input
-                required
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className={inputClass}
-              />
-            </Field>
-            <Field label="Telefon">
-              <input
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                className={inputClass}
-              />
-            </Field>
-            <Field label="Cep Telefonu">
-              <input
-                value={form.mobilePhone}
-                onChange={(e) => setForm({ ...form, mobilePhone: e.target.value })}
-                className={inputClass}
-              />
-            </Field>
-            <div className="sm:col-span-2">
-              <Field label="Firma Adresi">
-                <textarea
-                  rows={2}
-                  value={form.companyAddress}
-                  onChange={(e) => setForm({ ...form, companyAddress: e.target.value })}
+          <div className="rounded-[20px] border border-assid-line bg-white p-6 md:p-7">
+            <h2 className="mb-5 text-[1.05rem] font-bold text-assid-ink">Genel Bilgiler</h2>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <Field label="Ad Soyad" required>
+                <input
+                  required
+                  value={form.fullName}
+                  onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Şirket / Kurum Adı">
+                <input
+                  value={form.companyName}
+                  onChange={(e) => setForm({ ...form, companyName: e.target.value })}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Görevi / Ünvanı">
+                <input
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  className={inputClass}
+                />
+              </Field>
+              <div className="sm:col-span-2">
+                <Field label="Şirket / Kurum Adresi">
+                  <textarea
+                    rows={2}
+                    value={form.companyAddress}
+                    onChange={(e) => setForm({ ...form, companyAddress: e.target.value })}
+                    className={inputClass}
+                  />
+                </Field>
+              </div>
+              <Field label="Telefon">
+                <PhoneInput value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
+              </Field>
+              <Field label="Cep Telefonu">
+                <PhoneInput value={form.mobilePhone} onChange={(v) => setForm({ ...form, mobilePhone: v })} />
+              </Field>
+              <Field label="E-posta" required>
+                <input
+                  required
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
                   className={inputClass}
                 />
               </Field>
             </div>
-          </Section>
 
-          <Section title="Sektör ve Faaliyet Bilgileri">
-            <div className="sm:col-span-2">
-              <span className="mb-2 block text-[0.78rem] font-bold text-assid-muted">
-                Sektörler
-                <RequiredMark />
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {SECTORS.map((sector) => (
-                  <button
-                    type="button"
-                    key={sector.slug}
-                    onClick={() => toggleSector(sector.slug)}
-                    className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-[0.78rem] font-bold ${
-                      sectors.includes(sector.slug)
-                        ? "border-assid-green bg-assid-green text-white"
-                        : "border-assid-line bg-transparent text-assid-ink"
-                    }`}
-                  >
-                    {sector.name}
-                  </button>
-                ))}
+            <h2 className="mb-5 mt-8 text-[1.05rem] font-bold text-assid-ink">Sektör ve Faaliyet Bilgileri</h2>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <span className="mb-2 block text-[0.78rem] font-bold text-assid-muted">
+                  Sektörler
+                  <RequiredMark />
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {SECTORS.map((sector) => (
+                    <button
+                      type="button"
+                      key={sector.slug}
+                      onClick={() => toggleSector(sector.slug)}
+                      className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-[0.78rem] font-bold ${
+                        sectors.includes(sector.slug)
+                          ? "border-assid-green bg-assid-green text-white"
+                          : "border-assid-line bg-transparent text-assid-ink"
+                      }`}
+                    >
+                      {sector.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="sm:col-span-2">
+                <span className="mb-2 block text-[0.78rem] font-bold text-assid-muted">Faaliyet Türleri</span>
+                <div className="flex flex-wrap gap-2">
+                  {businessActivityOptions.map((opt) => (
+                    <button
+                      type="button"
+                      key={opt.value}
+                      onClick={() => toggleActivityType(opt.value)}
+                      className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-[0.78rem] font-bold ${
+                        businessActivityTypes.includes(opt.value)
+                          ? "border-assid-green bg-assid-green text-white"
+                          : "border-assid-line bg-transparent text-assid-ink"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="sm:col-span-2">
+                <span className="mb-2 block text-[0.78rem] font-bold text-assid-muted">Alt Faaliyet Alanları</span>
+                <TagEditor items={activityAreas} onChange={setActivityAreas} placeholder="Faaliyet alanı ekle..." />
+              </div>
+
+              <div className="sm:col-span-2">
+                <span className="mb-2 block text-[0.78rem] font-bold text-assid-muted">Ürün ve Hizmetler</span>
+                <TagEditor
+                  items={productsAndServices}
+                  onChange={setProductsAndServices}
+                  placeholder="Ürün / hizmet ekle..."
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <span className="mb-2 block text-[0.78rem] font-bold text-assid-muted">Referanslar</span>
+                <textarea
+                  rows={2}
+                  value={form.references}
+                  onChange={(e) => setForm({ ...form, references: e.target.value })}
+                  className={`w-full ${inputClass}`}
+                />
               </div>
             </div>
+          </div>
 
-            <div className="sm:col-span-2">
-              <span className="mb-2 block text-[0.78rem] font-bold text-assid-muted">Faaliyet Türleri</span>
-              <div className="flex flex-wrap gap-2">
-                {businessActivityOptions.map((opt) => (
-                  <button
-                    type="button"
-                    key={opt.value}
-                    onClick={() => toggleActivityType(opt.value)}
-                    className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-[0.78rem] font-bold ${
-                      businessActivityTypes.includes(opt.value)
-                        ? "border-assid-green bg-assid-green text-white"
-                        : "border-assid-line bg-transparent text-assid-ink"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="sm:col-span-2">
-              <span className="mb-2 block text-[0.78rem] font-bold text-assid-muted">Alt Faaliyet Alanları</span>
-              <TagEditor items={activityAreas} onChange={setActivityAreas} placeholder="Faaliyet alanı ekle..." />
-            </div>
-
-            <div className="sm:col-span-2">
-              <span className="mb-2 block text-[0.78rem] font-bold text-assid-muted">Ürün ve Hizmetler</span>
-              <TagEditor
-                items={productsAndServices}
-                onChange={setProductsAndServices}
-                placeholder="Ürün / hizmet ekle..."
-              />
-            </div>
-
-            <div className="sm:col-span-2">
-              <span className="mb-2 block text-[0.78rem] font-bold text-assid-muted">Referanslar</span>
-              <textarea
-                rows={2}
-                value={form.references}
-                onChange={(e) => setForm({ ...form, references: e.target.value })}
-                className={`w-full ${inputClass}`}
-              />
-            </div>
-          </Section>
-
+          {(settings?.showMembershipClassSection ?? true) && (
           <Section title="Üyelik Sınıfı">
-            <Field label="Üyelik Tipi" required>
+            <Field label="Üyelik Tipi">
               <select
-                required
                 value={form.membershipType}
                 onChange={(e) =>
                   setForm({ ...form, membershipType: e.target.value as "" | "individual" | "corporate" })
@@ -360,7 +367,22 @@ export default function MembershipApplicationPage() {
                 ))}
               </select>
             </Field>
+            <div className="sm:col-span-2">
+              <ul className="grid gap-2 text-[0.92rem] text-assid-muted">
+                <li>* Sınıflandırma Yönetim Kurulu kriterlerine göre kesinleşir.</li>
+                <li>
+                  * Sektör içi bireysel: Siteler bölgesi ve ilgili sektörlerde faaliyet gösteren gerçek kişiler
+                </li>
+                <li>* Sektör içi kurumsal: Siteler bölgesi ve ilgili sektörlerde faaliyet gösteren tüzel kişiler</li>
+                <li>* Sektör dışı bireysel: Sektör dışında olup dernek amaçlarını destekleyen gerçek kişiler</li>
+                <li>
+                  * Sektör dışı kurumsal: Sektör dışında faaliyet gösteren, dernekle iş birliği yapmak isteyen tüzel
+                  kişiler
+                </li>
+              </ul>
+            </div>
           </Section>
+          )}
 
           <Section title="Kişisel Bilgiler">
             <Field label="Doğum Yeri">
@@ -385,11 +407,36 @@ export default function MembershipApplicationPage() {
                 className={inputClass}
               />
             </Field>
-            <Field label="Medeni Hal">
+            <Field label="TC Kimlik No">
               <input
+                inputMode="numeric"
+                maxLength={11}
+                value={form.nationalId}
+                onChange={(e) => setForm({ ...form, nationalId: e.target.value.replace(/\D/g, "").slice(0, 11) })}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Medeni Hal">
+              <select
                 value={form.maritalStatus}
                 onChange={(e) => setForm({ ...form, maritalStatus: e.target.value })}
                 className={inputClass}
+              >
+                <option value="">Seçiniz</option>
+                {maritalStatusOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Telefon / Faks">
+              <PhoneInput value={form.faxPhone} onChange={(v) => setForm({ ...form, faxPhone: v })} />
+            </Field>
+            <Field label="Cep Telefonu">
+              <PhoneInput
+                value={form.personalMobilePhone}
+                onChange={(v) => setForm({ ...form, personalMobilePhone: v })}
               />
             </Field>
             <Field label="Bağlı Olduğu Kuruluşlar">
@@ -399,65 +446,84 @@ export default function MembershipApplicationPage() {
                 className={inputClass}
               />
             </Field>
-            <Field label="İletişim Tercihi">
-              <select
-                value={form.contactPreference}
-                onChange={(e) => setForm({ ...form, contactPreference: e.target.value })}
-                className={inputClass}
-              >
-                <option value="">Seçiniz</option>
-                {contactPreferenceOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </Field>
+            <div className="sm:col-span-2">
+              <label className="flex cursor-pointer items-center gap-2 text-[0.85rem] text-assid-ink">
+                <input
+                  type="checkbox"
+                  checked={infoAccuracyConfirmed}
+                  onChange={(e) => setInfoAccuracyConfirmed(e.target.checked)}
+                />
+                Belirttiğim bilgilerimin doğru olduğunu kabul ediyorum
+              </label>
+            </div>
           </Section>
 
-          <Section title="Ekler">
-            <FileUploadField
-              label="Fotoğraf (en fazla 2 adet)"
-              hint="PNG, JPEG veya WEBP"
-              files={files.photos ?? []}
-              onChange={(f) => setFiles({ ...files, photos: f })}
-              multiple
-            />
-            <FileUploadField
-              label="Kimlik Fotokopisi"
-              hint="PNG, JPEG veya PDF"
-              files={files.idCopy ?? []}
-              onChange={(f) => setFiles({ ...files, idCopy: f })}
-            />
-            <FileUploadField
-              label="Adli Sicil Kaydı"
-              hint="PNG, JPEG veya PDF"
-              files={files.criminalRecord ?? []}
-              onChange={(f) => setFiles({ ...files, criminalRecord: f })}
-            />
-            {isCorporate && (
-              <>
-                <FileUploadField
-                  label="Ticaret Sicil Gazetesi"
-                  hint="Kurumsal üyelik için — PNG, JPEG veya PDF"
-                  files={files.tradeRegistryGazette ?? []}
-                  onChange={(f) => setFiles({ ...files, tradeRegistryGazette: f })}
-                />
-                <FileUploadField
-                  label="Vergi Levhası"
-                  hint="Kurumsal üyelik için — PNG, JPEG veya PDF"
-                  files={files.taxCertificate ?? []}
-                  onChange={(f) => setFiles({ ...files, taxCertificate: f })}
-                />
-                <FileUploadField
-                  label="İmza Sirküleri"
-                  hint="Kurumsal üyelik için — PNG, JPEG veya PDF"
-                  files={files.signatureCircular ?? []}
-                  onChange={(f) => setFiles({ ...files, signatureCircular: f })}
-                />
-              </>
-            )}
-          </Section>
+          {(settings?.showMembershipFeesTable ?? true) && (
+            <div className="rounded-[20px] border border-assid-line bg-white p-6 md:p-7">
+              <h2 className="text-[1.05rem] font-bold text-assid-ink">Ücretler</h2>
+              <p className="mb-5 mt-1 text-[0.78rem] text-assid-muted">Bilgilendirme Amaçlıdır</p>
+              <div className="overflow-x-auto rounded-[12px] border border-assid-line">
+                <table className="w-full min-w-[420px] border-collapse text-left text-[0.85rem]">
+                  <thead>
+                    <tr className="bg-assid-ink text-white">
+                      <th className="px-4 py-3 font-bold">Üyelik Sınıfı</th>
+                      <th className="px-4 py-3 font-bold">Tutar</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(membershipFees ?? []).map((fee) => (
+                      <tr key={fee._id} className="border-t border-assid-line">
+                        <td className="px-4 py-3 font-bold text-assid-ink">{fee.label}</td>
+                        <td className="px-4 py-3 font-bold text-assid-ink">{fee.amount.toLocaleString("tr-TR")}₺</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {(settings?.showAttachmentsSection ?? true) && (
+            <Section title="Ekler">
+              <FileUploadField
+                label="2 Adet Fotoğraf"
+                hint="PNG, JPEG veya WEBP"
+                files={files.photos ?? []}
+                onChange={(f) => setFiles({ ...files, photos: f })}
+                multiple
+              />
+              <FileUploadField
+                label="Adli Sicil Kaydı"
+                hint="PNG, JPEG veya PDF"
+                files={files.criminalRecord ?? []}
+                onChange={(f) => setFiles({ ...files, criminalRecord: f })}
+              />
+              <FileUploadField
+                label="Kimlik Fotokopisi"
+                hint="PNG, JPEG veya PDF"
+                files={files.idCopy ?? []}
+                onChange={(f) => setFiles({ ...files, idCopy: f })}
+              />
+              <FileUploadField
+                label="Ticaret Sicil Gazetesi (Kurumsal)"
+                hint="PNG, JPEG veya PDF"
+                files={files.tradeRegistryGazette ?? []}
+                onChange={(f) => setFiles({ ...files, tradeRegistryGazette: f })}
+              />
+              <FileUploadField
+                label="Vergi Levhası (Kurumsal)"
+                hint="PNG, JPEG veya PDF"
+                files={files.taxCertificate ?? []}
+                onChange={(f) => setFiles({ ...files, taxCertificate: f })}
+              />
+              <FileUploadField
+                label="İmza Sirküleri (Kurumsal)"
+                hint="PNG, JPEG veya PDF"
+                files={files.signatureCircular ?? []}
+                onChange={(f) => setFiles({ ...files, signatureCircular: f })}
+              />
+            </Section>
+          )}
 
           {((settings?.showKvkkConsent ?? true) || (settings?.showBylawsConsent ?? true)) && (
             <Section title="Onaylar">
@@ -483,8 +549,8 @@ export default function MembershipApplicationPage() {
           )}
 
           <div className="flex justify-end">
-            <Button type="submit" variant="primary" disabled={isSubmitting}>
-              {isSubmitting ? "Gönderiliyor..." : "Başvuruyu Gönder"}
+            <Button type="submit" variant="primary" disabled={applyMutation.isPending}>
+              {applyMutation.isPending ? "Gönderiliyor..." : "Başvuruyu Gönder"}
             </Button>
           </div>
         </form>

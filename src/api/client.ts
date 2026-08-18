@@ -28,7 +28,7 @@ interface BackendMember {
   companyAddress?: string;
   logo?: string;
   notes?: Record<string, string>;
-  isApproved: boolean;
+  applicationStatus: "pending" | "approved" | "rejected";
 }
 
 export interface BackendNews {
@@ -62,6 +62,12 @@ export interface BackendStats {
   eventsCount: number;
 }
 
+export interface BackendMembershipFee {
+  _id: string;
+  label: string;
+  amount: number;
+}
+
 export interface BackendOrganizationSettings {
   _id: string;
   name: string;
@@ -87,10 +93,15 @@ export interface BackendOrganizationSettings {
   requireKvkkConsent?: boolean;
   showBylawsConsent?: boolean;
   requireBylawsConsent?: boolean;
+  showLoginMembershipCta?: boolean;
+  showMembershipFeesTable?: boolean;
+  showAttachmentsSection?: boolean;
+  showMembershipClassSection?: boolean;
 }
 
-// Yönetim panelinden onaylanmamış (isApproved:false) üyeler herkese açık
-// sitede hiçbir yerde görünmemeli; bu yüzden filtre burada, tek noktada uygulanır.
+// Yönetim panelinden onaylanmamış (applicationStatus !== "approved") üyeler
+// herkese açık sitede hiçbir yerde görünmemeli; bu yüzden filtre burada, tek
+// noktada uygulanır.
 function toFrontendMember(m: BackendMember): Member {
   return {
     id: m._id,
@@ -100,7 +111,7 @@ function toFrontendMember(m: BackendMember): Member {
     activityAreas: m.activityAreas ?? [],
     productsAndServices: m.productsAndServices ?? [],
     contact: {
-      memberType: m.membershipType === "corporate" ? "Tüzel" : "Gerçek",
+      memberType: m.membershipType === "corporate" ? "Kurumsal" : "Bireysel",
       representative: m.fullName,
       phone: m.phone || m.mobilePhone || "",
       address: m.companyAddress || "",
@@ -140,12 +151,12 @@ export async function get({
       if (id) {
         try {
           const member = await request<BackendMember>(`/members/${id}`);
-          return member.isApproved ? toFrontendMember(member) : null;
+          return member.applicationStatus === "approved" ? toFrontendMember(member) : null;
         } catch {
           return null;
         }
       }
-      const list = await request<BackendMember[]>("/members", { ...params, isApproved: true });
+      const list = await request<BackendMember[]>("/members", params);
       return list.map(toFrontendMember);
     }
 
@@ -164,6 +175,9 @@ export async function get({
 
     case "organization-settings":
       return request<BackendOrganizationSettings>("/organization-settings");
+
+    case "membership-fees":
+      return request<BackendMembershipFee[]>("/membership-fees");
 
     default:
       throw new Error(`Bilinmeyen kaynak: ${path}`);

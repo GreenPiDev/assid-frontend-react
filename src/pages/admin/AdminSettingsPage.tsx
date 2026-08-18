@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   fetchOrganizationSettings,
   updateOrganizationSettings,
@@ -7,6 +8,13 @@ import {
 } from "../../api/admin";
 import { useToast } from "../../context/ToastContext";
 import FooterPreview from "../../components/admin/FooterPreview";
+
+const orgSettingsQueryKey = ["admin", "organization-settings"];
+
+function invalidateOrgSettings(queryClient: ReturnType<typeof useQueryClient>) {
+  queryClient.invalidateQueries({ queryKey: orgSettingsQueryKey });
+  queryClient.invalidateQueries({ queryKey: ["/organization-settings"] });
+}
 
 type FormState = {
   name: string;
@@ -25,10 +33,6 @@ type FormState = {
   bylawsText: string;
   cookiePolicyText: string;
   privacyPolicyText: string;
-  showKvkkConsent: boolean;
-  requireKvkkConsent: boolean;
-  showBylawsConsent: boolean;
-  requireBylawsConsent: boolean;
 };
 
 function toForm(s: AdminOrganizationSettings): FormState {
@@ -49,55 +53,62 @@ function toForm(s: AdminOrganizationSettings): FormState {
     bylawsText: s.bylawsText ?? "",
     cookiePolicyText: s.cookiePolicyText ?? "",
     privacyPolicyText: s.privacyPolicyText ?? "",
-    showKvkkConsent: s.showKvkkConsent ?? true,
-    requireKvkkConsent: s.requireKvkkConsent ?? true,
-    showBylawsConsent: s.showBylawsConsent ?? true,
-    requireBylawsConsent: s.requireBylawsConsent ?? true,
   };
 }
 
 export default function AdminSettingsPage() {
   const showToast = useToast();
+  const queryClient = useQueryClient();
   const [form, setForm] = useState<FormState | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const { data: settings, isLoading, isError } = useQuery({
+    queryKey: orgSettingsQueryKey,
+    queryFn: fetchOrganizationSettings,
+  });
+
   useEffect(() => {
-    fetchOrganizationSettings()
-      .then((s) => {
-        setForm(toForm(s));
-        setLogoUrl(s.logo);
-      })
-      .catch(() => showToast("Ayarlar yüklenemedi."))
-      .finally(() => setIsLoading(false));
+    if (isError) showToast("Ayarlar yüklenemedi.");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isError]);
+
+  useEffect(() => {
+    if (!settings) return;
+    setForm(toForm(settings));
+    setLogoUrl(settings.logo);
+  }, [settings]);
+
+  const uploadLogoMutation = useMutation({
+    mutationFn: uploadOrganizationLogo,
+    onSuccess: (updated) => {
+      setLogoUrl(updated.logo);
+      invalidateOrgSettings(queryClient);
+    },
+  });
 
   async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    setIsUploadingLogo(true);
     try {
-      const updated = await uploadOrganizationLogo(file);
-      setLogoUrl(updated.logo);
+      await uploadLogoMutation.mutateAsync(file);
       showToast("Logo güncellendi.");
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Logo yüklenemedi.");
-    } finally {
-      setIsUploadingLogo(false);
     }
   }
+
+  const saveMutation = useMutation({
+    mutationFn: updateOrganizationSettings,
+    onSuccess: () => invalidateOrgSettings(queryClient),
+  });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form) return;
-    setIsSaving(true);
     try {
-      await updateOrganizationSettings({
+      await saveMutation.mutateAsync({
         name: form.name,
         shortName: form.shortName,
         description: form.description || undefined,
@@ -116,16 +127,10 @@ export default function AdminSettingsPage() {
         bylawsText: form.bylawsText || undefined,
         cookiePolicyText: form.cookiePolicyText || undefined,
         privacyPolicyText: form.privacyPolicyText || undefined,
-        showKvkkConsent: form.showKvkkConsent,
-        requireKvkkConsent: form.requireKvkkConsent,
-        showBylawsConsent: form.showBylawsConsent,
-        requireBylawsConsent: form.requireBylawsConsent,
       });
       showToast("Kurum ayarları güncellendi.");
     } catch {
       showToast("Güncelleme başarısız oldu.");
-    } finally {
-      setIsSaving(false);
     }
   }
 
@@ -163,11 +168,11 @@ export default function AdminSettingsPage() {
                 />
                 <button
                   type="button"
-                  disabled={isUploadingLogo}
+                  disabled={uploadLogoMutation.isPending}
                   onClick={() => fileInputRef.current?.click()}
                   className="cursor-pointer rounded-full border border-assid-line bg-transparent px-5 py-2.5 text-[0.85rem] font-bold text-assid-ink disabled:opacity-60"
                 >
-                  {isUploadingLogo ? "Yükleniyor..." : "Logo Yükle"}
+                  {uploadLogoMutation.isPending ? "Yükleniyor..." : "Logo Yükle"}
                 </button>
                 <p className="mt-2 text-[0.78rem] text-assid-muted">PNG, JPEG, WEBP veya SVG — en fazla 5MB.</p>
               </div>
@@ -314,74 +319,24 @@ export default function AdminSettingsPage() {
               metinleri ayrıca üyelik başvuru formunda gösterilir.
             </p>
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-              <div className="grid gap-2">
-                <label className="grid gap-1.5">
-                  <span className="text-[0.78rem] font-bold text-assid-muted">KVKK Aydınlatma Metni</span>
-                  <textarea
-                    rows={6}
-                    value={form.kvkkText}
-                    onChange={(e) => setForm({ ...form, kvkkText: e.target.value })}
-                    className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
-                  />
-                </label>
-                <label className="flex cursor-pointer items-center gap-2 text-[0.8rem] text-assid-ink">
-                  <input
-                    type="checkbox"
-                    checked={form.showKvkkConsent}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        showKvkkConsent: e.target.checked,
-                        requireKvkkConsent: e.target.checked && form.requireKvkkConsent,
-                      })
-                    }
-                  />
-                  Üye başvuru formunda görünsün
-                </label>
-                <label className="flex cursor-pointer items-center gap-2 text-[0.8rem] text-assid-ink">
-                  <input
-                    type="checkbox"
-                    checked={form.requireKvkkConsent}
-                    disabled={!form.showKvkkConsent}
-                    onChange={(e) => setForm({ ...form, requireKvkkConsent: e.target.checked })}
-                  />
-                  Üyelik başvurusu için zorunlu
-                </label>
-              </div>
-              <div className="grid gap-2">
-                <label className="grid gap-1.5">
-                  <span className="text-[0.78rem] font-bold text-assid-muted">Dernek Tüzüğü</span>
-                  <textarea
-                    rows={6}
-                    value={form.bylawsText}
-                    onChange={(e) => setForm({ ...form, bylawsText: e.target.value })}
-                    className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
-                  />
-                </label>
-                <label className="flex cursor-pointer items-center gap-2 text-[0.8rem] text-assid-ink">
-                  <input
-                    type="checkbox"
-                    checked={form.showBylawsConsent}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        showBylawsConsent: e.target.checked,
-                        requireBylawsConsent: e.target.checked && form.requireBylawsConsent,
-                      })
-                    }
-                  />
-                  Üye başvuru formunda görünsün
-                </label>
-                <label className="flex cursor-pointer items-center gap-2 text-[0.8rem] text-assid-ink">
-                  <input
-                    type="checkbox"
-                    checked={form.requireBylawsConsent}
-                    disabled={!form.showBylawsConsent}
-                    onChange={(e) => setForm({ ...form, requireBylawsConsent: e.target.checked })}
-                  />
-                  Üyelik başvurusu için zorunlu
-                </label>
-              </div>
+              <label className="grid gap-1.5">
+                <span className="text-[0.78rem] font-bold text-assid-muted">KVKK Aydınlatma Metni</span>
+                <textarea
+                  rows={6}
+                  value={form.kvkkText}
+                  onChange={(e) => setForm({ ...form, kvkkText: e.target.value })}
+                  className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
+                />
+              </label>
+              <label className="grid gap-1.5">
+                <span className="text-[0.78rem] font-bold text-assid-muted">Dernek Tüzüğü</span>
+                <textarea
+                  rows={6}
+                  value={form.bylawsText}
+                  onChange={(e) => setForm({ ...form, bylawsText: e.target.value })}
+                  className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
+                />
+              </label>
               <label className="grid gap-1.5">
                 <span className="text-[0.78rem] font-bold text-assid-muted">Çerez Politikası</span>
                 <textarea
@@ -406,10 +361,10 @@ export default function AdminSettingsPage() {
           <div className="flex justify-end">
             <button
               type="submit"
-              disabled={isSaving}
+              disabled={saveMutation.isPending}
               className="cursor-pointer rounded-full border-0 bg-assid-green px-6 py-3 text-[0.88rem] font-bold text-white disabled:opacity-60"
             >
-              {isSaving ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
+              {saveMutation.isPending ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
             </button>
           </div>
         </form>
