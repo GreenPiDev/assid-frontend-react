@@ -39,7 +39,7 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-30 border-b border-assid-line/80 bg-white/92 backdrop-blur-md">
+    <header className="sticky top-0 z-30 bg-transparent">
       <div className="mx-auto flex min-h-[78px] w-[min(calc(100%-40px),1240px)] items-center gap-8">
         <button
           type="button"
@@ -49,7 +49,7 @@ export default function Header() {
         >
           {logoUrl && <img src={logoUrl} alt="ASSİD logo" className="h-[43px] w-auto object-contain" />}
         </button>
-        <nav className="ml-auto hidden items-center gap-6 text-[0.89rem] font-bold text-[#405048] lg:flex" aria-label="Ana menü">
+        <nav className="ml-auto hidden items-center gap-6 text-[0.89rem] font-bold text-white/85 lg:flex" aria-label="Ana menü">
           {navLinks.map((link) =>
             link.type === "route" ? (
               <Link key={link.label} to={link.to} className="group relative py-1.5">
@@ -70,10 +70,10 @@ export default function Header() {
           )}
         </nav>
         <div className="ml-auto flex items-center gap-2.5 lg:ml-0">
-          <Button as={Link} to="/login" variant="primary">
+          <Button as={Link} to="/login" variant="light">
             Üye Girişi
           </Button>
-          <button className="p-2 text-assid-green lg:hidden" aria-label="Menüyü aç">
+          <button className="p-2 text-white lg:hidden" aria-label="Menüyü aç">
             ☰
           </button>
         </div>

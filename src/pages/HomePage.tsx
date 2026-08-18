@@ -22,7 +22,9 @@ export default function HomePage() {
   return (
     <main>
       <HeroCarousel />
+      <div className="pointer-events-none relative -mt-28 h-28 bg-gradient-to-b from-transparent to-[rgba(6,18,30,0.98)] md:-mt-36 md:h-36" />
       <DirectorySection />
+      <div className="pointer-events-none relative -mt-28 h-28 bg-gradient-to-b from-transparent to-[rgba(9,30,46,0.97)] md:-mt-36 md:h-36" />
       <NewsSection />
     </main>
   );
