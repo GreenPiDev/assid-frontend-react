@@ -4,9 +4,9 @@ export default function ContactPage() {
   const { data: settings } = useOrganizationSettings();
 
   const contactItems = [
-    { icon: "⌖", label: "Adres", value: settings?.address },
-    { icon: "☎", label: "Telefon", value: settings?.phone },
-    { icon: "✉", label: "E-posta", value: settings?.email },
+    { label: "Adres", value: settings?.address },
+    { label: "Telefon", value: settings?.phone },
+    { label: "E-posta", value: settings?.email },
   ].filter((item) => item.value);
 
   return (
@@ -29,10 +29,7 @@ export default function ContactPage() {
                 key={item.label}
                 className="rounded-[24px] border border-white/18 bg-white/9 p-6.5 backdrop-blur-md"
               >
-                <span className="grid h-11 w-11 place-items-center rounded-full bg-assid-lime text-[1.1rem] text-assid-green-dark">
-                  {item.icon}
-                </span>
-                <h3 className="mt-4 text-[0.79rem] font-extrabold tracking-wide text-assid-lime uppercase">
+                <h3 className="text-[0.79rem] font-extrabold tracking-wide text-assid-lime uppercase">
                   {item.label}
                 </h3>
                 <p className="mt-1 text-[0.95rem] font-bold text-white">{item.value}</p>

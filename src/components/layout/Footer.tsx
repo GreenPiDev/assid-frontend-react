@@ -53,8 +53,8 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-[#0a2540] pt-16 text-white/74">
-      <div className="mx-auto grid w-[min(calc(100%-40px),1240px)] grid-cols-1 gap-7 pb-12 sm:grid-cols-3 lg:grid-cols-[1.2fr_.7fr_.7fr_1fr]">
+    <footer className="bg-[#0a2540] pt-10 text-white/74">
+      <div className="mx-auto grid w-[min(calc(100%-40px),1240px)] grid-cols-1 gap-6 pb-8 sm:grid-cols-3 lg:grid-cols-[1.2fr_.7fr_.7fr_1fr]">
         <div className="sm:col-span-3 lg:col-span-1">
           <button type="button" className="flex cursor-pointer flex-col items-start gap-2.5 border-0 bg-transparent p-0 text-left text-white" onClick={() => navigate("/")}>
             {settings?.logo && <img src={settings.logo} alt={settings.shortName || settings.name || "Logo"} className="h-[43px] w-auto object-contain" />}
@@ -65,12 +65,12 @@ export default function Footer() {
               </small>
             </span>
           </button>
-          <p className="my-4 max-w-[310px] text-[0.86rem]">
+          <p className="my-3 max-w-[310px] text-[0.86rem]">
             {settings?.description}
           </p>
         </div>
         <div>
-          <h4 className="mb-3 text-[0.79rem] tracking-wide text-assid-lime uppercase">Kurumsal</h4>
+          <h4 className="mb-2.5 text-[0.79rem] tracking-wide text-assid-lime uppercase">Kurumsal</h4>
           <ul className="grid gap-2 text-[0.84rem]">
             {corporateLinks.map((label) => (
               <li key={label}>
@@ -80,14 +80,14 @@ export default function Footer() {
           </ul>
         </div>
         <div>
-          <h4 className="mb-3 text-[0.79rem] tracking-wide text-assid-lime uppercase">Platform</h4>
+          <h4 className="mb-2.5 text-[0.79rem] tracking-wide text-assid-lime uppercase">Platform</h4>
           <ul className="grid gap-2 text-[0.84rem]">
             <li><button type="button" className="cursor-pointer border-0 bg-transparent p-0 text-left hover:text-white" onClick={() => scrollToId("firma-rehberi")}>Firma Rehberi</button></li>
             <li><button type="button" className="cursor-pointer border-0 bg-transparent p-0 text-left hover:text-white" onClick={() => scrollToId("etkinlikler")}>Etkinlikler</button></li>
           </ul>
         </div>
         <div id="iletisim">
-          <h4 className="mb-3 text-[0.79rem] tracking-wide text-assid-lime uppercase">İletişim</h4>
+          <h4 className="mb-2.5 text-[0.79rem] tracking-wide text-assid-lime uppercase">İletişim</h4>
           {settings?.address && (
             <a
               href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(settings.address)}`}
@@ -137,7 +137,7 @@ export default function Footer() {
           </div>
         </div>
       </div>
-      <div className="mx-auto flex w-[min(calc(100%-40px),1240px)] flex-col justify-between gap-5 border-t border-white/11 py-5 text-[0.76rem] sm:flex-row">
+      <div className="mx-auto flex w-[min(calc(100%-40px),1240px)] flex-col justify-between gap-3 border-t border-white/11 py-4 text-[0.76rem] sm:flex-row">
         <span>{settings?.footerText}</span>
         <span className="flex gap-1.5">
           <button type="button" className="cursor-pointer border-0 bg-transparent p-0 text-inherit hover:text-white" onClick={() => setOpenModal("kvkk")}>KVKK</button>
