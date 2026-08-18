@@ -7,7 +7,7 @@ declare global {
   }
 }
 
-const MOBILE_BREAKPOINT = 760;
+const MOBILE_BREAKPOINT = 1024;
 const NATURAL_WIDTH = 1920;
 const NATURAL_HEIGHT = 1080;
 

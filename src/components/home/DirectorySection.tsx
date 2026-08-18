@@ -29,7 +29,7 @@ export default function DirectorySection() {
             <SectorCard sector={sector} key={sector.slug} />
           ))}
         </div>
-        <div className="mt-4.5 flex justify-center">
+        <div className="relative z-10 mt-4.5 flex justify-center">
           <Button as={Link} to="/firma-rehberi" variant="primary">
             Tüm Firmaları Görüntüle <span>→</span>
           </Button>
