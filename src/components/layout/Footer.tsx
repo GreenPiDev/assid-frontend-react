@@ -26,14 +26,6 @@ export function FacebookIcon() {
   );
 }
 
-function XIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
-      <path d="M18.9 3h3.1l-6.77 7.74L23.2 21h-6.24l-4.89-6.4-5.59 6.4H3.36l7.24-8.28L2.8 3h6.4l4.42 5.85L18.9 3Zm-1.09 16.17h1.72L8.28 4.73H6.43l11.38 14.44Z" />
-    </svg>
-  );
-}
-
 export function LinkedInIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
