@@ -294,7 +294,7 @@ export default function HeroCarousel() {
   const ActiveSlide = SLIDES[index].Component;
 
   return (
-    <div id="anasayfa" ref={containerRef} className="relative isolate scroll-mt-[78px] lg:h-[calc(100vh-78px)]">
+    <div id="anasayfa" ref={containerRef} className="relative isolate scroll-mt-[78px] lg:h-screen">
       <div key={index} className="animate-slide-fade h-full">
         <ActiveSlide />
       </div>

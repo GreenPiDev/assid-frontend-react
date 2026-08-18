@@ -39,7 +39,7 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-30 bg-transparent">
+    <header className="fixed inset-x-0 top-0 z-30 bg-transparent">
       <div className="mx-auto flex min-h-[78px] w-[min(calc(100%-40px),1240px)] items-center gap-8">
         <button
           type="button"

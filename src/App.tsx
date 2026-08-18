@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet, ScrollRestoration } from 'react-router-dom'
+import { createBrowserRouter, Outlet, ScrollRestoration, useLocation } from 'react-router-dom'
 import RequireAuth from './components/auth/RequireAuth'
 import Footer from './components/layout/Footer'
 import Header from './components/layout/Header'
@@ -27,10 +27,14 @@ function RootLayout() {
 }
 
 function SiteLayout() {
+  const location = useLocation()
+  const isHome = location.pathname === '/'
   return (
     <>
       <Header />
-      <Outlet />
+      <div className={isHome ? undefined : 'pt-[78px]'}>
+        <Outlet />
+      </div>
       <Footer />
     </>
   )
