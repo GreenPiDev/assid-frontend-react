@@ -22,7 +22,7 @@ const BADGE_RADIUS = 68;
 const NEEDLE_LENGTH = BADGE_RADIUS;
 const TOOTH_COUNT = 20;
 // Açılar, çarkın sadece sol (görünür) yarısına yayılacak şekilde seçildi.
-const BADGE_ANGLES = [145, 180, 215];
+const BADGE_ANGLES = [215, 180, 145];
 const SLIDE_COUNT = 3;
 
 function pointOnCircle(angleDeg: number, radius: number) {
