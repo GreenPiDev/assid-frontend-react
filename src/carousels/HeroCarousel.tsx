@@ -147,7 +147,7 @@ function EventsSlide() {
           </Button>
         </div>
         <div className="grid min-h-0 flex-1 grid-cols-1 gap-6.5 lg:grid-cols-[1.12fr_.88fr]">
-          <article className="relative isolate flex min-h-105 flex-col justify-end overflow-hidden rounded-[32px] p-6 text-white md:min-h-[418px] md:p-8.5 lg:min-h-0">
+          <article className="relative isolate flex min-h-80 flex-col justify-end overflow-hidden rounded-[32px] p-6 text-white md:min-h-[320px] md:p-8.5 lg:min-h-0">
             <div
               className="absolute inset-0 -z-10 bg-cover bg-center"
               style={{

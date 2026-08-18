@@ -36,9 +36,9 @@ function SiteLayout() {
 
   if (isSingleScreen) {
     return (
-      <div className="flex h-screen flex-col overflow-hidden">
+      <div className="flex flex-col lg:h-screen lg:overflow-hidden">
         <Header />
-        <div className="min-h-0 flex-1">
+        <div className="lg:min-h-0 lg:flex-1">
           <Outlet />
         </div>
         <Footer />

@@ -10,8 +10,8 @@ export default function ContactPage() {
   ].filter((item) => item.value);
 
   return (
-    <main className="h-full">
-      <section className="flex h-full items-center overflow-hidden bg-[linear-gradient(105deg,rgba(8,28,48,.97)_0%,rgba(10,35,58,.89)_53%,rgba(9,30,46,.77)_100%),url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1900&q=85')] bg-cover bg-center py-6 text-white">
+    <main className="lg:h-full">
+      <section className="flex min-h-screen items-center overflow-hidden bg-[linear-gradient(105deg,rgba(8,28,48,.97)_0%,rgba(10,35,58,.89)_53%,rgba(9,30,46,.77)_100%),url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1900&q=85')] bg-cover bg-center pb-10 pt-24 text-white lg:min-h-0 lg:h-full lg:py-6">
         <div className="mx-auto w-[min(calc(100%-40px),1240px)]">
           <div className="inline-flex items-center gap-2 text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-lime before:h-0.5 before:w-5 before:bg-assid-lime">
             Bize ulaşın

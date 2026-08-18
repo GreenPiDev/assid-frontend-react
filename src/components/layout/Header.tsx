@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Button from "../ui/Button";
 import { useOrganizationSettings } from "../../api/resources/organizationSettings";
@@ -18,13 +19,16 @@ export default function Header() {
   const isHome = location.pathname === "/";
   const { data: settings } = useOrganizationSettings();
   const logoUrl = settings?.logo;
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   function goHome() {
+    setMobileMenuOpen(false);
     if (isHome) scrollToTop();
     else navigate("/");
   }
 
   function goToSection(id: string) {
+    setMobileMenuOpen(false);
     if (id in HERO_CAROUSEL_SLIDES) {
       if (isHome) {
         scrollToId("anasayfa");
@@ -73,11 +77,46 @@ export default function Header() {
           <Button as={Link} to="/login" variant="light">
             Üye Girişi
           </Button>
-          <button className="p-2 text-white lg:hidden" aria-label="Menüyü aç">
-            ☰
+          <button
+            type="button"
+            className="grid h-11 w-11 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-3xl leading-none text-white lg:hidden"
+            aria-label={mobileMenuOpen ? "Menüyü kapat" : "Menüyü aç"}
+            aria-expanded={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+          >
+            {mobileMenuOpen ? "✕" : "☰"}
           </button>
         </div>
       </div>
+
+      {mobileMenuOpen && (
+        <nav
+          className="flex flex-col gap-1 border-t border-white/15 bg-[rgba(6,18,30,0.92)] px-5 py-4 text-[0.95rem] font-bold text-white backdrop-blur-md lg:hidden"
+          aria-label="Mobil menü"
+        >
+          {navLinks.map((link) =>
+            link.type === "route" ? (
+              <Link
+                key={link.label}
+                to={link.to}
+                className="rounded-lg px-3 py-3 hover:bg-white/10"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <button
+                key={link.label}
+                type="button"
+                onClick={() => goToSection(link.id)}
+                className="cursor-pointer rounded-lg border-0 bg-transparent px-3 py-3 text-left hover:bg-white/10"
+              >
+                {link.label}
+              </button>
+            ),
+          )}
+        </nav>
+      )}
     </header>
   );
 }
