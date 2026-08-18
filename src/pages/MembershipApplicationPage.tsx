@@ -178,7 +178,7 @@ export default function MembershipApplicationPage() {
 
   if (isSent) {
     return (
-      <main className="py-17 md:py-24">
+      <main className="min-h-screen bg-[linear-gradient(160deg,#081a2c_0%,#0d2743_100%)] py-17 md:py-24">
         <div className="mx-auto w-[min(calc(100%-40px),720px)] rounded-[24px] border border-assid-line bg-white p-8 text-center md:p-12">
           <span className="text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-green">
             Üyelik Başvurusu
@@ -197,14 +197,14 @@ export default function MembershipApplicationPage() {
   }
 
   return (
-    <main className="py-17 md:py-24">
+    <main className="min-h-screen bg-[linear-gradient(160deg,#081a2c_0%,#0d2743_100%)] py-17 md:py-24">
       <div className="mx-auto w-[min(calc(100%-40px),1320px)]">
         <div className="mb-8 max-w-2xl">
 
-          <h1 className="mt-3 text-[clamp(1.8rem,3.2vw,2.6rem)] leading-[1.05] tracking-[-.03em] text-assid-ink">
+          <h1 className="mt-3 text-[clamp(1.8rem,3.2vw,2.6rem)] leading-[1.05] tracking-[-.03em] text-white">
             Üyelik Başvurusu
           </h1>
-          <p className="mt-3 text-[0.95rem] text-[#5d665f]">
+          <p className="mt-3 text-[0.95rem] text-white/75">
             Aşağıdaki formu eksiksiz olarak doldurmanızın ardından başvurunuz değerlendirmeye alınacak ve sonuç hakkında tarafınıza geri dönüş sağlanacaktır.
           </p>
         </div>

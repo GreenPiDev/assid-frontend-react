@@ -26,13 +26,30 @@ function RootLayout() {
   )
 }
 
+const FULL_BLEED_PATHS = ['/', '/login', '/forgot-password', '/reset-password', '/contact', '/uyelik-basvurusu']
+const SINGLE_SCREEN_PATHS = ['/contact']
+
 function SiteLayout() {
   const location = useLocation()
-  const isHome = location.pathname === '/'
+  const isFullBleed = FULL_BLEED_PATHS.includes(location.pathname)
+  const isSingleScreen = SINGLE_SCREEN_PATHS.includes(location.pathname)
+
+  if (isSingleScreen) {
+    return (
+      <div className="flex h-screen flex-col overflow-hidden">
+        <Header />
+        <div className="min-h-0 flex-1">
+          <Outlet />
+        </div>
+        <Footer />
+      </div>
+    )
+  }
+
   return (
     <>
       <Header />
-      <div className={isHome ? undefined : 'pt-[78px]'}>
+      <div className={isFullBleed ? undefined : 'pt-[78px]'}>
         <Outlet />
       </div>
       <Footer />
