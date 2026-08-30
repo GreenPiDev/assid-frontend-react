@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Button from "../ui/Button";
+import { useAuth } from "../../context/AuthContext";
 import { useOrganizationSettings } from "../../api/resources/organizationSettings";
 import { goToHeroCarouselSlide, HERO_CAROUSEL_SLIDES, type HeroCarouselSlideId } from "../../utils/heroCarouselBus";
 import { scrollToId, scrollToTop } from "../../utils/scroll";
@@ -17,6 +18,7 @@ export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const isHome = location.pathname === "/";
+  const { user } = useAuth();
   const { data: settings } = useOrganizationSettings();
   const logoUrl = settings?.logo;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -74,9 +76,15 @@ export default function Header() {
           )}
         </nav>
         <div className="ml-auto flex items-center gap-2.5 lg:ml-0">
-          <Button as={Link} to="/login" variant="light">
-            Üye Girişi
-          </Button>
+          {user ? (
+            <Button as={Link} to="/dashboard" variant="light">
+              Yönetim Paneli
+            </Button>
+          ) : (
+            <Button as={Link} to="/login" variant="light">
+              Üye Girişi
+            </Button>
+          )}
           <button
             type="button"
             className="grid h-11 w-11 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-3xl leading-none text-white lg:hidden"

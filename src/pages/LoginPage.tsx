@@ -44,7 +44,7 @@ export default function LoginPage() {
               placeholder="ornek@sirket.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border-0 bg-transparent text-white outline-none placeholder:text-white/45"
+              className="auth-field-input w-full border-0 bg-transparent text-white outline-none placeholder:text-white/45"
             />
           </span>
         </label>
@@ -59,7 +59,7 @@ export default function LoginPage() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border-0 bg-transparent text-white outline-none placeholder:text-white/45"
+              className="auth-field-input w-full border-0 bg-transparent text-white outline-none placeholder:text-white/45"
             />
             <button
               type="button"

@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { CloseIcon, KeyIcon, LogoutIcon, MenuIcon, UserIcon } from "../admin/icons";
+import { ArrowLeftIcon, CloseIcon, KeyIcon, LogoutIcon, MenuIcon, UserIcon } from "../admin/icons";
 
 const navItems = [
   { to: "/dashboard/profilim", label: "Profilim", icon: UserIcon },
@@ -51,6 +51,15 @@ export default function MemberLayout({ children }: { children: ReactNode }) {
     <div className="font-dashboard min-h-screen bg-assid-paper">
       <header className="fixed inset-x-0 top-0 z-40 flex h-[64px] items-center justify-between border-b border-assid-line bg-white px-5">
         <div className="flex items-center gap-3">
+          <Link
+            to="/"
+            title="Siteye dön"
+            aria-label="Siteye dön"
+            className="grid h-9 w-9 place-items-center rounded-full border border-assid-line bg-transparent text-assid-ink transition hover:bg-assid-paper"
+          >
+            <ArrowLeftIcon className="h-4 w-4" />
+          </Link>
+
           <button
             type="button"
             onClick={() => setIsMobileNavOpen(true)}

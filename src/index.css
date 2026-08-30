@@ -67,3 +67,22 @@ html {
     text-decoration: none;
   }
 }
+
+/* Giriş/şifre ekranlarındaki koyu-cam inputlarda tarayıcı otomatik
+   doldurma (autofill) kendi açık renkli arka planını dayatıyor. Bunu
+   bastırmak için inset box-shadow kullanmak zorundayız (background-color
+   autofill'i geçersiz kılamıyor), ama yarı saydam bir renk kullanırsak
+   zaten bg-white/10 olan sarmalayıcının üzerine bir kat daha yarı saydamlık
+   binip input'un içini çevresinden daha parlak/belirgin gösteriyordu. Onun
+   yerine o bölgede gerçekte görünen düz (opak) tonu hesaplayıp birebir
+   eşitliyoruz: lacivert fon (#06121e) + kart camı (beyaz %12) + input
+   sarmalayıcısı (beyaz %10) üst üste bindiğinde çıkan renk ~#3a434d. */
+.auth-field-input:-webkit-autofill,
+.auth-field-input:-webkit-autofill:hover,
+.auth-field-input:-webkit-autofill:focus,
+.auth-field-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #5a636d inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff;
+  transition: background-color 600000s ease-in-out 0s;
+}

@@ -58,7 +58,7 @@ export default function ResetPasswordPage() {
               placeholder="En az 8 karakter"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full border-0 bg-transparent text-white outline-none placeholder:text-white/45"
+              className="auth-field-input w-full border-0 bg-transparent text-white outline-none placeholder:text-white/45"
             />
           </span>
         </label>
@@ -73,7 +73,7 @@ export default function ResetPasswordPage() {
               autoComplete="new-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full border-0 bg-transparent text-white outline-none"
+              className="auth-field-input w-full border-0 bg-transparent text-white outline-none"
             />
           </span>
         </label>
