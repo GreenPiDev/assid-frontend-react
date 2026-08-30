@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Button from "../ui/Button";
 import { useAuth } from "../../context/AuthContext";
@@ -22,6 +22,30 @@ export default function Header() {
   const { data: settings } = useOrganizationSettings();
   const logoUrl = settings?.logo;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    lastScrollY.current = window.scrollY;
+
+    function handleScroll() {
+      const currentScrollY = window.scrollY;
+      const delta = currentScrollY - lastScrollY.current;
+
+      if (currentScrollY < 80) {
+        setHidden(false);
+      } else if (delta > 4) {
+        setHidden(true);
+      } else if (delta < -4) {
+        setHidden(false);
+      }
+
+      lastScrollY.current = currentScrollY;
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   function goHome() {
     setMobileMenuOpen(false);
@@ -45,7 +69,11 @@ export default function Header() {
   }
 
   return (
-    <header className="fixed inset-x-0 top-0 z-30 bg-transparent backdrop-blur-[2px]">
+    <header
+      className={`fixed inset-x-0 top-0 z-30 bg-transparent backdrop-blur-[2px] transition-transform duration-300 ${
+        hidden && !mobileMenuOpen ? "-translate-y-full" : "translate-y-0"
+      }`}
+    >
       <div className="mx-auto flex min-h-[78px] w-[min(calc(100%-40px),1240px)] items-center gap-8">
         <button
           type="button"

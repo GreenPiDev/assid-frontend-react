@@ -20,16 +20,17 @@
   --animate-ticker: ticker 35s linear infinite;
   --animate-pin-pulse: pin-pulse 2.2s ease-out infinite;
   --animate-loading-bounce: loading-bounce 1s ease-in-out infinite;
-  --animate-gear-spin: gear-spin 60s linear infinite;
   --animate-scroll-hint: scroll-hint 1.8s ease-in-out infinite;
   --animate-slide-fade: slide-fade 0.5s ease-out;
+  --animate-hero-wheel-exit-up: hero-wheel-exit-up 650ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  --animate-hero-wheel-enter-from-below: hero-wheel-enter-from-below 650ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  --animate-hero-wheel-exit-down: hero-wheel-exit-down 650ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  --animate-hero-wheel-enter-from-corner: hero-wheel-enter-from-corner 650ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  --animate-hero-hint-bounce: hero-hint-bounce 1.6s ease-in-out infinite;
 }
 
 @keyframes ticker {
   to { transform: translateX(-50%); }
-}
-@keyframes gear-spin {
-  to { transform: rotate(360deg); }
 }
 @keyframes scroll-hint {
   0%, 100% { transform: translateY(0); opacity: .5; }
@@ -38,6 +39,32 @@
 @keyframes slide-fade {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
+}
+@keyframes hero-hint-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+/* Hero carousel geçişi: slaytlar sol kenardaki dişli çarkın göbeğine
+   menteşelenmiş kartlar gibi, iki "park" noktası arasında (sol-üst ve alt)
+   döner. İleri gidilirken (1→2→3): mevcut slayt sol üste doğru dönerek
+   çıkar, bir sonraki slayt onu takip edercesine alttan gelir. Geri
+   gidilirken (3→2→1): yön tersine döner — mevcut slayt aşağı doğru gider,
+   bir önceki slayt sol üstten kayarak geri gelir. */
+@keyframes hero-wheel-exit-up {
+  from { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 1; }
+  to { transform: translate3d(-18%, -22%, 0) rotate(-12deg); opacity: 0; }
+}
+@keyframes hero-wheel-enter-from-below {
+  from { transform: translate3d(2%, 24%, 0) rotate(6deg); opacity: 0; }
+  to { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 1; }
+}
+@keyframes hero-wheel-exit-down {
+  from { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 1; }
+  to { transform: translate3d(2%, 24%, 0) rotate(6deg); opacity: 0; }
+}
+@keyframes hero-wheel-enter-from-corner {
+  from { transform: translate3d(-18%, -22%, 0) rotate(-12deg); opacity: 0; }
+  to { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 1; }
 }
 @keyframes pin-pulse {
   0% { transform: scale(1); opacity: .8; }

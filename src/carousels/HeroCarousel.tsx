@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useUpcomingEvents } from "../api/resources/events";
 import { useOrgStats } from "../api/resources/stats";
@@ -9,7 +9,7 @@ import { onHeroCarouselGoTo } from "../utils/heroCarouselBus";
 import { scrollToId } from "../utils/scroll";
 import Button from "../components/ui/Button";
 
-const WHEEL_LOCK_MS = 700;
+const WHEEL_LOCK_MS = 1300;
 // Son/ilk slayta yeni ulaşıldığında, sayfa scroll'una geçmeden önce
 // kullanıcının slaytı görebilmesi için biraz daha uzun tutulur.
 const BOUNDARY_HOLD_MS = 1000;
@@ -19,10 +19,11 @@ const TEETH_RADIUS = 102;
 const RIM_RADIUS = 88;
 const BOLT_RADIUS = 52;
 const BADGE_RADIUS = 68;
-const NEEDLE_LENGTH = BADGE_RADIUS;
 const TOOTH_COUNT = 20;
-// Açılar, çarkın sadece sağ (görünür) yarısına yayılacak şekilde seçildi.
-const BADGE_ANGLES = [325, 0, 35];
+// hero-wheel-exit/enter keyframe süresiyle (index.css) birebir eşleşmeli.
+const WHEEL_TRANSITION_MS = 650;
+// Rozetler arası açı farkı — çarkın sadece sağ (görünür) yarısına yayılır.
+const BADGE_STEP = 35;
 const SLIDE_COUNT = 3;
 
 function pointOnCircle(angleDeg: number, radius: number) {
@@ -31,6 +32,15 @@ function pointOnCircle(angleDeg: number, radius: number) {
     x: CENTER + radius * Math.cos(rad),
     y: CENTER + radius * Math.sin(rad),
   };
+}
+
+// Rozetlerin sırası (01→02→03) hiçbir zaman bozulmaz; sanki sabit aralıklı
+// bir cetvel üzerindeymiş gibi her rozetin "ev" açısı i*BADGE_STEP'tir ve
+// aktif slayt değiştikçe bütün cetvel bu kadar kayar (döngüsel sarma yok).
+// Böylece 01 aktifken 02/03 onun altında, 03 aktifken 01/02 onun üstünde
+// sırayla dizilir; sadece ortadaki (aktif) her zaman merkezde (0°) kalır.
+function badgeAngle(badgeIndex: number, activeIndex: number) {
+  return (badgeIndex - activeIndex) * BADGE_STEP;
 }
 
 function HeroSlide() {
@@ -244,10 +254,38 @@ const SLIDES = [
   { Component: JoinSlide, label: "Üyelik" },
 ];
 
+// Slaytı, çark göbeğine (sol kenar) menteşelenmiş bir kart gibi döndürerek
+// değiştirir. İleri gidilirken (index büyüyor) mevcut slayt sol üste doğru
+// çıkar, yenisi alttan takip ederek gelir; geri gidilirken (index küçülüyor)
+// yön tersine döner — mevcut slayt aşağı gider, yenisi sol üstten gelir.
+function useWheelTransition(index: number) {
+  const [displayed, setDisplayed] = useState(index);
+  const [incoming, setIncoming] = useState<number | null>(null);
+  const [direction, setDirection] = useState<"forward" | "backward">("forward");
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (index === displayed) return;
+    setDirection(index > displayed ? "forward" : "backward");
+    setIncoming(index);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setDisplayed(index);
+      setIncoming(null);
+    }, WHEEL_TRANSITION_MS);
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index]);
+
+  return { displayed, incoming, direction };
+}
+
 export default function HeroCarousel() {
   const { index, next, prev, goTo } = useCarousel(SLIDE_COUNT, 0);
+  const { displayed, incoming, direction } = useWheelTransition(index);
   const containerRef = useRef<HTMLDivElement>(null);
-  const lockUntilRef = useRef(0);
   const indexRef = useRef(index);
   indexRef.current = index;
 
@@ -257,7 +295,15 @@ export default function HeroCarousel() {
     const el = containerRef.current;
     if (!el) return;
 
+    let lockUntil = 0;
+
     const onWheel = (e: WheelEvent) => {
+      // Sayfa tepede değilse (kullanıcı zaten aşağı inmiş, hero'nun sadece
+      // bir kısmı görünüyor olabilir) imleç nerede olursa olsun normal
+      // sayfa scroll'u işlesin; karusel yalnızca sayfanın tam en üstünde
+      // (scrollY 0) iken scroll'u yakalayıp slayt değiştirsin.
+      if (window.scrollY > 1) return;
+
       const goingNext = e.deltaY > 0;
       const goingPrev = e.deltaY < 0;
       if (!goingNext && !goingPrev) return;
@@ -268,7 +314,7 @@ export default function HeroCarousel() {
       const atBoundary = (goingNext && atLast) || (goingPrev && atFirst);
 
       const now = Date.now();
-      const locked = now < lockUntilRef.current;
+      const locked = now < lockUntil;
 
       if (atBoundary) {
         // Sınıra yeni ulaşıldıysa scroll'u bir süre burada tut, kullanıcı
@@ -284,7 +330,7 @@ export default function HeroCarousel() {
       else prev();
 
       const landingOnBoundary = (goingNext && curIndex === SLIDE_COUNT - 2) || (goingPrev && curIndex === 1);
-      lockUntilRef.current = now + (landingOnBoundary ? BOUNDARY_HOLD_MS : WHEEL_LOCK_MS);
+      lockUntil = now + (landingOnBoundary ? BOUNDARY_HOLD_MS : WHEEL_LOCK_MS);
     };
 
     el.addEventListener("wheel", onWheel, { passive: false });
@@ -293,53 +339,62 @@ export default function HeroCarousel() {
 
   const teeth = Array.from({ length: TOOTH_COUNT }, (_, i) => (i * 360) / TOOTH_COUNT);
   const bolts = Array.from({ length: 8 }, (_, i) => (i * 360) / 8);
-  const ActiveSlide = SLIDES[index].Component;
+  const DisplayedSlide = SLIDES[displayed].Component;
+  const IncomingSlide = incoming !== null ? SLIDES[incoming].Component : null;
 
   return (
     <div id="anasayfa" ref={containerRef} className="relative isolate scroll-mt-[78px] lg:h-screen">
-      <div key={index} className="animate-slide-fade h-full">
-        <ActiveSlide />
+      <div className="relative h-full overflow-hidden">
+        <div
+          className={`absolute inset-0 h-full ${
+            incoming !== null ? (direction === "forward" ? "animate-hero-wheel-exit-up" : "animate-hero-wheel-exit-down") : ""
+          }`}
+        >
+          <DisplayedSlide />
+        </div>
+        {IncomingSlide && (
+          <div
+            key={incoming}
+            className={`absolute inset-0 z-10 h-full ${
+              direction === "forward" ? "animate-hero-wheel-enter-from-below" : "animate-hero-wheel-enter-from-corner"
+            }`}
+          >
+            <IncomingSlide />
+          </div>
+        )}
       </div>
 
       {/* Kaydırma ipucu */}
-      <div className="pointer-events-none absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 text-[11px] tracking-[0.14em] text-assid-ink/45 uppercase lg:left-auto lg:right-32 lg:translate-x-0">
-        {index < SLIDE_COUNT - 1 ? (
-          <>
-            <svg className="animate-scroll-hint h-4 w-4" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M12 4v16m0 0l-5-5m5 5l5-5"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Sonraki bölüm için kaydırın
-          </>
-        ) : (
-          <>
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M12 4v16m0 0l-5-5m5 5l5-5"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Devam etmek için kaydırın
-          </>
-        )}
-      </div>
+      {index < SLIDE_COUNT - 1 ? (
+        <div className="pointer-events-none absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 text-[11px] tracking-[0.14em] text-assid-ink/45 uppercase lg:left-auto lg:right-32 lg:translate-x-0">
+          <svg className="animate-scroll-hint h-4 w-4" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M12 4v16m0 0l-5-5m5 5l5-5"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          Sonraki bölüm için kaydırın
+        </div>
+      ) : (
+        <div className="animate-hero-hint-bounce pointer-events-none absolute bottom-8 left-1/2 z-20 -translate-x-1/2 text-[15px] font-normal tracking-[0.18em] text-white uppercase drop-shadow-[0_1px_6px_rgba(0,0,0,0.45)]">
+          Devam etmek için aşağı kaydırın
+        </div>
+      )}
 
       {/* Dişli çark — sol kenarda yarım görünür */}
       <div
         className="pointer-events-none absolute top-1/2 left-0 z-20 -translate-x-1/2 -translate-y-1/2"
         style={{ width: WHEEL_SIZE, height: WHEEL_SIZE }}
       >
-        {/* Dönen dişli halkası */}
+        {/* Dişli halkası — artık kendi kendine sürekli dönmüyor; rozetlerle
+            birlikte, aynı yönde ve aynı miktarda dönerek gerçek bir çark
+            hissi veriyor. */}
         <svg
-          className="animate-gear-spin absolute inset-0"
+          className="absolute inset-0 transition-transform duration-700 ease-[cubic-bezier(0.65,0,0.35,1)]"
+          style={{ transform: `rotate(${-index * BADGE_STEP}deg)` }}
           width={WHEEL_SIZE}
           height={WHEEL_SIZE}
           viewBox={`0 0 ${WHEEL_SIZE} ${WHEEL_SIZE}`}
@@ -385,15 +440,11 @@ export default function HeroCarousel() {
           <circle cx={CENTER} cy={CENTER} r={5} fill="#8ecae6" opacity={0.95} />
         </svg>
 
-        {/* Aktif slaytı gösteren ibre */}
-        <div
-          className="absolute top-1/2 left-1/2 h-[2px] origin-left bg-gradient-to-r from-assid-lime to-transparent transition-transform duration-700 ease-[cubic-bezier(0.65,0,0.35,1)]"
-          style={{ width: NEEDLE_LENGTH, transform: `rotate(${BADGE_ANGLES[index]}deg)` }}
-        />
-
-        {/* Bölüm rozetleri */}
+        {/* Bölüm rozetleri — aktif slayta göre çark üzerinde konum değiştirir.
+            Ön-arka sırası (z-index) sabittir: 01 her zaman en önde, 03 en
+            arkada; dönerken yalnızca açısal konumları değişir. */}
         {SLIDES.map((slide, i) => {
-          const p = pointOnCircle(BADGE_ANGLES[i], BADGE_RADIUS);
+          const p = pointOnCircle(badgeAngle(i, index), BADGE_RADIUS);
           const isActive = i === index;
           return (
             <button
@@ -402,8 +453,8 @@ export default function HeroCarousel() {
               aria-label={slide.label}
               title={slide.label}
               onClick={() => goTo(i)}
-              style={{ left: p.x, top: p.y }}
-              className={`pointer-events-auto absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border text-xs font-semibold tracking-wide transition-all duration-500 ${
+              style={{ left: p.x, top: p.y, zIndex: SLIDE_COUNT - i }}
+              className={`pointer-events-auto absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border text-xs font-semibold tracking-wide transition-all duration-700 ease-[cubic-bezier(0.65,0,0.35,1)] ${
                 isActive
                   ? "scale-110 border-assid-lime bg-assid-lime text-assid-green-dark shadow-[0_0_18px_rgba(142,202,230,0.55)]"
                   : "border-white/30 bg-assid-green-dark/90 text-white/60 hover:border-white/50 hover:text-white/90"
