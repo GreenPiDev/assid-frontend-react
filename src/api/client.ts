@@ -113,6 +113,21 @@ export interface BackendPresidentMessage {
   messageHtml?: string;
 }
 
+export type BoardMemberCategory =
+  | "yonetim_kurulu_asil"
+  | "yonetim_kurulu_yedek"
+  | "denetleme_kurulu_asil"
+  | "denetleme_kurulu_yedek"
+  | "disiplin_kurulu_asil"
+  | "disiplin_kurulu_yedek";
+
+export interface BackendBoardMember {
+  _id: string;
+  category: BoardMemberCategory;
+  name: string;
+  title?: string;
+}
+
 // Yönetim panelinden onaylanmamış (applicationStatus !== "approved") üyeler
 // herkese açık sitede hiçbir yerde görünmemeli; bu yüzden filtre burada, tek
 // noktada uygulanır.
@@ -195,6 +210,9 @@ export async function get({
 
     case "president-message":
       return request<BackendPresidentMessage>("/president-message");
+
+    case "board-members":
+      return request<BackendBoardMember[]>("/board-members");
 
     case "membership-fees":
       return request<BackendMembershipFee[]>("/membership-fees");

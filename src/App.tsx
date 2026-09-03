@@ -8,6 +8,7 @@ import { ToastProvider } from './context/ToastContext'
 import AboutPage from './pages/AboutPage'
 import AllEventsPage from './pages/AllEventsPage'
 import AllNewsPage from './pages/AllNewsPage'
+import BoardManagementPage from './pages/BoardManagementPage'
 import ContactPage from './pages/ContactPage'
 import FirmaRehberiPage from './pages/FirmaRehberiPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
@@ -42,6 +43,7 @@ const FULL_BLEED_PATHS = [
   '/hakkimizda',
   '/haberler',
   '/baskanin-mesaji',
+  '/dernek-yonetimi',
 ]
 const SINGLE_SCREEN_PATHS = ['/contact']
 
@@ -92,6 +94,7 @@ export const router = createBrowserRouter([
           { path: '/haberler', element: <AllNewsPage /> },
           { path: '/haberler/:slug', element: <NewsDetailPage /> },
           { path: '/baskanin-mesaji', element: <PresidentMessagePage /> },
+          { path: '/dernek-yonetimi', element: <BoardManagementPage /> },
         ],
       },
       { path: '/firma-rehberi', element: <FirmaRehberiPage /> },

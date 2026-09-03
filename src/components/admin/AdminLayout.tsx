@@ -21,6 +21,7 @@ const contentChildren = [
   { to: "/dashboard/uye-kayit-formu", label: "Üye Kayıt Formu" },
   { to: "/dashboard/hakkimizda", label: "Hakkımızda" },
   { to: "/dashboard/baskanin-mesaji", label: "Başkanın Mesajı" },
+  { to: "/dashboard/dernek-yonetimi", label: "Dernek Yönetimi" },
 ];
 
 const navItems = [

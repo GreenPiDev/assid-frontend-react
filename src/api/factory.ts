@@ -12,6 +12,7 @@ export const Paths = {
   OrganizationSettings: "/organization-settings",
   AboutPage: "/about-page",
   PresidentMessage: "/president-message",
+  BoardMembers: "/board-members",
   MembershipFees: "/membership-fees",
 };
 

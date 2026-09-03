@@ -105,6 +105,21 @@ export interface AdminPresidentMessage {
   messageHtml?: string;
 }
 
+export type BoardMemberCategory =
+  | "yonetim_kurulu_asil"
+  | "yonetim_kurulu_yedek"
+  | "denetleme_kurulu_asil"
+  | "denetleme_kurulu_yedek"
+  | "disiplin_kurulu_asil"
+  | "disiplin_kurulu_yedek";
+
+export interface AdminBoardMember {
+  _id: string;
+  category: BoardMemberCategory;
+  name: string;
+  title?: string;
+}
+
 export interface AdminMembershipFee {
   _id: string;
   label: string;
@@ -321,6 +336,23 @@ export async function uploadAdminPresidentMessageImage(file: File): Promise<Admi
     throw new Error(message ?? `İstek başarısız (${res.status})`);
   }
   return res.json() as Promise<AdminPresidentMessage>;
+}
+
+// --- Board members ---
+export function fetchAdminBoardMembers() {
+  return request<AdminBoardMember[]>("/board-members");
+}
+
+export function createAdminBoardMember(dto: { category: BoardMemberCategory; name: string; title?: string }) {
+  return request<AdminBoardMember>("/board-members", { method: "POST", body: JSON.stringify(dto) });
+}
+
+export function updateAdminBoardMember(id: string, dto: { name?: string; title?: string }) {
+  return request<AdminBoardMember>(`/board-members/${id}`, { method: "PATCH", body: JSON.stringify(dto) });
+}
+
+export function deleteAdminBoardMember(id: string) {
+  return request<void>(`/board-members/${id}`, { method: "DELETE" });
 }
 
 // --- Membership fees ---

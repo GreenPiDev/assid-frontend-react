@@ -17,6 +17,7 @@ const navLinks = [
 const kurumsalLinks = [
   { to: "/hakkimizda", label: "Hakkımızda" },
   { to: "/baskanin-mesaji", label: "Başkanın Mesajı" },
+  { to: "/dernek-yonetimi", label: "Dernek Yönetimi" },
 ] as const;
 
 export default function Header() {
