@@ -16,9 +16,11 @@ import {
 
 const contentChildren = [
   { to: "/dashboard/etkinlikler", label: "Etkinlikler" },
-  { to: "/dashboard/haberler", label: "Sektörel Haberler" },
+  { to: "/dashboard/haberler", label: "Haberler" },
   { to: "/dashboard/uye-girisi-sayfasi", label: "Üye Girişi Sayfası" },
   { to: "/dashboard/uye-kayit-formu", label: "Üye Kayıt Formu" },
+  { to: "/dashboard/hakkimizda", label: "Hakkımızda" },
+  { to: "/dashboard/baskanin-mesaji", label: "Başkanın Mesajı" },
 ];
 
 const navItems = [
@@ -125,7 +127,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <header className="fixed inset-x-0 top-0 z-40 flex h-[64px] items-center justify-between border-b border-assid-line bg-white px-5">
         <div className="flex items-center gap-3">
           <Link
-            to="/"
+            to="/home"
             title="Siteye dön"
             aria-label="Siteye dön"
             className="grid h-9 w-9 place-items-center rounded-full border border-assid-line bg-transparent text-assid-ink transition hover:bg-assid-paper"

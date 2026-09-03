@@ -53,22 +53,21 @@ export default function AdminUsersPage() {
           </span>
           <h1 className="mt-1 text-[1.5rem] tracking-[-.03em] text-assid-ink">Kullanıcılar</h1>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="E-posta ara..."
-            className="min-w-64 rounded-full border border-assid-line bg-white px-4 py-2.5 text-[0.85rem] outline-none focus:border-assid-green/50"
-          />
-          <button
-            type="button"
-            onClick={() => setIsCreateOpen(true)}
-            className="flex cursor-pointer items-center gap-2 rounded-full border-0 bg-assid-green px-5 py-2.5 text-[0.85rem] font-bold text-white"
-          >
-            <PlusIcon className="h-4 w-4" /> Yeni Kullanıcı
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setIsCreateOpen(true)}
+          className="flex cursor-pointer items-center gap-2 rounded-full border-0 bg-assid-green px-5 py-2.5 text-[0.85rem] font-bold text-white"
+        >
+          <PlusIcon className="h-4 w-4" /> Yeni Kullanıcı
+        </button>
       </div>
+
+      <input
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="E-posta ara..."
+        className="mb-5 w-full rounded-full border border-assid-line bg-white px-4 py-2.5 text-[0.85rem] outline-none focus:border-assid-green/50"
+      />
 
       <div className="overflow-x-auto rounded-[20px] border border-assid-line bg-white">
         <table className="w-full min-w-[640px] border-collapse text-left text-[0.85rem]">

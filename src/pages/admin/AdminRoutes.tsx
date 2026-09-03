@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
+import AdminAboutPage from "./AdminAboutPage";
 import AdminEventsPage from "./AdminEventsPage";
 import AdminLoginPageSettingsPage from "./AdminLoginPageSettingsPage";
 import AdminMembersPage from "./AdminMembersPage";
@@ -7,6 +8,7 @@ import AdminMembershipDetailPage from "./AdminMembershipDetailPage";
 import AdminMembershipFormPage from "./AdminMembershipFormPage";
 import AdminMembershipsPage from "./AdminMembershipsPage";
 import AdminNewsPage from "./AdminNewsPage";
+import AdminPresidentMessagePage from "./AdminPresidentMessagePage";
 import AdminSettingsPage from "./AdminSettingsPage";
 import AdminUsersPage from "./AdminUsersPage";
 
@@ -25,6 +27,8 @@ export default function AdminRoutes() {
         <Route path="organizasyon-bilgileri" element={<AdminSettingsPage />} />
         <Route path="uye-girisi-sayfasi" element={<AdminLoginPageSettingsPage />} />
         <Route path="uye-kayit-formu" element={<AdminMembershipFormPage />} />
+        <Route path="hakkimizda" element={<AdminAboutPage />} />
+        <Route path="baskanin-mesaji" element={<AdminPresidentMessagePage />} />
         <Route path="*" element={<Navigate to="/dashboard/uye-basvurulari" replace />} />
       </Routes>
     </AdminLayout>

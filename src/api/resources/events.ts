@@ -9,3 +9,11 @@ export function useUpcomingEvents(limit = 4) {
   });
   return { ...query, data: query.data as BackendEvent[] };
 }
+
+// GET /events — tarihe göre artan sırayla (geçmiş dahil) tüm etkinlikler
+export function useAllEvents() {
+  const query = useGetList(Paths.Events, {
+    queryKey: [Paths.Events, "all"],
+  });
+  return { ...query, data: query.data as BackendEvent[] };
+}

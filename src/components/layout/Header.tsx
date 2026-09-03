@@ -9,19 +9,25 @@ import { scrollToId, scrollToTop } from "../../utils/scroll";
 const navLinks = [
   { type: "scroll", id: "etkinlikler", label: "Etkinlikler" },
   { type: "scroll", id: "firma-rehberi", label: "Firma Rehberi" },
-  { type: "scroll", id: "haberler", label: "Sektörel Haberler" },
+  { type: "scroll", id: "haberler", label: "Dernek Haberleri" },
   { type: "scroll", id: "uyelik", label: "Üyelik" },
   { type: "route", to: "/contact", label: "İletişim" },
+] as const;
+
+const kurumsalLinks = [
+  { to: "/hakkimizda", label: "Hakkımızda" },
+  { to: "/baskanin-mesaji", label: "Başkanın Mesajı" },
 ] as const;
 
 export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
-  const isHome = location.pathname === "/";
+  const isHome = location.pathname === "/home";
   const { user } = useAuth();
   const { data: settings } = useOrganizationSettings();
   const logoUrl = settings?.logo;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [kurumsalOpen, setKurumsalOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
   const lastScrollY = useRef(0);
 
@@ -50,7 +56,7 @@ export default function Header() {
   function goHome() {
     setMobileMenuOpen(false);
     if (isHome) scrollToTop();
-    else navigate("/");
+    else navigate("/home");
   }
 
   function goToSection(id: string) {
@@ -84,6 +90,36 @@ export default function Header() {
           {logoUrl && <img src={logoUrl} alt="ASSİD logo" className="h-[43px] w-auto object-contain" />}
         </button>
         <nav className="ml-auto hidden items-center gap-6 text-[0.89rem] font-bold text-white/85 lg:flex" aria-label="Ana menü">
+          <div
+            className="relative py-1.5"
+            onMouseEnter={() => setKurumsalOpen(true)}
+            onMouseLeave={() => setKurumsalOpen(false)}
+          >
+            <button type="button" className="flex cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 text-left">
+              Kurumsal
+              <span className={`text-[0.7rem] transition-transform duration-200 ${kurumsalOpen ? "-rotate-180" : ""}`}>
+                ▾
+              </span>
+            </button>
+            <div
+              className={`absolute left-0 top-full pt-3 transition-all duration-150 ${
+                kurumsalOpen ? "visible opacity-100" : "invisible opacity-0"
+              }`}
+            >
+              <div className="min-w-[210px] rounded-[14px] border border-white/15 bg-white/10 p-2 shadow-card backdrop-blur-md">
+                {kurumsalLinks.map((link) => (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    onClick={() => setKurumsalOpen(false)}
+                    className="block rounded-lg px-3.5 py-2.5 text-[0.85rem] font-bold text-white/80 hover:bg-white/10 hover:text-white"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
           {navLinks.map((link) =>
             link.type === "route" ? (
               <Link key={link.label} to={link.to} className="group relative py-1.5">
@@ -130,6 +166,16 @@ export default function Header() {
           className="flex flex-col gap-1 border-t border-white/15 bg-[rgba(6,18,30,0.92)] px-5 py-4 text-[0.95rem] font-bold text-white backdrop-blur-md lg:hidden"
           aria-label="Mobil menü"
         >
+          {kurumsalLinks.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="rounded-lg px-3 py-3 hover:bg-white/10"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {link.label}
+            </Link>
+          ))}
           {navLinks.map((link) =>
             link.type === "route" ? (
               <Link

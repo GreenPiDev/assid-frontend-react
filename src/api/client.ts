@@ -36,11 +36,8 @@ export interface BackendNews {
   title: string;
   summary?: string;
   content?: string;
-  imageUrl?: string;
-  category?: string;
-  sectors: string[];
+  imageUrls: string[];
   publishedAt: string;
-  isFeatured: boolean;
   isPublished: boolean;
 }
 
@@ -52,7 +49,6 @@ export interface BackendEvent {
   startDate: string;
   endDate?: string;
   imageUrl?: string;
-  isFeatured: boolean;
 }
 
 export interface BackendStats {
@@ -97,6 +93,24 @@ export interface BackendOrganizationSettings {
   showMembershipFeesTable?: boolean;
   showAttachmentsSection?: boolean;
   showMembershipClassSection?: boolean;
+}
+
+export interface BackendAboutPage {
+  _id: string;
+  title?: string;
+  subtitle?: string;
+  bodyParagraph1?: string;
+  bodyParagraph2?: string;
+  visionText?: string;
+  missionText?: string;
+  image1?: string;
+  image2?: string;
+}
+
+export interface BackendPresidentMessage {
+  _id: string;
+  image?: string;
+  messageHtml?: string;
 }
 
 // Yönetim panelinden onaylanmamış (applicationStatus !== "approved") üyeler
@@ -175,6 +189,12 @@ export async function get({
 
     case "organization-settings":
       return request<BackendOrganizationSettings>("/organization-settings");
+
+    case "about-page":
+      return request<BackendAboutPage>("/about-page");
+
+    case "president-message":
+      return request<BackendPresidentMessage>("/president-message");
 
     case "membership-fees":
       return request<BackendMembershipFee[]>("/membership-fees");

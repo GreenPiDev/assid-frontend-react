@@ -113,3 +113,31 @@ html {
   caret-color: #ffffff;
   transition: background-color 600000s ease-in-out 0s;
 }
+
+/* Başkanın mesajı gibi admin panelindeki Quill editörüyle üretilen HTML'i
+   public sayfalarda gösterirken, editörün boyut sınıflarının (küçük/büyük/
+   çok büyük) karşılığı olmadan düz metin gibi görünmemesi için; editörün
+   kendi CSS'ini (araç çubuğuyla birlikte) bütün olarak import etmek yerine
+   sadece bu üç sınıfı burada tekrar tanımlıyoruz. */
+.president-message-content .ql-size-small {
+  font-size: 0.75em;
+}
+.president-message-content .ql-size-large {
+  font-size: 1.5em;
+}
+.president-message-content .ql-size-huge {
+  font-size: 2.5em;
+}
+.president-message-content p {
+  margin: 0 0 1em;
+}
+
+/* Word'den yapıştırılan metinlerdeki &nbsp; karakterleri kaydederken normal
+   boşluğa çevriliyor (bkz. AdminPresidentMessagePage), ama olası eski/kaçan
+   içerikler için ekstra güvenlik: satır hiçbir yerde kırılamıyorsa bile
+   kutunun dışına taşmasın. */
+.president-message-content,
+.president-message-editor .ql-editor {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}

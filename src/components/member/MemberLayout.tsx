@@ -52,7 +52,7 @@ export default function MemberLayout({ children }: { children: ReactNode }) {
       <header className="fixed inset-x-0 top-0 z-40 flex h-[64px] items-center justify-between border-b border-assid-line bg-white px-5">
         <div className="flex items-center gap-3">
           <Link
-            to="/"
+            to="/home"
             title="Siteye dön"
             aria-label="Siteye dön"
             className="grid h-9 w-9 place-items-center rounded-full border border-assid-line bg-transparent text-assid-ink transition hover:bg-assid-paper"

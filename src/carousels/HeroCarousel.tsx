@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { useUpcomingEvents } from "../api/resources/events";
+import { useHomeNews } from "../api/resources/news";
 import { useOrgStats } from "../api/resources/stats";
-import { useToast } from "../context/ToastContext";
 import { useCarousel } from "../hooks/useCarousel";
-import { formatEventDateTime, formatEventDay, formatEventMonth, formatEventTime } from "../utils/date";
 import { onHeroCarouselGoTo } from "../utils/heroCarouselBus";
 import { scrollToId } from "../utils/scroll";
+import { slugify } from "../utils/slug";
 import Button from "../components/ui/Button";
 
 const WHEEL_LOCK_MS = 1300;
@@ -122,83 +121,56 @@ function HeroStats() {
   );
 }
 
-function EventsSlide() {
-  const showToast = useToast();
-  const { data: events } = useUpcomingEvents(4);
+function NewsSlide() {
+  const { data: news } = useHomeNews(3);
 
-  if (events.length === 0) {
+  if (news.length === 0) {
     return (
       <section className="flex h-full flex-col items-center justify-center bg-assid-paper py-16 text-center">
         <div className="inline-flex items-center gap-2 text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-green before:h-0.5 before:w-5 before:bg-assid-lime">
-          Etkinlik takvimi
+          Gündem ve duyurular
         </div>
         <h2 className="mt-2.5 max-w-2xl text-[clamp(1.8rem,3.4vw,3rem)] leading-[1.07] tracking-[-.045em] text-assid-ink">
-          Şu anda planlanmış bir etkinlik bulunmuyor.
+          Şu anda yayınlanmış bir haber bulunmuyor.
         </h2>
       </section>
     );
   }
 
-  const featuredEvent = events.find((e) => e.isFeatured) ?? events[0];
-  const restEvents = events.filter((e) => e !== featuredEvent).slice(0, 3);
-
   return (
-    <section className="relative flex h-full flex-col justify-center overflow-hidden bg-[linear-gradient(105deg,rgba(8,28,48,.97)_0%,rgba(10,35,58,.89)_53%,rgba(9,30,46,.77)_100%),url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1900&q=85')] bg-cover bg-center py-17 text-white before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_82%_20%,rgba(142,202,230,.34),transparent_23%),radial-gradient(circle_at_78%_85%,rgba(233,120,60,.24),transparent_24%)] md:py-24 lg:pb-11 lg:pt-28">
-      <div className="relative z-10 mx-auto flex h-auto w-[min(calc(100%-40px),1240px)] flex-col pl-24 lg:pl-32">
-        <div className="mb-9 flex flex-none flex-col items-start justify-between gap-5 md:flex-row md:items-end">
+    <section className="relative flex h-full flex-col justify-center overflow-hidden bg-[linear-gradient(105deg,rgba(8,28,48,.97)_0%,rgba(10,35,58,.89)_53%,rgba(9,30,46,.77)_100%),url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1900&q=85')] bg-cover bg-center py-17 text-white before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_82%_20%,rgba(142,202,230,.34),transparent_23%),radial-gradient(circle_at_78%_85%,rgba(233,120,60,.24),transparent_24%)] md:py-24">
+      <div className="relative z-10 mx-auto w-[min(calc(100%-40px),1240px)] pl-24 lg:pl-32">
+        <div className="mb-9 flex flex-col items-start justify-between gap-5 md:flex-row md:items-end">
           <div>
             <div className="inline-flex items-center gap-2 text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-lime before:h-0.5 before:w-5 before:bg-assid-lime">
-              Etkinlik takvimi
+              Gündem ve duyurular
             </div>
-            <h2 className="mt-2.5 max-w-3xl text-[clamp(2rem,4vw,3.4rem)] leading-[1.07] tracking-[-.045em]">
-              Bir araya gelmek, yeni işlerin başlangıcıdır.
+            <h2 className="mt-2.5 max-w-3xl text-[clamp(2rem,4vw,3.4rem)] leading-[1.07] tracking-[-.045em] text-white">
+              Dernek Haberleri
             </h2>
           </div>
-          <Button variant="light" onClick={() => showToast("Etkinlik takvimi yönetim panelinden yönetilecek.")}>
-            Tüm Etkinlikler →
+          <Button as={Link} to="/haberler" variant="light">
+            Tüm Haberler →
           </Button>
         </div>
-        <div className="grid grid-cols-1 gap-6.5 lg:grid-cols-[1.12fr_.88fr]">
-          <article className="relative isolate flex min-h-80 flex-col justify-end overflow-hidden rounded-[32px] p-6 text-white md:min-h-[320px] md:p-8.5 lg:h-[340px] lg:min-h-0">
-            <div
-              className="absolute inset-0 -z-10 bg-cover bg-center"
-              style={{
-                backgroundImage: `linear-gradient(0deg,rgba(2,25,21,.94),rgba(2,25,21,.08)), url('${featuredEvent.imageUrl || "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1400&q=85"}')`,
-              }}
-            />
-            <span className="inline-block w-max rounded-xl bg-assid-lime px-3.5 py-2.5 text-[0.78rem] font-black text-assid-green-dark">
-              {formatEventDateTime(featuredEvent.startDate)}
-            </span>
-            <h3 className="my-4 max-w-165 text-[clamp(1.65rem,3vw,2.55rem)] leading-[1.05] tracking-[-.05em]">
-              {featuredEvent.title}
-            </h3>
-            <p className="m-0 text-white/73">{featuredEvent.location}</p>
-          </article>
-          <div className="grid grid-rows-3 gap-2.5 lg:h-[340px]">
-            {restEvents.map((event) => (
-              <article
-                key={event._id}
-                className="grid grid-cols-[74px_1fr_auto] items-center gap-4 rounded-[17px] border border-white/18 bg-white/9 p-4.5 backdrop-blur-md transition duration-250 hover:translate-x-1 hover:bg-white/14"
-              >
-                <div className="rounded-xl bg-assid-lime/90 px-1.5 py-2.5 text-center text-assid-green-dark">
-                  <strong className="block text-[1.46rem] leading-none tracking-[-.05em]">
-                    {formatEventDay(event.startDate)}
-                  </strong>
-                  <span className="text-[0.7rem] font-extrabold uppercase">{formatEventMonth(event.startDate)}</span>
-                </div>
-                <div>
-                  <b className="block text-[0.97rem] tracking-tight">{event.title}</b>
-                  <span className="mt-1 block text-[0.78rem] text-white/65">
-                    {formatEventTime(event.startDate)}
-                    {event.location ? ` · ${event.location}` : ""}
-                  </span>
-                </div>
-                <span className="hidden h-8.5 w-8.5 place-items-center rounded-full border border-white/25 text-white sm:grid">
-                  →
-                </span>
-              </article>
-            ))}
-          </div>
+        <div className="grid grid-cols-1 gap-4.5 md:grid-cols-3">
+          {news.map((item) => (
+            <Link
+              key={item._id}
+              to={`/haberler/${slugify(item.title)}`}
+              className="flex h-full flex-col overflow-hidden rounded-[22px] border border-white/18 bg-white/9 backdrop-blur-md transition duration-250 hover:-translate-y-1.5 hover:bg-white/14"
+            >
+              {item.imageUrls[0] && (
+                <div className="h-48 bg-cover bg-center" style={{ backgroundImage: `url('${item.imageUrls[0]}')` }} />
+              )}
+              <div className="flex flex-1 flex-col p-5">
+                <h3 className="my-2.5 line-clamp-2 text-[1.2rem] leading-tight tracking-tight text-white">
+                  {item.title}
+                </h3>
+                {item.summary && <p className="m-0 line-clamp-2 text-[0.84rem] text-white/70">{item.summary}</p>}
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
     </section>
@@ -249,8 +221,8 @@ function JoinSlide() {
 }
 
 const SLIDES = [
+  { Component: NewsSlide, label: "Haberler" },
   { Component: HeroSlide, label: "Anasayfa" },
-  { Component: EventsSlide, label: "Etkinlikler" },
   { Component: JoinSlide, label: "Üyelik" },
 ];
 

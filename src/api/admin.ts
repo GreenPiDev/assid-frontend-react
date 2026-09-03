@@ -44,7 +44,6 @@ export interface AdminEvent {
   startDate: string;
   endDate?: string;
   imageUrl?: string;
-  isFeatured: boolean;
 }
 
 export interface AdminNews {
@@ -52,11 +51,8 @@ export interface AdminNews {
   title: string;
   summary?: string;
   content?: string;
-  imageUrl?: string;
-  category?: string;
-  sectors: string[];
+  imageUrls: string[];
   publishedAt: string;
-  isFeatured: boolean;
   isPublished: boolean;
 }
 
@@ -89,6 +85,24 @@ export interface AdminOrganizationSettings {
   showMembershipFeesTable?: boolean;
   showAttachmentsSection?: boolean;
   showMembershipClassSection?: boolean;
+}
+
+export interface AdminAboutPage {
+  _id: string;
+  title?: string;
+  subtitle?: string;
+  bodyParagraph1?: string;
+  bodyParagraph2?: string;
+  visionText?: string;
+  missionText?: string;
+  image1?: string;
+  image2?: string;
+}
+
+export interface AdminPresidentMessage {
+  _id: string;
+  image?: string;
+  messageHtml?: string;
 }
 
 export interface AdminMembershipFee {
@@ -172,6 +186,23 @@ export function deleteAdminEvent(id: string) {
   return request<void>(`/events/${id}`, { method: "DELETE" });
 }
 
+export async function uploadAdminEventImage(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch(`${API_BASE_URL}/events/upload-image`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as { message?: string | string[] } | null;
+    const message = Array.isArray(body?.message) ? body.message[0] : body?.message;
+    throw new Error(message ?? `İstek başarısız (${res.status})`);
+  }
+  const { url } = (await res.json()) as { url: string };
+  return url;
+}
+
 // --- News ---
 export function fetchAdminNews() {
   return request<AdminNews[]>("/news");
@@ -187,6 +218,23 @@ export function updateAdminNews(id: string, dto: Partial<AdminNews>) {
 
 export function deleteAdminNews(id: string) {
   return request<void>(`/news/${id}`, { method: "DELETE" });
+}
+
+export async function uploadAdminNewsImages(files: File[]): Promise<string[]> {
+  const formData = new FormData();
+  files.forEach((file) => formData.append("files", file));
+  const res = await fetch(`${API_BASE_URL}/news/upload-images`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as { message?: string | string[] } | null;
+    const message = Array.isArray(body?.message) ? body.message[0] : body?.message;
+    throw new Error(message ?? `İstek başarısız (${res.status})`);
+  }
+  const { urls } = (await res.json()) as { urls: string[] };
+  return urls;
 }
 
 // --- Organization settings ---
@@ -215,6 +263,64 @@ export async function uploadOrganizationLogo(file: File): Promise<AdminOrganizat
     throw new Error(message ?? `İstek başarısız (${res.status})`);
   }
   return res.json() as Promise<AdminOrganizationSettings>;
+}
+
+// --- About page ---
+export function fetchAdminAboutPage() {
+  return request<AdminAboutPage>("/about-page");
+}
+
+export function updateAdminAboutPage(dto: Partial<AdminAboutPage>) {
+  return request<AdminAboutPage>("/about-page", { method: "PATCH", body: JSON.stringify(dto) });
+}
+
+async function uploadAdminAboutImage(field: "image1" | "image2", file: File): Promise<AdminAboutPage> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch(`${API_BASE_URL}/about-page/${field}`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as { message?: string | string[] } | null;
+    const message = Array.isArray(body?.message) ? body.message[0] : body?.message;
+    throw new Error(message ?? `İstek başarısız (${res.status})`);
+  }
+  return res.json() as Promise<AdminAboutPage>;
+}
+
+export function uploadAdminAboutImage1(file: File) {
+  return uploadAdminAboutImage("image1", file);
+}
+
+export function uploadAdminAboutImage2(file: File) {
+  return uploadAdminAboutImage("image2", file);
+}
+
+// --- President message ---
+export function fetchAdminPresidentMessage() {
+  return request<AdminPresidentMessage>("/president-message");
+}
+
+export function updateAdminPresidentMessage(dto: Partial<AdminPresidentMessage>) {
+  return request<AdminPresidentMessage>("/president-message", { method: "PATCH", body: JSON.stringify(dto) });
+}
+
+export async function uploadAdminPresidentMessageImage(file: File): Promise<AdminPresidentMessage> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch(`${API_BASE_URL}/president-message/image`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as { message?: string | string[] } | null;
+    const message = Array.isArray(body?.message) ? body.message[0] : body?.message;
+    throw new Error(message ?? `İstek başarısız (${res.status})`);
+  }
+  return res.json() as Promise<AdminPresidentMessage>;
 }
 
 // --- Membership fees ---

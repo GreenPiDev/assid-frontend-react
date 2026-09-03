@@ -31,20 +31,19 @@ export default function AdminMembershipsPage() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <span className="text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-green">
-            Yönetim Paneli
-          </span>
-          <h1 className="mt-1 text-[1.5rem] tracking-[-.03em] text-assid-ink">Üyelikler</h1>
-        </div>
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="İsim, firma veya sektör ara..."
-          className="min-w-64 rounded-full border border-assid-line bg-white px-4 py-2.5 text-[0.85rem] outline-none focus:border-assid-green/50"
-        />
+      <div className="mb-6">
+        <span className="text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-green">
+          Yönetim Paneli
+        </span>
+        <h1 className="mt-1 text-[1.5rem] tracking-[-.03em] text-assid-ink">Üyelikler</h1>
       </div>
+
+      <input
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="İsim, firma veya sektör ara..."
+        className="mb-5 w-full rounded-full border border-assid-line bg-white px-4 py-2.5 text-[0.85rem] outline-none focus:border-assid-green/50"
+      />
 
       <div className="mb-5 flex gap-2">
         {(["all", "approved", "pending"] as Filter[]).map((f) => (
@@ -64,11 +63,12 @@ export default function AdminMembershipsPage() {
       </div>
 
       <div className="overflow-x-auto rounded-[20px] border border-assid-line bg-white">
-        <table className="w-full min-w-[880px] border-collapse text-left text-[0.85rem]">
+        <table className="w-full min-w-[980px] border-collapse text-left text-[0.85rem]">
           <thead>
             <tr className="border-b border-assid-line text-[0.74rem] uppercase tracking-wide text-assid-muted">
               <th className="px-5 py-3.5">Logo</th>
-              <th className="px-5 py-3.5">Firma / Ad Soyad</th>
+              <th className="px-5 py-3.5">Firma</th>
+              <th className="px-5 py-3.5">Ad Soyad</th>
               <th className="px-5 py-3.5">Sektör</th>
               <th className="px-5 py-3.5">Üyelik Tipi</th>
               <th className="px-5 py-3.5">Telefon</th>
@@ -79,13 +79,13 @@ export default function AdminMembershipsPage() {
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={7} className="px-5 py-8 text-center text-assid-muted">
+                <td colSpan={8} className="px-5 py-8 text-center text-assid-muted">
                   Yükleniyor...
                 </td>
               </tr>
             ) : members.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-5 py-8 text-center text-assid-muted">
+                <td colSpan={8} className="px-5 py-8 text-center text-assid-muted">
                   Kayıt bulunamadı.
                 </td>
               </tr>
@@ -111,10 +111,8 @@ export default function AdminMembershipsPage() {
                       )}
                     </div>
                   </td>
-                  <td className="px-5 py-3.5">
-                    <div className="font-bold text-[#2563eb]">{m.companyName || m.fullName}</div>
-                    <div className="text-[0.78rem] text-assid-muted">{m.fullName}</div>
-                  </td>
+                  <td className="px-5 py-3.5 font-bold text-[#2563eb]">{m.companyName || "—"}</td>
+                  <td className="px-5 py-3.5">{m.fullName}</td>
                   <td className="px-5 py-3.5 text-assid-muted">
                     {m.sectors.map((s) => getSectorName(s)).join(", ") || "—"}
                   </td>

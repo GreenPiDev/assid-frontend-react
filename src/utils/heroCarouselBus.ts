@@ -4,8 +4,8 @@
 const EVENT_NAME = "hero-carousel:goto";
 
 export const HERO_CAROUSEL_SLIDES = {
-  anasayfa: 0,
-  etkinlikler: 1,
+  haberler: 0,
+  anasayfa: 1,
   uyelik: 2,
 } as const;
 

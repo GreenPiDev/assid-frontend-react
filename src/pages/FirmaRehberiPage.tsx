@@ -94,7 +94,7 @@ export default function FirmaRehberiPage() {
 
       <Link
         className="group fixed left-6 top-6 z-10 grid h-11.5 w-11.5 place-items-center rounded-full border border-white/50 bg-[rgba(30,155,255,.28)] text-white backdrop-blur-md transition duration-250 hover:-translate-x-0.5 hover:bg-[rgba(30,155,255,.42)]"
-        to="/"
+        to="/home"
         aria-label="Ana sayfaya dön"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">

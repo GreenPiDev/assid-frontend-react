@@ -10,6 +10,8 @@ export const Paths = {
   Events: "/events",
   Stats: "/stats",
   OrganizationSettings: "/organization-settings",
+  AboutPage: "/about-page",
+  PresidentMessage: "/president-message",
   MembershipFees: "/membership-fees",
 };
 

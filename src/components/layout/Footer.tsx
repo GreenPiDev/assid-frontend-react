@@ -6,7 +6,7 @@ import TextModal from "../ui/TextModal";
 
 type LegalModalKey = "kvkk" | "cookies" | "privacy";
 
-const corporateLinks = ["Hakkımızda", "Yönetim Kurulu", "Faaliyetler", "Basın Merkezi"];
+const corporateLinks = ["Yönetim Kurulu", "Faaliyetler", "Basın Merkezi"];
 
 export function InstagramIcon() {
   return (
@@ -56,7 +56,7 @@ export default function Footer() {
     <footer className="bg-[#0a2540] pt-10 text-white/74">
       <div className="mx-auto grid w-[min(calc(100%-40px),1240px)] grid-cols-1 gap-6 pb-8 sm:grid-cols-3 lg:grid-cols-[1.2fr_.7fr_.7fr_1fr]">
         <div className="sm:col-span-3 lg:col-span-1">
-          <button type="button" className="flex cursor-pointer flex-col items-start gap-2.5 border-0 bg-transparent p-0 text-left text-white" onClick={() => navigate("/")}>
+          <button type="button" className="flex cursor-pointer flex-col items-start gap-2.5 border-0 bg-transparent p-0 text-left text-white" onClick={() => navigate("/home")}>
             {settings?.logo && <img src={settings.logo} alt={settings.shortName || settings.name || "Logo"} className="h-[43px] w-auto object-contain" />}
             <span>
               <b className="block text-base leading-none tracking-tight">{settings?.shortName}</b>
@@ -72,6 +72,15 @@ export default function Footer() {
         <div>
           <h4 className="mb-2.5 text-[0.79rem] tracking-wide text-assid-lime uppercase">Kurumsal</h4>
           <ul className="grid gap-2 text-[0.84rem]">
+            <li>
+              <button
+                type="button"
+                className="cursor-pointer border-0 bg-transparent p-0 text-left hover:text-white"
+                onClick={() => navigate("/hakkimizda")}
+              >
+                Hakkımızda
+              </button>
+            </li>
             {corporateLinks.map((label) => (
               <li key={label}>
                 <button type="button" className="cursor-pointer border-0 bg-transparent p-0 text-left hover:text-white">{label}</button>
