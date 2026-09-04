@@ -141,10 +141,40 @@ function HeroStats() {
   );
 }
 
+const NEWS_WHEEL_LOCK_MS = 450;
+
 function NewsSlide() {
   const { data: news } = useHomeNews(14);
   const [activeIndex, setActiveIndex] = useState(0);
   const active = news[activeIndex] ?? news[0];
+  const newsBoxRef = useRef<HTMLDivElement>(null);
+  const newsCountRef = useRef(news.length);
+  newsCountRef.current = news.length;
+
+  useEffect(() => {
+    const el = newsBoxRef.current;
+    if (!el) return;
+
+    let lockUntil = 0;
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (e.deltaY === 0) return;
+      const now = Date.now();
+      if (now < lockUntil) return;
+      lockUntil = now + NEWS_WHEEL_LOCK_MS;
+
+      setActiveIndex((i) => {
+        const next = i + (e.deltaY > 0 ? 1 : -1);
+        return Math.min(Math.max(next, 0), newsCountRef.current - 1);
+      });
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
 
   if (news.length === 0) {
     return (
@@ -173,7 +203,10 @@ function NewsSlide() {
             ASSİD, Siteler Bölgesi sanayisinin kalitesini ve rekabet gücünü temsil eden 1200'den fazla aktif üyeyi çatısı altında birleştirmektedir.
           </p>
         </div>
-        <div className="relative mb-4 h-[340px] overflow-hidden rounded-[22px] border border-white/18 bg-white/9 md:h-[520px]">
+        <div
+          ref={newsBoxRef}
+          className="relative mb-4 h-[340px] overflow-hidden rounded-[22px] border border-white/18 bg-white/9 md:h-[520px]"
+        >
           <Link to={`/haberler/${slugify(active.title)}`} className="absolute inset-0">
             <div key={active._id} className="absolute inset-0 animate-slide-fade">
               {active.imageUrls[0] && (
