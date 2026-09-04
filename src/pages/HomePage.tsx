@@ -20,7 +20,7 @@ export default function HomePage() {
     function finish() {
       scrollToId(targetId);
       if (heroSlide) goToHeroCarouselSlide(heroSlide);
-      navigate(location.pathname, { replace: true, state: null });
+      navigate(location.pathname, { replace: true, state: null, preventScrollReset: true });
     }
 
     if (document.getElementById(targetId)) {

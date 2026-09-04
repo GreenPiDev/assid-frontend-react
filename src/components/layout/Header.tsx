@@ -68,12 +68,12 @@ export default function Header() {
         scrollToId("anasayfa");
         goToHeroCarouselSlide(id as HeroCarouselSlideId);
       } else {
-        navigate("/anasayfa", { state: { scrollTo: "anasayfa", heroSlide: id } });
+        navigate("/anasayfa", { state: { scrollTo: "anasayfa", heroSlide: id }, preventScrollReset: true });
       }
       return;
     }
     if (isHome) scrollToId(id);
-    else navigate("/anasayfa", { state: { scrollTo: id } });
+    else navigate("/anasayfa", { state: { scrollTo: id }, preventScrollReset: true });
   }
 
   return (
