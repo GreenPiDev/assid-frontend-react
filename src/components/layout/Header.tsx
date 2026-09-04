@@ -9,7 +9,7 @@ import { scrollToId, scrollToTop } from "../../utils/scroll";
 const navLinks = [
   { type: "scroll", id: "etkinlikler", label: "Etkinlikler" },
   { type: "scroll", id: "firma-rehberi", label: "Firma Rehberi" },
-  { type: "route", to: "/haberler", label: "Dernek Haberleri" },
+  { type: "route", to: "/haberler", label: "Basın Odası" },
   { type: "scroll", id: "uyelik", label: "Üyelik" },
   { type: "route", to: "/iletisim", label: "İletişim" },
 ] as const;
@@ -67,12 +67,12 @@ export default function Header() {
         scrollToId("anasayfa");
         goToHeroCarouselSlide(id as HeroCarouselSlideId);
       } else {
-        navigate("/", { state: { scrollTo: "anasayfa", heroSlide: id } });
+        navigate("/anasayfa", { state: { scrollTo: "anasayfa", heroSlide: id } });
       }
       return;
     }
     if (isHome) scrollToId(id);
-    else navigate("/", { state: { scrollTo: id } });
+    else navigate("/anasayfa", { state: { scrollTo: id } });
   }
 
   return (

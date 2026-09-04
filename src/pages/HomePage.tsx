@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import HeroCarousel from "../carousels/HeroCarousel";
+import ActivityAreasSection from "../components/home/ActivityAreasSection";
 import DirectorySection from "../components/home/DirectorySection";
 import EventsSection from "../components/home/EventsSection";
 import { goToHeroCarouselSlide, type HeroCarouselSlideId } from "../utils/heroCarouselBus";
@@ -26,6 +27,7 @@ export default function HomePage() {
       <EventsSection />
       <div className="pointer-events-none relative -mt-28 h-28 bg-gradient-to-b from-transparent to-[rgba(6,18,30,0.98)] md:-mt-36 md:h-36" />
       <DirectorySection />
+      <ActivityAreasSection />
     </main>
   );
 }

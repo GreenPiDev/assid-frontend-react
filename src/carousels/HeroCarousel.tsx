@@ -51,11 +51,14 @@ function HeroSlide() {
       <div className="flex flex-1 flex-col justify-center">
         <div className="relative z-10 mx-auto grid w-[min(calc(100%-40px),1240px)] grid-cols-1 items-end gap-10 py-16 pl-24 md:py-22 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,.75fr)] lg:items-stretch lg:pl-32">
           <div>
+            <div className="inline-flex items-center gap-2 text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-lime before:h-0.5 before:w-5 before:bg-assid-lime">
+              Firma Rehberi
+            </div>
             <h1 className="my-4 max-w-3xl text-[clamp(3rem,6vw,5.75rem)] leading-[.92] tracking-[-.07em]">
               Birlikte büyüyen <em>güçlü</em> bir sanayi ekosistemi.
             </h1>
             <p className="mb-7 max-w-2xl text-[clamp(1rem,1.6vw,1.17rem)] text-white/75">
-              ASSİD; üyelerini, üretim gücünü ve yeni iş fırsatlarını tek bir dijital platformda buluşturur.
+              ASSİD; üyelerini, üretim gücünü ve yeni iş fırsatlarını tek bir dijital platformda buluşturuyor..
             </p>
             <div className="flex flex-wrap gap-3">
               <Button onClick={() => scrollToId("firma-rehberi")} variant="light">
@@ -160,12 +163,14 @@ function NewsSlide() {
     <section className="relative flex h-full flex-col justify-center overflow-hidden bg-[linear-gradient(105deg,rgba(8,28,48,.97)_0%,rgba(10,35,58,.89)_53%,rgba(9,30,46,.77)_100%),url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1900&q=85')] bg-cover bg-center py-17 text-white before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_82%_20%,rgba(142,202,230,.34),transparent_23%),radial-gradient(circle_at_78%_85%,rgba(233,120,60,.24),transparent_24%)] md:py-24">
       <div className="relative z-10 mx-auto w-[min(calc(100%-40px),1240px)] pl-24 lg:pl-32">
         <div className="mb-9">
-          <h2 className="max-w-3xl text-[clamp(2rem,4vw,3.4rem)] leading-[1.07] tracking-[-.045em] text-white">
+          <div className="inline-flex items-center gap-2 text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-lime before:h-0.5 before:w-5 before:bg-assid-lime">
+            Ankara Siteler Sanayici ve İş İnsanları Derneği
+          </div>
+          <h2 className="mt-2.5 max-w-3xl text-[clamp(2rem,4vw,3.4rem)] leading-[1.07] tracking-[-.045em] text-white">
             Derneğimizden Haberler
           </h2>
-          <p className="mt-2.5 max-w-2xl text-[clamp(1rem,1.6vw,1.17rem)] text-white/75">
-            ASSİD, Siteler Bölgesi sanayisinin kalitesini ve rekabet gücünü temsil eden 1200'den fazla aktif üyeyi
-            çatısı altında birleştirmektedir.
+          <p className="mt-2.5 whitespace-nowrap text-[clamp(.78rem,1.6vw,1.17rem)] text-white/75">
+            ASSİD, Siteler Bölgesi sanayisinin kalitesini ve rekabet gücünü temsil eden 1200'den fazla aktif üyeyi çatısı altında birleştirmektedir.
           </p>
         </div>
         <div className="relative mb-4">
