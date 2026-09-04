@@ -14,9 +14,37 @@ export default function HomePage() {
   useEffect(() => {
     const state = location.state as { scrollTo?: string; heroSlide?: HeroCarouselSlideId } | null;
     if (!state?.scrollTo) return;
-    scrollToId(state.scrollTo);
-    if (state.heroSlide) goToHeroCarouselSlide(state.heroSlide);
-    navigate(location.pathname, { replace: true, state: null });
+    const targetId = state.scrollTo;
+    const heroSlide = state.heroSlide;
+
+    function finish() {
+      scrollToId(targetId);
+      if (heroSlide) goToHeroCarouselSlide(heroSlide);
+      navigate(location.pathname, { replace: true, state: null });
+    }
+
+    if (document.getElementById(targetId)) {
+      finish();
+      return;
+    }
+
+    // Hedef bölüm (ör. etkinlikler) veri yüklenene kadar DOM'da olmayabilir;
+    // DOM'a eklenir eklenmez yakalayıp scroll işlemi tamamlanır.
+    const observer = new MutationObserver(() => {
+      if (document.getElementById(targetId)) {
+        observer.disconnect();
+        window.clearTimeout(timeout);
+        finish();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    const timeout = window.setTimeout(() => observer.disconnect(), 8000);
+
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(timeout);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state]);
 

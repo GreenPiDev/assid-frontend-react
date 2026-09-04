@@ -47,17 +47,17 @@ function HeroSlide() {
   const { data: presidentMessage } = usePresidentMessage();
 
   return (
-    <section className="relative flex flex-col overflow-hidden bg-[linear-gradient(105deg,rgba(8,28,48,.97)_0%,rgba(10,35,58,.89)_53%,rgba(9,30,46,.77)_100%),url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1900&q=85')] bg-cover bg-center text-white before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_82%_20%,rgba(142,202,230,.34),transparent_23%),radial-gradient(circle_at_78%_85%,rgba(233,120,60,.24),transparent_24%)] lg:h-full">
+    <section className="relative flex min-h-screen flex-col overflow-hidden bg-[linear-gradient(105deg,rgba(8,28,48,.97)_0%,rgba(10,35,58,.89)_53%,rgba(9,30,46,.77)_100%),url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1900&q=85')] bg-cover bg-center text-white before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_82%_20%,rgba(142,202,230,.34),transparent_23%),radial-gradient(circle_at_78%_85%,rgba(233,120,60,.24),transparent_24%)] lg:h-full lg:min-h-0">
       <div className="flex flex-1 flex-col justify-center">
-        <div className="relative z-10 mx-auto grid w-[min(calc(100%-40px),1240px)] grid-cols-1 items-end gap-10 py-16 pl-24 md:py-22 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,.75fr)] lg:items-stretch lg:pl-32">
+        <div className="relative z-10 mx-auto grid w-[min(calc(100%-40px),1240px)] grid-cols-1 items-end gap-10 py-16 md:py-22 md:pl-24 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,.75fr)] lg:items-stretch lg:pl-32">
           <div>
             <div className="inline-flex items-center gap-2 text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-lime before:h-0.5 before:w-5 before:bg-assid-lime">
               Firma Rehberi
             </div>
-            <h1 className="my-4 max-w-3xl text-[clamp(3rem,6vw,5.75rem)] leading-[.92] tracking-[-.07em]">
+            <h1 className="my-4 max-w-3xl text-[clamp(2rem,8vw,3rem)] leading-[.98] tracking-[-.04em] lg:text-[clamp(3rem,6vw,5.75rem)] lg:leading-[.92] lg:tracking-[-.07em]">
               Birlikte büyüyen <em>güçlü</em> bir sanayi ekosistemi.
             </h1>
-            <p className="mb-7 max-w-2xl text-[clamp(1rem,1.6vw,1.17rem)] text-white/75">
+            <p className="mb-7 max-w-2xl text-[clamp(.85rem,3.6vw,1rem)] text-white/75 lg:text-[clamp(1rem,1.6vw,1.17rem)]">
               ASSİD; üyelerini, üretim gücünü ve yeni iş fırsatlarını tek bir dijital platformda buluşturuyor..
             </p>
             <div className="flex flex-wrap gap-3">
@@ -66,7 +66,7 @@ function HeroSlide() {
               </Button>
             </div>
           </div>
-          <aside className="relative flex flex-col items-end justify-between gap-6 overflow-hidden rounded-[32px] border border-white/18 bg-white/9 p-7 text-right backdrop-blur-md lg:p-8">
+          <aside className="relative flex flex-col items-end justify-between gap-4 overflow-hidden rounded-[32px] border border-white/18 bg-white/9 p-5 text-right backdrop-blur-md lg:gap-6 lg:p-8">
             {presidentMessage?.image && (
               <img
                 src={presidentMessage.image}
@@ -84,7 +84,7 @@ function HeroSlide() {
               <span className="text-[0.75rem] font-extrabold uppercase tracking-[.12em] text-assid-lime">
                 Başkanın mesajı
               </span>
-              <h3 className="mt-4 mb-4 text-[1.7rem] leading-[1.15] tracking-tight">
+              <h3 className="mt-4 mb-4 text-[1.3rem] leading-[1.2] tracking-tight lg:text-[1.7rem] lg:leading-[1.15]">
                 "Siteler, Türkiye mobilya, dekorasyon ve imalat sektörünün köklü ve stratejik üretim üssüdür."
               </h3>
               <p className="m-0 text-[0.95rem] text-white/73">
@@ -126,7 +126,7 @@ function HeroStats() {
   ];
 
   return (
-    <div className="relative z-3 mx-auto w-[min(calc(100%-40px),1240px)] pl-24 pb-11 lg:pl-32">
+    <div className="relative z-3 mx-auto w-[min(calc(100%-40px),1240px)] pb-11 md:pl-24 lg:pl-32">
       <div className="grid grid-cols-2 overflow-hidden rounded-[22px] bg-white shadow-card md:grid-cols-4">
         {items.map((stat, index) => (
           <div key={stat.label} className={`px-5 py-5 text-center md:px-7 ${borderClasses[index]}`}>
@@ -161,7 +161,7 @@ function NewsSlide() {
 
   return (
     <section className="relative flex h-full flex-col justify-center overflow-hidden bg-[linear-gradient(105deg,rgba(8,28,48,.97)_0%,rgba(10,35,58,.89)_53%,rgba(9,30,46,.77)_100%),url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1900&q=85')] bg-cover bg-center py-17 text-white before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_82%_20%,rgba(142,202,230,.34),transparent_23%),radial-gradient(circle_at_78%_85%,rgba(233,120,60,.24),transparent_24%)] md:py-24">
-      <div className="relative z-10 mx-auto w-[min(calc(100%-40px),1240px)] pl-24 lg:pl-32">
+      <div className="relative z-10 mx-auto w-[min(calc(100%-40px),1240px)] md:pl-24 lg:pl-32">
         <div className="mb-9">
           <div className="inline-flex items-center gap-2 text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-lime before:h-0.5 before:w-5 before:bg-assid-lime">
             Ankara Siteler Sanayici ve İş İnsanları Derneği
@@ -169,15 +169,12 @@ function NewsSlide() {
           <h2 className="mt-2.5 max-w-3xl text-[clamp(2rem,4vw,3.4rem)] leading-[1.07] tracking-[-.045em] text-white">
             Derneğimizden Haberler
           </h2>
-          <p className="mt-2.5 whitespace-nowrap text-[clamp(.78rem,1.6vw,1.17rem)] text-white/75">
+          <p className="mt-2.5 max-w-2xl text-[clamp(.78rem,1.6vw,1.17rem)] text-white/75 md:max-w-none md:whitespace-nowrap">
             ASSİD, Siteler Bölgesi sanayisinin kalitesini ve rekabet gücünü temsil eden 1200'den fazla aktif üyeyi çatısı altında birleştirmektedir.
           </p>
         </div>
-        <div className="relative mb-4">
-          <Link
-            to={`/haberler/${slugify(active.title)}`}
-            className="relative block h-[300px] overflow-hidden rounded-[22px] border border-white/18 bg-white/9 md:h-[380px]"
-          >
+        <div className="relative mb-4 h-[340px] overflow-hidden rounded-[22px] border border-white/18 bg-white/9 md:h-[520px]">
+          <Link to={`/haberler/${slugify(active.title)}`} className="absolute inset-0">
             <div key={active._id} className="absolute inset-0 animate-slide-fade">
               {active.imageUrls[0] && (
                 <div
@@ -186,7 +183,7 @@ function NewsSlide() {
                 />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 p-6 md:max-w-lg md:p-8">
+              <div className="absolute inset-x-0 bottom-20 p-6 md:bottom-24 md:max-w-lg md:p-8">
                 <h3 className="text-[clamp(1.3rem,2.6vw,2rem)] leading-tight tracking-tight text-white">
                   {active.title}
                 </h3>
@@ -201,7 +198,7 @@ function NewsSlide() {
               type="button"
               aria-label="Önceki haber"
               onClick={() => setActiveIndex((i) => i - 1)}
-              className="absolute top-1/2 left-4 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-black/35 text-white backdrop-blur-md transition hover:bg-black/55"
+              className="absolute top-[40%] left-4 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-black/35 text-white backdrop-blur-md transition hover:bg-black/55"
             >
               <span>←</span>
             </button>
@@ -211,33 +208,33 @@ function NewsSlide() {
               type="button"
               aria-label="Sonraki haber"
               onClick={() => setActiveIndex((i) => i + 1)}
-              className="absolute top-1/2 right-4 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-black/35 text-white backdrop-blur-md transition hover:bg-black/55"
+              className="absolute top-[40%] right-4 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-black/35 text-white backdrop-blur-md transition hover:bg-black/55"
             >
               <span>→</span>
             </button>
           )}
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="flex flex-1 gap-2.5 overflow-hidden">
-            {news.map((item, index) => (
-              <button
-                key={item._id}
-                type="button"
-                onClick={() => setActiveIndex(index)}
-                className={`h-14 w-20 flex-shrink-0 overflow-hidden rounded-[12px] border bg-cover bg-center transition ${
-                  index === activeIndex
-                    ? "border-assid-lime"
-                    : "border-white/18 opacity-60 hover:opacity-100"
-                }`}
-                style={item.imageUrls[0] ? { backgroundImage: `url('${item.imageUrls[0]}')` } : undefined}
-                title={item.title}
-                aria-label={item.title}
-              />
-            ))}
+          <div className="absolute inset-x-0 bottom-0 z-10 flex items-center gap-3 bg-gradient-to-t from-black/70 to-transparent p-4 md:p-6">
+            <div className="flex flex-1 gap-2.5 overflow-hidden">
+              {news.map((item, index) => (
+                <button
+                  key={item._id}
+                  type="button"
+                  onClick={() => setActiveIndex(index)}
+                  className={`h-14 w-20 flex-shrink-0 overflow-hidden rounded-[12px] border bg-cover bg-center transition ${
+                    index === activeIndex
+                      ? "border-assid-lime"
+                      : "border-white/18 opacity-60 hover:opacity-100"
+                  }`}
+                  style={item.imageUrls[0] ? { backgroundImage: `url('${item.imageUrls[0]}')` } : undefined}
+                  title={item.title}
+                  aria-label={item.title}
+                />
+              ))}
+            </div>
+            <Button as={Link} to="/haberler" variant="light" className="flex-shrink-0">
+              Tüm Haberler →
+            </Button>
           </div>
-          <Button as={Link} to="/haberler" variant="light" className="flex-shrink-0">
-            Tüm Haberler →
-          </Button>
         </div>
       </div>
     </section>
@@ -247,7 +244,7 @@ function NewsSlide() {
 function JoinSlide() {
   return (
     <section className="relative flex h-full flex-col justify-center overflow-hidden bg-[linear-gradient(105deg,rgba(8,28,48,.97)_0%,rgba(10,35,58,.89)_53%,rgba(9,30,46,.77)_100%),url('https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=1900&q=85')] bg-cover bg-center py-15 text-white before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_82%_20%,rgba(142,202,230,.34),transparent_23%),radial-gradient(circle_at_78%_85%,rgba(233,120,60,.24),transparent_24%)] lg:py-11">
-      <div className="relative z-10 mx-auto grid w-[min(calc(100%-40px),1240px)] grid-cols-1 items-center gap-10 pl-24 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,.75fr)] lg:pl-32">
+      <div className="relative z-10 mx-auto grid w-[min(calc(100%-40px),1240px)] grid-cols-1 items-center gap-10 md:pl-24 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,.75fr)] lg:pl-32">
         <div>
           <div className="inline-flex items-center gap-2 text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-lime before:h-0.5 before:w-5 before:bg-assid-lime">
             ASSİD ailesine katılın
@@ -382,7 +379,7 @@ export default function HeroCarousel() {
   const IncomingSlide = incoming !== null ? SLIDES[incoming].Component : null;
 
   return (
-    <div id="anasayfa" ref={containerRef} className="relative isolate scroll-mt-[78px] lg:h-screen">
+    <div id="anasayfa" ref={containerRef} className="relative isolate h-screen scroll-mt-[78px] overflow-hidden">
       <div className="relative h-full overflow-hidden">
         <div
           className={`absolute inset-0 h-full ${
@@ -423,9 +420,9 @@ export default function HeroCarousel() {
         </div>
       )}
 
-      {/* Dişli çark — sol kenarda yarım görünür */}
+      {/* Dişli çark — masaüstünde sol kenarda, mobilde alt kenarda yarım görünür */}
       <div
-        className="pointer-events-none absolute top-1/2 left-0 z-20 -translate-x-1/2 -translate-y-1/2"
+        className="pointer-events-none absolute bottom-0 left-1/2 z-20 -translate-x-1/2 translate-y-1/2 -rotate-90 md:top-1/2 md:left-0 md:bottom-auto md:-translate-x-1/2 md:-translate-y-1/2 md:rotate-0"
         style={{ width: WHEEL_SIZE, height: WHEEL_SIZE }}
       >
         {/* Dişli halkası — artık kendi kendine sürekli dönmüyor; rozetlerle
@@ -493,7 +490,7 @@ export default function HeroCarousel() {
               title={slide.label}
               onClick={() => goTo(i)}
               style={{ left: p.x, top: p.y, zIndex: SLIDE_COUNT - i }}
-              className={`pointer-events-auto absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border text-xs font-semibold tracking-wide transition-all duration-700 ease-[cubic-bezier(0.65,0,0.35,1)] ${
+              className={`pointer-events-auto absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 rotate-90 items-center justify-center rounded-full border text-xs font-semibold tracking-wide transition-all duration-700 ease-[cubic-bezier(0.65,0,0.35,1)] md:rotate-0 ${
                 isActive
                   ? "scale-110 border-assid-lime bg-assid-lime text-assid-green-dark shadow-[0_0_18px_rgba(142,202,230,0.55)]"
                   : "border-white/30 bg-assid-green-dark/90 text-white/60 hover:border-white/50 hover:text-white/90"

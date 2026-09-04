@@ -28,6 +28,7 @@ export default function Header() {
   const { data: settings } = useOrganizationSettings();
   const logoUrl = settings?.logo;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileKurumsalOpen, setMobileKurumsalOpen] = useState(false);
   const [kurumsalOpen, setKurumsalOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
   const lastScrollY = useRef(0);
@@ -76,11 +77,12 @@ export default function Header() {
   }
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-30 bg-transparent backdrop-blur-[2px] transition-transform duration-300 ${
-        hidden && !mobileMenuOpen ? "-translate-y-full" : "translate-y-0"
-      }`}
-    >
+    <>
+      <header
+        className={`fixed inset-x-0 top-0 z-30 bg-transparent backdrop-blur-[2px] transition-transform duration-300 ${
+          hidden && !mobileMenuOpen ? "-translate-y-full" : "translate-y-0"
+        }`}
+      >
       <div className="mx-auto flex min-h-[78px] w-[min(calc(100%-40px),1240px)] items-center gap-8">
         <button
           type="button"
@@ -161,45 +163,73 @@ export default function Header() {
           </button>
         </div>
       </div>
+      </header>
 
-      {mobileMenuOpen && (
-        <nav
-          className="flex flex-col gap-1 border-t border-white/15 bg-[rgba(6,18,30,0.92)] px-5 py-4 text-[0.95rem] font-bold text-white backdrop-blur-md lg:hidden"
-          aria-label="Mobil menü"
-        >
-          {kurumsalLinks.map((link) => (
+      <div
+        className={`fixed inset-0 top-[78px] z-30 bg-black/40 transition-opacity duration-300 lg:hidden ${
+          mobileMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+        onClick={() => setMobileMenuOpen(false)}
+        aria-hidden="true"
+      />
+
+      <nav
+        className={`fixed top-[78px] right-0 bottom-0 z-40 flex w-[78%] max-w-[320px] flex-col gap-1 overflow-y-auto bg-assid-green-dark px-5 py-5 text-[0.95rem] font-bold text-white shadow-[-8px_0_24px_rgba(0,0,0,.3)] transition-transform duration-300 lg:hidden ${
+          mobileMenuOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+        aria-label="Mobil menü"
+      >
+        <div className="flex flex-col">
+          <button
+            type="button"
+            onClick={() => setMobileKurumsalOpen((prev) => !prev)}
+            aria-expanded={mobileKurumsalOpen}
+            className="flex w-full cursor-pointer items-center justify-between rounded-lg border-0 bg-transparent px-3 py-3 text-left hover:bg-white/10"
+          >
+            Kurumsal
+            <span className={`text-[0.7rem] transition-transform duration-200 ${mobileKurumsalOpen ? "-rotate-180" : ""}`}>
+              ▾
+            </span>
+          </button>
+          <div
+            className={`grid transition-all duration-200 ${mobileKurumsalOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
+          >
+            <div className="flex flex-col gap-1 overflow-hidden pl-3">
+              {kurumsalLinks.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className="rounded-lg px-3 py-3 font-normal text-white/85 hover:bg-white/10"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+        {navLinks.map((link) =>
+          link.type === "route" ? (
             <Link
-              key={link.to}
+              key={link.label}
               to={link.to}
               className="rounded-lg px-3 py-3 hover:bg-white/10"
               onClick={() => setMobileMenuOpen(false)}
             >
               {link.label}
             </Link>
-          ))}
-          {navLinks.map((link) =>
-            link.type === "route" ? (
-              <Link
-                key={link.label}
-                to={link.to}
-                className="rounded-lg px-3 py-3 hover:bg-white/10"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {link.label}
-              </Link>
-            ) : (
-              <button
-                key={link.label}
-                type="button"
-                onClick={() => goToSection(link.id)}
-                className="cursor-pointer rounded-lg border-0 bg-transparent px-3 py-3 text-left hover:bg-white/10"
-              >
-                {link.label}
-              </button>
-            ),
-          )}
-        </nav>
-      )}
-    </header>
+          ) : (
+            <button
+              key={link.label}
+              type="button"
+              onClick={() => goToSection(link.id)}
+              className="cursor-pointer rounded-lg border-0 bg-transparent px-3 py-3 text-left hover:bg-white/10"
+            >
+              {link.label}
+            </button>
+          ),
+        )}
+      </nav>
+    </>
   );
 }
