@@ -106,9 +106,9 @@ export default function FirmaRehberiPage() {
       </Link>
 
       <div
-        className={`fixed inset-0 z-15 bg-[rgba(6,18,30,.38)] transition-opacity duration-300 ${
-          scrimOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
-        }`}
+        className={`fixed inset-0 z-15 transition-opacity duration-300 ${
+          modalMember ? "bg-[rgba(6,18,30,.38)]" : "bg-transparent"
+        } ${scrimOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
         onClick={() => {
           if (modalMember) setModalMember(null);
           else if (panelOpen) closePanel();
