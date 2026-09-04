@@ -33,11 +33,11 @@ function RootLayout() {
 }
 
 const FULL_BLEED_PATHS = [
-  '/home',
-  '/login',
-  '/forgot-password',
-  '/reset-password',
-  '/contact',
+  '/anasayfa',
+  '/giris',
+  '/sifremi-unuttum',
+  '/sifre-sifirla',
+  '/iletisim',
   '/uyelik-basvurusu',
   '/tum-etkinlikler',
   '/hakkimizda',
@@ -45,7 +45,7 @@ const FULL_BLEED_PATHS = [
   '/baskanin-mesaji',
   '/dernek-yonetimi',
 ]
-const SINGLE_SCREEN_PATHS = ['/contact']
+const SINGLE_SCREEN_PATHS = ['/iletisim']
 
 function SiteLayout() {
   const location = useLocation()
@@ -82,12 +82,12 @@ export const router = createBrowserRouter([
       {
         element: <SiteLayout />,
         children: [
-          { path: '/', element: <Navigate to="/home" replace /> },
-          { path: '/home', element: <HomePage /> },
-          { path: '/login', element: <LoginPage /> },
-          { path: '/forgot-password', element: <ForgotPasswordPage /> },
-          { path: '/reset-password', element: <ResetPasswordPage /> },
-          { path: '/contact', element: <ContactPage /> },
+          { path: '/', element: <Navigate to="/anasayfa" replace /> },
+          { path: '/anasayfa', element: <HomePage /> },
+          { path: '/giris', element: <LoginPage /> },
+          { path: '/sifremi-unuttum', element: <ForgotPasswordPage /> },
+          { path: '/sifre-sifirla', element: <ResetPasswordPage /> },
+          { path: '/iletisim', element: <ContactPage /> },
           { path: '/uyelik-basvurusu', element: <MembershipApplicationPage /> },
           { path: '/tum-etkinlikler', element: <AllEventsPage /> },
           { path: '/hakkimizda', element: <AboutPage /> },
@@ -99,7 +99,7 @@ export const router = createBrowserRouter([
       },
       { path: '/firma-rehberi', element: <FirmaRehberiPage /> },
       {
-        path: '/dashboard/*',
+        path: '/panel/*',
         element: (
           <RequireAuth>
             <RoleDashboardRouter />

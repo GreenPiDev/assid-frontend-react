@@ -280,7 +280,7 @@ export default function AdminMembershipFormPage() {
       <div className="mt-5 rounded-[20px] border border-assid-line bg-white p-6 md:p-7">
         <h2 className="mb-1 text-[1.02rem] font-bold text-assid-ink">Onaylar</h2>
         <p className="mb-5 text-[0.78rem] text-assid-muted">
-          Metinler /dashboard/organizasyon-bilgileri sayfasından düzenlenir; bu bölüm sadece üyelik başvuru
+          Metinler /panel/organizasyon-bilgileri sayfasından düzenlenir; bu bölüm sadece üyelik başvuru
           formundaki görünürlük ve zorunluluk ayarlarını yönetir.
         </p>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">

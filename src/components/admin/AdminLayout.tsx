@@ -15,20 +15,20 @@ import {
 } from "./icons";
 
 const contentChildren = [
-  { to: "/dashboard/etkinlikler", label: "Etkinlikler" },
-  { to: "/dashboard/haberler", label: "Haberler" },
-  { to: "/dashboard/uye-girisi-sayfasi", label: "Üye Girişi Sayfası" },
-  { to: "/dashboard/uye-kayit-formu", label: "Üye Kayıt Formu" },
-  { to: "/dashboard/hakkimizda", label: "Hakkımızda" },
-  { to: "/dashboard/baskanin-mesaji", label: "Başkanın Mesajı" },
-  { to: "/dashboard/dernek-yonetimi", label: "Dernek Yönetimi" },
+  { to: "/panel/etkinlikler", label: "Etkinlikler" },
+  { to: "/panel/haberler", label: "Haberler" },
+  { to: "/panel/uye-girisi-sayfasi", label: "Üye Girişi Sayfası" },
+  { to: "/panel/uye-kayit-formu", label: "Üye Kayıt Formu" },
+  { to: "/panel/hakkimizda", label: "Hakkımızda" },
+  { to: "/panel/baskanin-mesaji", label: "Başkanın Mesajı" },
+  { to: "/panel/dernek-yonetimi", label: "Dernek Yönetimi" },
 ];
 
 const navItems = [
-  { type: "link" as const, to: "/dashboard/uye-basvurulari", label: "Üye Başvuruları", icon: UsersIcon },
-  { type: "link" as const, to: "/dashboard/uyelikler", label: "Üyelikler", icon: ListIcon },
-  { type: "link" as const, to: "/dashboard/kullanicilar", label: "Kullanıcılar", icon: UserCogIcon },
-  { type: "link" as const, to: "/dashboard/organizasyon-bilgileri", label: "Organizasyon Bilgileri", icon: BuildingIcon },
+  { type: "link" as const, to: "/panel/uye-basvurulari", label: "Üye Başvuruları", icon: UsersIcon },
+  { type: "link" as const, to: "/panel/uyelikler", label: "Üyelikler", icon: ListIcon },
+  { type: "link" as const, to: "/panel/kullanicilar", label: "Kullanıcılar", icon: UserCogIcon },
+  { type: "link" as const, to: "/panel/organizasyon-bilgileri", label: "Organizasyon Bilgileri", icon: BuildingIcon },
   { type: "group" as const, label: "İçerik Yönetimi", icon: FolderIcon, children: contentChildren },
 ];
 
@@ -128,7 +128,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <header className="fixed inset-x-0 top-0 z-40 flex h-[64px] items-center justify-between border-b border-assid-line bg-white px-5">
         <div className="flex items-center gap-3">
           <Link
-            to="/home"
+            to="/anasayfa"
             title="Siteye dön"
             aria-label="Siteye dön"
             className="grid h-9 w-9 place-items-center rounded-full border border-assid-line bg-transparent text-assid-ink transition hover:bg-assid-paper"

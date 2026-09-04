@@ -144,7 +144,7 @@ export default function AdminMembersPage() {
               members.map((m) => (
                 <tr
                   key={m._id}
-                  onClick={() => navigate(`/dashboard/uye-basvurulari/${m._id}`)}
+                  onClick={() => navigate(`/panel/uye-basvurulari/${m._id}`)}
                   className="cursor-pointer border-b border-assid-line last:border-0 hover:bg-assid-paper"
                 >
                   <td className="px-5 py-3.5 font-bold text-[#2563eb]">{m.companyName || "—"}</td>

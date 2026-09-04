@@ -9,9 +9,9 @@ import { scrollToId, scrollToTop } from "../../utils/scroll";
 const navLinks = [
   { type: "scroll", id: "etkinlikler", label: "Etkinlikler" },
   { type: "scroll", id: "firma-rehberi", label: "Firma Rehberi" },
-  { type: "scroll", id: "haberler", label: "Dernek Haberleri" },
+  { type: "route", to: "/haberler", label: "Dernek Haberleri" },
   { type: "scroll", id: "uyelik", label: "Üyelik" },
-  { type: "route", to: "/contact", label: "İletişim" },
+  { type: "route", to: "/iletisim", label: "İletişim" },
 ] as const;
 
 const kurumsalLinks = [
@@ -23,7 +23,7 @@ const kurumsalLinks = [
 export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
-  const isHome = location.pathname === "/home";
+  const isHome = location.pathname === "/anasayfa";
   const { user } = useAuth();
   const { data: settings } = useOrganizationSettings();
   const logoUrl = settings?.logo;
@@ -57,7 +57,7 @@ export default function Header() {
   function goHome() {
     setMobileMenuOpen(false);
     if (isHome) scrollToTop();
-    else navigate("/home");
+    else navigate("/anasayfa");
   }
 
   function goToSection(id: string) {
@@ -142,11 +142,11 @@ export default function Header() {
         </nav>
         <div className="ml-auto flex items-center gap-2.5 lg:ml-0">
           {user ? (
-            <Button as={Link} to="/dashboard" variant="light">
+            <Button as={Link} to="/panel" variant="light">
               Yönetim Paneli
             </Button>
           ) : (
-            <Button as={Link} to="/login" variant="light">
+            <Button as={Link} to="/giris" variant="light">
               Üye Girişi
             </Button>
           )}

@@ -202,6 +202,22 @@ export function UndoIcon({ className = base }: IconProps) {
   );
 }
 
+export function StarIcon({ className = base, filled = false }: IconProps & { filled?: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill={filled ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <polygon points="12 2.5 15.09 8.76 22 9.76 17 14.64 18.18 21.52 12 18.2 5.82 21.52 7 14.64 2 9.76 8.91 8.76 12 2.5" />
+    </svg>
+  );
+}
+
 export function PlusIcon({ className = base }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className={className}>

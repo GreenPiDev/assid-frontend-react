@@ -11,7 +11,8 @@ import {
 import Badge from "../../components/admin/Badge";
 import ConfirmModal from "../../components/admin/ConfirmModal";
 import Modal from "../../components/admin/Modal";
-import { CloseIcon, PencilIcon, PlusIcon, TrashIcon } from "../../components/admin/icons";
+import { CloseIcon, PencilIcon, PlusIcon, StarIcon, TrashIcon } from "../../components/admin/icons";
+import Tooltip from "../../components/admin/Tooltip";
 import { useToast } from "../../context/ToastContext";
 
 const MAX_IMAGES = 5;
@@ -150,6 +151,8 @@ export default function AdminNewsPage() {
   );
 }
 
+type ImageItem = { key: string; url?: string; file?: File; preview: string };
+
 function NewsFormModal({
   news,
   onClose,
@@ -168,11 +171,12 @@ function NewsFormModal({
     content: news?.content ?? "",
     isPublished: news?.isPublished ?? true,
   });
-  const [existingImageUrls, setExistingImageUrls] = useState<string[]>(news?.imageUrls ?? []);
-  const [newImages, setNewImages] = useState<{ file: File; preview: string }[]>([]);
+  const [images, setImages] = useState<ImageItem[]>(
+    () => news?.imageUrls.map((url) => ({ key: url, url, preview: url })) ?? [],
+  );
   const [isUploadingImages, setIsUploadingImages] = useState(false);
 
-  const totalImageCount = existingImageUrls.length + newImages.length;
+  const totalImageCount = images.length;
 
   function handleImagesChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
@@ -184,15 +188,28 @@ function NewsFormModal({
       return;
     }
     const accepted = files.slice(0, remaining);
-    setNewImages((prev) => [...prev, ...accepted.map((file) => ({ file, preview: URL.createObjectURL(file) }))]);
+    setImages((prev) => [
+      ...prev,
+      ...accepted.map((file) => {
+        const preview = URL.createObjectURL(file);
+        return { key: preview, file, preview };
+      }),
+    ]);
   }
 
-  function removeExistingImage(url: string) {
-    setExistingImageUrls((prev) => prev.filter((u) => u !== url));
+  function removeImage(key: string) {
+    setImages((prev) => prev.filter((img) => img.key !== key));
   }
 
-  function removeNewImage(preview: string) {
-    setNewImages((prev) => prev.filter((img) => img.preview !== preview));
+  function setCoverImage(key: string) {
+    setImages((prev) => {
+      const index = prev.findIndex((img) => img.key === key);
+      if (index <= 0) return prev;
+      const copy = [...prev];
+      const [item] = copy.splice(index, 1);
+      copy.unshift(item);
+      return copy;
+    });
   }
 
   const saveMutation = useMutation({
@@ -203,13 +220,15 @@ function NewsFormModal({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      let imageUrls = existingImageUrls;
-      if (newImages.length > 0) {
+      const filesToUpload = images.filter((img) => img.file);
+      let uploadedByKey = new Map<string, string>();
+      if (filesToUpload.length > 0) {
         setIsUploadingImages(true);
-        const uploadedUrls = await uploadAdminNewsImages(newImages.map((img) => img.file));
+        const uploadedUrls = await uploadAdminNewsImages(filesToUpload.map((img) => img.file!));
         setIsUploadingImages(false);
-        imageUrls = [...existingImageUrls, ...uploadedUrls].slice(0, MAX_IMAGES);
+        uploadedByKey = new Map(filesToUpload.map((img, i) => [img.key, uploadedUrls[i]]));
       }
+      const imageUrls = images.map((img) => img.url ?? uploadedByKey.get(img.key)!).slice(0, MAX_IMAGES);
       const dto = {
         title: form.title,
         summary: form.summary || undefined,
@@ -262,28 +281,30 @@ function NewsFormModal({
             Görseller ({totalImageCount}/{MAX_IMAGES})
           </span>
           <div className="flex flex-wrap gap-3">
-            {existingImageUrls.map((url) => (
-              <div key={url} className="relative h-20 w-28 shrink-0 overflow-hidden rounded-[12px] border border-assid-line">
-                <img src={url} alt="Haber görseli" className="h-full w-full object-cover" />
-                <button
-                  type="button"
-                  onClick={() => removeExistingImage(url)}
-                  aria-label="Kaldır"
-                  className="absolute right-1 top-1 grid h-5 w-5 cursor-pointer place-items-center rounded-full border-0 bg-black/60 text-white"
-                >
-                  <CloseIcon className="h-3 w-3" />
-                </button>
-              </div>
-            ))}
-            {newImages.map((img) => (
+            {images.map((img, index) => (
               <div
-                key={img.preview}
+                key={img.key}
                 className="relative h-20 w-28 shrink-0 overflow-hidden rounded-[12px] border border-assid-line"
               >
-                <img src={img.preview} alt="Yeni haber görseli" className="h-full w-full object-cover" />
+                <img src={img.url ?? img.preview} alt="Haber görseli" className="h-full w-full object-cover" />
+                <div className="absolute left-1 top-1 z-10">
+                  <Tooltip label="Haber kapak fotoğrafı yap">
+                    <button
+                      type="button"
+                      onClick={() => setCoverImage(img.key)}
+                      aria-label="Kapak fotoğrafı yap"
+                      className="grid h-6 w-6 cursor-pointer place-items-center rounded-full border-0 bg-black/45 text-white drop-shadow-sm transition hover:bg-black/60"
+                    >
+                      <StarIcon
+                        className={`h-3.5 w-3.5 ${index === 0 ? "text-yellow-400" : "text-white"}`}
+                        filled={index === 0}
+                      />
+                    </button>
+                  </Tooltip>
+                </div>
                 <button
                   type="button"
-                  onClick={() => removeNewImage(img.preview)}
+                  onClick={() => removeImage(img.key)}
                   aria-label="Kaldır"
                   className="absolute right-1 top-1 grid h-5 w-5 cursor-pointer place-items-center rounded-full border-0 bg-black/60 text-white"
                 >

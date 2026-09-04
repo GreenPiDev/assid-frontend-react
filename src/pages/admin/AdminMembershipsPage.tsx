@@ -93,7 +93,7 @@ export default function AdminMembershipsPage() {
               members.map((m) => (
                 <tr
                   key={m._id}
-                  onClick={() => navigate(`/dashboard/uyelikler/${m._id}`)}
+                  onClick={() => navigate(`/panel/uyelikler/${m._id}`)}
                   className="cursor-pointer border-b border-assid-line last:border-0 hover:bg-assid-paper"
                 >
                   <td className="px-5 py-3.5">

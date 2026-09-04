@@ -56,7 +56,7 @@ export default function Footer() {
     <footer className="bg-[#0a2540] pt-10 text-white/74">
       <div className="mx-auto grid w-[min(calc(100%-40px),1240px)] grid-cols-1 gap-6 pb-8 sm:grid-cols-3 lg:grid-cols-[1.2fr_.7fr_.7fr_1fr]">
         <div className="sm:col-span-3 lg:col-span-1">
-          <button type="button" className="flex cursor-pointer flex-col items-start gap-2.5 border-0 bg-transparent p-0 text-left text-white" onClick={() => navigate("/home")}>
+          <button type="button" className="flex cursor-pointer flex-col items-start gap-2.5 border-0 bg-transparent p-0 text-left text-white" onClick={() => navigate("/anasayfa")}>
             {settings?.logo && <img src={settings.logo} alt={settings.shortName || settings.name || "Logo"} className="h-[43px] w-auto object-contain" />}
             <span>
               <b className="block text-base leading-none tracking-tight">{settings?.shortName}</b>

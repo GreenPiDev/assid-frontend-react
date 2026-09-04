@@ -17,7 +17,7 @@ export default function AdminRoutes() {
   return (
     <AdminLayout>
       <Routes>
-        <Route index element={<Navigate to="/dashboard/uye-basvurulari" replace />} />
+        <Route index element={<Navigate to="/panel/uye-basvurulari" replace />} />
         <Route path="uye-basvurulari" element={<AdminMembersPage />} />
         <Route path="uye-basvurulari/:id" element={<AdminMembershipDetailPage />} />
         <Route path="uyelikler" element={<AdminMembershipsPage />} />
@@ -31,7 +31,7 @@ export default function AdminRoutes() {
         <Route path="hakkimizda" element={<AdminAboutPage />} />
         <Route path="baskanin-mesaji" element={<AdminPresidentMessagePage />} />
         <Route path="dernek-yonetimi" element={<AdminBoardManagementPage />} />
-        <Route path="*" element={<Navigate to="/dashboard/uye-basvurulari" replace />} />
+        <Route path="*" element={<Navigate to="/panel/uye-basvurulari" replace />} />
       </Routes>
     </AdminLayout>
   );

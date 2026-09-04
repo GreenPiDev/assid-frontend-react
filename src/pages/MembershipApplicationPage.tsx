@@ -188,7 +188,7 @@ export default function MembershipApplicationPage() {
             Başvurunuz ASSİD yönetimi tarafından incelenecek. Onaylandığında, panelinize giriş yapabilmeniz için size
             e-posta adresinize giriş bilgileri iletilecektir.
           </p>
-          <Button as={Link} to="/home" variant="primary" className="mt-6">
+          <Button as={Link} to="/anasayfa" variant="primary" className="mt-6">
             Ana Sayfaya Dön
           </Button>
         </div>

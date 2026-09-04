@@ -7,10 +7,10 @@ export default function MemberRoutes() {
   return (
     <MemberLayout>
       <Routes>
-        <Route index element={<Navigate to="/dashboard/profilim" replace />} />
+        <Route index element={<Navigate to="/panel/profilim" replace />} />
         <Route path="profilim" element={<MemberProfilePage />} />
         <Route path="sifre" element={<MemberPasswordPage />} />
-        <Route path="*" element={<Navigate to="/dashboard/profilim" replace />} />
+        <Route path="*" element={<Navigate to="/panel/profilim" replace />} />
       </Routes>
     </MemberLayout>
   );

@@ -57,7 +57,7 @@ export default function AdminLoginPageSettingsPage() {
         <form onSubmit={handleSubmit} className="grid gap-5">
           <div className="grid gap-3 rounded-[20px] border border-assid-line bg-white p-6 md:p-7">
             <h2 className="text-[1.02rem] font-bold text-assid-ink">Üyelik Başvurusu Yönlendirmesi</h2>
-            <p className="text-[0.78rem] text-assid-muted">/login sayfasında görüntülenir.</p>
+            <p className="text-[0.78rem] text-assid-muted">/giris sayfasında görüntülenir.</p>
             <label className="flex cursor-pointer items-center gap-2 text-[0.85rem] text-assid-ink">
               <input
                 type="checkbox"

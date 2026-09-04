@@ -26,7 +26,7 @@ export default function ResetPasswordPage() {
     try {
       await resetPasswordMutation.mutateAsync(newPassword);
       showToast("Şifreniz güncellendi, giriş yapabilirsiniz.");
-      navigate("/login", { replace: true });
+      navigate("/giris", { replace: true });
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Bağlantının süresi dolmuş olabilir.");
     }
@@ -36,7 +36,7 @@ export default function ResetPasswordPage() {
     return (
       <AuthShell title="Geçersiz Bağlantı" subtitle="Şifre sıfırlama bağlantısı eksik veya hatalı.">
         <div className="mt-8 text-center">
-          <Link to="/forgot-password" className="text-[0.85rem] font-bold text-assid-lime hover:underline">
+          <Link to="/sifremi-unuttum" className="text-[0.85rem] font-bold text-assid-lime hover:underline">
             Yeni bağlantı iste
           </Link>
         </div>

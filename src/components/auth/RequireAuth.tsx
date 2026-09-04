@@ -13,7 +13,7 @@ export default function RequireAuth({ children }: { children: ReactNode }) {
   }
 
   if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/giris" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;

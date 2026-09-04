@@ -23,7 +23,7 @@ export default function LoginPage() {
     try {
       await login(email, password);
       const from = (location.state as { from?: Location } | null)?.from;
-      navigate(from ? `${from.pathname}${from.search}` : "/dashboard", { replace: true });
+      navigate(from ? `${from.pathname}${from.search}` : "/panel", { replace: true });
     } catch {
       showToast("E-posta veya şifre hatalı.");
     } finally {
@@ -86,7 +86,7 @@ export default function LoginPage() {
         </label>
 
         <Link
-          to="/forgot-password"
+          to="/sifremi-unuttum"
           className="justify-self-end text-[0.82rem] font-bold text-assid-lime hover:underline"
         >
           Şifremi unuttum

@@ -34,7 +34,7 @@ export default function ForgotPasswordPage() {
           <p className="text-[0.95rem] font-bold text-white">
             Lütfen mail hesabınızda spam / gereksiz klasörünü de kontrol edin.
           </p>
-          <Button as={Link} to="/login" variant="light" className="mt-2 w-full">
+          <Button as={Link} to="/giris" variant="light" className="mt-2 w-full">
             Giriş Sayfasına Dön
           </Button>
         </div>
@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
           </Button>
 
           <Link
-            to="/login"
+            to="/giris"
             className="justify-self-center text-[0.82rem] font-bold text-assid-lime hover:underline"
           >
             Giriş sayfasına dön

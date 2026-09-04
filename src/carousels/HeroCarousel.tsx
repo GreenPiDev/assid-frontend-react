@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useHomeNews } from "../api/resources/news";
+import { usePresidentMessage } from "../api/resources/presidentMessage";
 import { useOrgStats } from "../api/resources/stats";
 import { useCarousel } from "../hooks/useCarousel";
 import { onHeroCarouselGoTo } from "../utils/heroCarouselBus";
@@ -43,6 +44,8 @@ function badgeAngle(badgeIndex: number, activeIndex: number) {
 }
 
 function HeroSlide() {
+  const { data: presidentMessage } = usePresidentMessage();
+
   return (
     <section className="relative flex flex-col overflow-hidden bg-[linear-gradient(105deg,rgba(8,28,48,.97)_0%,rgba(10,35,58,.89)_53%,rgba(9,30,46,.77)_100%),url('https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1900&q=85')] bg-cover bg-center text-white before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_82%_20%,rgba(142,202,230,.34),transparent_23%),radial-gradient(circle_at_78%_85%,rgba(233,120,60,.24),transparent_24%)] lg:h-full">
       <div className="flex flex-1 flex-col justify-center">
@@ -60,27 +63,41 @@ function HeroSlide() {
               </Button>
             </div>
           </div>
-          <aside className="flex flex-col justify-between gap-6 rounded-[32px] border border-white/18 bg-white/9 p-7 backdrop-blur-md lg:p-8">
-            <div>
+          <aside className="relative flex flex-col items-end justify-between gap-6 overflow-hidden rounded-[32px] border border-white/18 bg-white/9 p-7 text-right backdrop-blur-md lg:p-8">
+            {presidentMessage?.image && (
+              <img
+                src={presidentMessage.image}
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 h-full w-[65%] object-cover object-left-top opacity-45"
+                style={{
+                  left: "-10%",
+                  maskImage: "linear-gradient(to right, rgba(0,0,0,.85), transparent 92%)",
+                  WebkitMaskImage: "linear-gradient(to right, rgba(0,0,0,.85), transparent 92%)",
+                }}
+              />
+            )}
+            <div className="relative z-10">
               <span className="text-[0.75rem] font-extrabold uppercase tracking-[.12em] text-assid-lime">
                 Başkanın mesajı
               </span>
               <h3 className="mt-4 mb-4 text-[1.7rem] leading-[1.15] tracking-tight">
-                "Gücümüz, birbirimizi tanımaktan ve birlikte üretmekten gelir."
+                "Siteler, Türkiye mobilya, dekorasyon ve imalat sektörünün köklü ve stratejik üretim üssüdür."
               </h3>
               <p className="m-0 text-[0.95rem] text-white/73">
-                ASSİD, Ankara Siteler'in üretim ve ticaret potansiyelini dijital dünyaya taşımak için çalışır.
+                ASSİD olarak, bu gücü ortak akıl ve kolektif bir vizyonla yönetme sorumluluğunu üstleniyoruz.
               </p>
+              <Link
+                to="/baskanin-mesaji"
+                className="mt-4 inline-flex items-center gap-1.5 text-[0.85rem] font-semibold text-assid-lime transition hover:text-white"
+              >
+                Devamını oku <span>→</span>
+              </Link>
             </div>
-            <div className="flex items-center gap-2.5">
-              <span className="grid h-10 w-10 place-items-center rounded-full bg-[linear-gradient(135deg,var(--color-assid-lime),#fff)] text-[0.8rem] font-black text-assid-green-dark">
-                AŞ
-              </span>
-              <span className="text-[0.81rem] text-white/72">
-                <b>ASSİD Yönetim Kurulu</b>
-                <br />
-                2026 Dönemi
-              </span>
+            <div className="relative z-10 text-[0.81rem] text-white/72">
+              <b className="text-white">Koray Durşen</b>
+              <br />
+              ASSİD Yönetim Kurulu Başkanı
             </div>
           </aside>
         </div>
@@ -109,7 +126,7 @@ function HeroStats() {
     <div className="relative z-3 mx-auto w-[min(calc(100%-40px),1240px)] pl-24 pb-11 lg:pl-32">
       <div className="grid grid-cols-2 overflow-hidden rounded-[22px] bg-white shadow-card md:grid-cols-4">
         {items.map((stat, index) => (
-          <div key={stat.label} className={`px-5 py-5 md:px-7 ${borderClasses[index]}`}>
+          <div key={stat.label} className={`px-5 py-5 text-center md:px-7 ${borderClasses[index]}`}>
             <strong className="block text-[clamp(1.75rem,3.1vw,2.65rem)] leading-none tracking-tighter text-assid-green">
               {stat.value}
             </strong>
@@ -122,7 +139,9 @@ function HeroStats() {
 }
 
 function NewsSlide() {
-  const { data: news } = useHomeNews(3);
+  const { data: news } = useHomeNews(14);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const active = news[activeIndex] ?? news[0];
 
   if (news.length === 0) {
     return (
@@ -140,37 +159,80 @@ function NewsSlide() {
   return (
     <section className="relative flex h-full flex-col justify-center overflow-hidden bg-[linear-gradient(105deg,rgba(8,28,48,.97)_0%,rgba(10,35,58,.89)_53%,rgba(9,30,46,.77)_100%),url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1900&q=85')] bg-cover bg-center py-17 text-white before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_82%_20%,rgba(142,202,230,.34),transparent_23%),radial-gradient(circle_at_78%_85%,rgba(233,120,60,.24),transparent_24%)] md:py-24">
       <div className="relative z-10 mx-auto w-[min(calc(100%-40px),1240px)] pl-24 lg:pl-32">
-        <div className="mb-9 flex flex-col items-start justify-between gap-5 md:flex-row md:items-end">
-          <div>
-            <div className="inline-flex items-center gap-2 text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-lime before:h-0.5 before:w-5 before:bg-assid-lime">
-              Gündem ve duyurular
+        <div className="mb-9">
+          <h2 className="max-w-3xl text-[clamp(2rem,4vw,3.4rem)] leading-[1.07] tracking-[-.045em] text-white">
+            Derneğimizden Haberler
+          </h2>
+          <p className="mt-2.5 max-w-2xl text-[clamp(1rem,1.6vw,1.17rem)] text-white/75">
+            ASSİD, Siteler Bölgesi sanayisinin kalitesini ve rekabet gücünü temsil eden 1200'den fazla aktif üyeyi
+            çatısı altında birleştirmektedir.
+          </p>
+        </div>
+        <div className="relative mb-4">
+          <Link
+            to={`/haberler/${slugify(active.title)}`}
+            className="relative block h-[300px] overflow-hidden rounded-[22px] border border-white/18 bg-white/9 md:h-[380px]"
+          >
+            <div key={active._id} className="absolute inset-0 animate-slide-fade">
+              {active.imageUrls[0] && (
+                <div
+                  className="absolute inset-0 bg-cover bg-top"
+                  style={{ backgroundImage: `url('${active.imageUrls[0]}')` }}
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-6 md:max-w-lg md:p-8">
+                <h3 className="text-[clamp(1.3rem,2.6vw,2rem)] leading-tight tracking-tight text-white">
+                  {active.title}
+                </h3>
+                {active.summary && (
+                  <p className="mt-2.5 line-clamp-2 text-[0.9rem] text-white/75">{active.summary}</p>
+                )}
+              </div>
             </div>
-            <h2 className="mt-2.5 max-w-3xl text-[clamp(2rem,4vw,3.4rem)] leading-[1.07] tracking-[-.045em] text-white">
-              Dernek Haberleri
-            </h2>
+          </Link>
+          {activeIndex > 0 && (
+            <button
+              type="button"
+              aria-label="Önceki haber"
+              onClick={() => setActiveIndex((i) => i - 1)}
+              className="absolute top-1/2 left-4 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-black/35 text-white backdrop-blur-md transition hover:bg-black/55"
+            >
+              <span>←</span>
+            </button>
+          )}
+          {activeIndex < news.length - 1 && (
+            <button
+              type="button"
+              aria-label="Sonraki haber"
+              onClick={() => setActiveIndex((i) => i + 1)}
+              className="absolute top-1/2 right-4 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-black/35 text-white backdrop-blur-md transition hover:bg-black/55"
+            >
+              <span>→</span>
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex flex-1 gap-2.5 overflow-hidden">
+            {news.map((item, index) => (
+              <button
+                key={item._id}
+                type="button"
+                onClick={() => setActiveIndex(index)}
+                className={`h-14 w-20 flex-shrink-0 overflow-hidden rounded-[12px] border bg-cover bg-center transition ${
+                  index === activeIndex
+                    ? "border-assid-lime"
+                    : "border-white/18 opacity-60 hover:opacity-100"
+                }`}
+                style={item.imageUrls[0] ? { backgroundImage: `url('${item.imageUrls[0]}')` } : undefined}
+                title={item.title}
+                aria-label={item.title}
+              />
+            ))}
           </div>
-          <Button as={Link} to="/haberler" variant="light">
+          <Button as={Link} to="/haberler" variant="light" className="flex-shrink-0">
             Tüm Haberler →
           </Button>
-        </div>
-        <div className="grid grid-cols-1 gap-4.5 md:grid-cols-3">
-          {news.map((item) => (
-            <Link
-              key={item._id}
-              to={`/haberler/${slugify(item.title)}`}
-              className="flex h-full flex-col overflow-hidden rounded-[22px] border border-white/18 bg-white/9 backdrop-blur-md transition duration-250 hover:-translate-y-1.5 hover:bg-white/14"
-            >
-              {item.imageUrls[0] && (
-                <div className="h-48 bg-cover bg-center" style={{ backgroundImage: `url('${item.imageUrls[0]}')` }} />
-              )}
-              <div className="flex flex-1 flex-col p-5">
-                <h3 className="my-2.5 line-clamp-2 text-[1.2rem] leading-tight tracking-tight text-white">
-                  {item.title}
-                </h3>
-                {item.summary && <p className="m-0 line-clamp-2 text-[0.84rem] text-white/70">{item.summary}</p>}
-              </div>
-            </Link>
-          ))}
         </div>
       </div>
     </section>
