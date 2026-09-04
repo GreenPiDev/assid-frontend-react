@@ -68,7 +68,10 @@ function ImageLightbox({
 export default function NewsDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { data: news, isLoading } = useAllNews();
-  const item = news.find((n) => slugify(n.title) === slug);
+  const itemIndex = news.findIndex((n) => slugify(n.title) === slug);
+  const item = itemIndex >= 0 ? news[itemIndex] : undefined;
+  const prevItem = itemIndex > 0 ? news[itemIndex - 1] : undefined;
+  const nextItem = itemIndex >= 0 && itemIndex < news.length - 1 ? news[itemIndex + 1] : undefined;
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   return (
@@ -119,6 +122,57 @@ export default function NewsDetailPage() {
                     <img src={url} alt={item.title} className="h-64 w-full object-cover" />
                   </button>
                 ))}
+              </div>
+            )}
+
+            {(prevItem || nextItem) && (
+              <div className="mt-10 grid grid-cols-1 gap-4 border-t border-assid-line pt-8 sm:grid-cols-2">
+                {prevItem ? (
+                  <Link
+                    to={`/haberler/${slugify(prevItem.title)}`}
+                    className="group flex items-center gap-3.5 overflow-hidden rounded-[16px] border border-assid-line p-3 transition hover:border-assid-green/40"
+                  >
+                    {prevItem.imageUrls[0] && (
+                      <img
+                        src={prevItem.imageUrls[0]}
+                        alt=""
+                        className="h-16 w-20 flex-shrink-0 rounded-[10px] object-cover"
+                      />
+                    )}
+                    <div className="min-w-0">
+                      <span className="block text-[0.72rem] font-bold uppercase tracking-[.1em] text-assid-muted">
+                        ← Önceki Haber
+                      </span>
+                      <span className="mt-1 block truncate text-[0.9rem] font-bold text-assid-ink group-hover:text-assid-green">
+                        {prevItem.title}
+                      </span>
+                    </div>
+                  </Link>
+                ) : (
+                  <div />
+                )}
+                {nextItem && (
+                  <Link
+                    to={`/haberler/${slugify(nextItem.title)}`}
+                    className="group flex items-center gap-3.5 overflow-hidden rounded-[16px] border border-assid-line p-3 text-right transition hover:border-assid-green/40 sm:flex-row-reverse"
+                  >
+                    {nextItem.imageUrls[0] && (
+                      <img
+                        src={nextItem.imageUrls[0]}
+                        alt=""
+                        className="h-16 w-20 flex-shrink-0 rounded-[10px] object-cover"
+                      />
+                    )}
+                    <div className="min-w-0">
+                      <span className="block text-[0.72rem] font-bold uppercase tracking-[.1em] text-assid-muted">
+                        Sonraki Haber →
+                      </span>
+                      <span className="mt-1 block truncate text-[0.9rem] font-bold text-assid-ink group-hover:text-assid-green">
+                        {nextItem.title}
+                      </span>
+                    </div>
+                  </Link>
+                )}
               </div>
             )}
           </article>
