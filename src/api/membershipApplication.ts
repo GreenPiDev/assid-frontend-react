@@ -12,7 +12,7 @@ export interface MembershipApplicationPayload {
   businessActivityTypes?: string[];
   references?: string;
   membershipType?: "individual" | "corporate";
-  sectorStatus?: string;
+  location?: string;
   birthPlace?: string;
   birthDate?: string;
   nationality?: string;
@@ -27,6 +27,14 @@ export interface MembershipApplicationPayload {
   kvkkConsent: boolean;
   bylawsAcknowledged: boolean;
   infoAccuracyConfirmed: boolean;
+  collectionType?: "entry_fee" | "monthly_fee" | "both";
+  autoDebitDate?: string;
+  autoDebitDayOfMonth?: number;
+  cardHolderName?: string;
+  cardNumber?: string;
+  cardExpiry?: string;
+  cardCvc?: string;
+  paymentConsent?: boolean;
 }
 
 export interface MembershipApplicationFiles {
@@ -38,7 +46,13 @@ export interface MembershipApplicationFiles {
   signatureCircular?: File[];
 }
 
-export async function applyForMembership(payload: MembershipApplicationPayload, files: MembershipApplicationFiles) {
+// Backend, başvuru kaydedildikten sonra JSON değil, doldurulmuş üyelik
+// başvuru formunun PDF'ini (application/pdf) döndürür — tarayıcı tarafında
+// indirilmesi çağıran taraftadır (bkz. MembershipApplicationPage.tsx).
+export async function applyForMembership(
+  payload: MembershipApplicationPayload,
+  files: MembershipApplicationFiles,
+): Promise<Blob> {
   const formData = new FormData();
   formData.append("payload", JSON.stringify(payload));
   for (const [field, fileList] of Object.entries(files)) {
@@ -56,5 +70,5 @@ export async function applyForMembership(payload: MembershipApplicationPayload, 
     const message = Array.isArray(body?.message) ? body.message[0] : body?.message;
     throw new Error(message ?? `İstek başarısız (${res.status})`);
   }
-  return res.json() as Promise<{ success: boolean }>;
+  return res.blob();
 }

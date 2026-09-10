@@ -48,3 +48,14 @@ export const maritalStatusOptions = Object.entries(maritalStatusLabels).map(([va
   value,
   label,
 }));
+
+export const collectionTypeLabels: Record<string, string> = {
+  entry_fee: "Giriş Aidatı",
+  monthly_fee: "Aylık Aidat",
+  both: "Her İkisi",
+};
+
+export const collectionTypeOptions = Object.entries(collectionTypeLabels).map(([value, label]) => ({
+  value,
+  label,
+}));

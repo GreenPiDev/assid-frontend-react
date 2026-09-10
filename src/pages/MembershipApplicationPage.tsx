@@ -11,11 +11,12 @@ import TagEditor from "../components/forms/TagEditor";
 import FileUploadField from "../components/forms/FileUploadField";
 import LegalConsentBox from "../components/forms/LegalConsentBox";
 import PhoneInput from "../components/forms/PhoneInput";
+import { DateField } from "../components/forms/DateField";
 import {
   businessActivityOptions,
+  collectionTypeOptions,
   maritalStatusOptions,
   membershipTypeOptions,
-  sectorStatusOptions,
 } from "../constants/memberEnums";
 import { SECTORS } from "../constants/sectors";
 import { useToast } from "../context/ToastContext";
@@ -73,7 +74,7 @@ const initialForm = {
   companyAddress: "",
   references: "",
   membershipType: "" as "" | "individual" | "corporate",
-  sectorStatus: "",
+  location: "",
   birthPlace: "",
   birthDate: "",
   nationality: "",
@@ -82,6 +83,13 @@ const initialForm = {
   faxPhone: "",
   personalMobilePhone: "",
   affiliatedOrganizations: "",
+  collectionType: "" as "" | "entry_fee" | "monthly_fee" | "both",
+  autoDebitDate: "",
+  autoDebitDayOfMonth: "",
+  cardHolderName: "",
+  cardNumber: "",
+  cardExpiry: "",
+  cardCvc: "",
 };
 
 const initialFiles: MembershipApplicationFiles = {
@@ -106,6 +114,7 @@ export default function MembershipApplicationPage() {
   const [kvkkConsent, setKvkkConsent] = useState(false);
   const [bylawsAcknowledged, setBylawsAcknowledged] = useState(false);
   const [infoAccuracyConfirmed, setInfoAccuracyConfirmed] = useState(false);
+  const [paymentConsent, setPaymentConsent] = useState(false);
   const [isSent, setIsSent] = useState(false);
 
   const applyMutation = useMutation({
@@ -139,8 +148,13 @@ export default function MembershipApplicationPage() {
       showToast("Devam etmek için belirttiğiniz bilgilerin doğruluğunu onaylamanız gerekiyor.");
       return;
     }
+    const hasCardInfo = Boolean(form.cardHolderName || form.cardNumber || form.cardExpiry || form.cardCvc);
+    if (hasCardInfo && !paymentConsent) {
+      showToast("Kart bilgisi girdiyseniz üyelik aidatının karttan çekilmesine rıza onayı zorunludur.");
+      return;
+    }
     try {
-      await applyMutation.mutateAsync({
+      const pdfBlob = await applyMutation.mutateAsync({
         payload: {
           fullName: form.fullName,
           companyName: form.companyName || undefined,
@@ -153,7 +167,7 @@ export default function MembershipApplicationPage() {
           businessActivityTypes: businessActivityTypes.length ? businessActivityTypes : undefined,
           references: form.references || undefined,
           membershipType: form.membershipType || undefined,
-          sectorStatus: form.sectorStatus || undefined,
+          location: form.location || undefined,
           birthPlace: form.birthPlace || undefined,
           birthDate: form.birthDate || undefined,
           nationality: form.nationality || undefined,
@@ -167,9 +181,32 @@ export default function MembershipApplicationPage() {
           kvkkConsent,
           bylawsAcknowledged,
           infoAccuracyConfirmed,
+          collectionType: form.collectionType || undefined,
+          autoDebitDate: form.collectionType === "entry_fee" ? form.autoDebitDate || undefined : undefined,
+          autoDebitDayOfMonth:
+            form.collectionType === "monthly_fee" || form.collectionType === "both"
+              ? form.autoDebitDayOfMonth
+                ? Number(form.autoDebitDayOfMonth)
+                : undefined
+              : undefined,
+          cardHolderName: form.cardHolderName || undefined,
+          cardNumber: form.cardNumber || undefined,
+          cardExpiry: form.cardExpiry || undefined,
+          cardCvc: form.cardCvc || undefined,
+          paymentConsent: hasCardInfo ? paymentConsent : undefined,
         },
         files,
       });
+
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "assid-uyelik-basvuru-formu.pdf";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+
       setIsSent(true);
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Başvuru gönderilemedi.");
@@ -245,6 +282,13 @@ export default function MembershipApplicationPage() {
                   />
                 </Field>
               </div>
+              <Field label="Lokasyon">
+                <input
+                  value={form.location}
+                  onChange={(e) => setForm({ ...form, location: e.target.value })}
+                  className={inputClass}
+                />
+              </Field>
               <Field label="Telefon">
                 <PhoneInput value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
               </Field>
@@ -353,31 +397,12 @@ export default function MembershipApplicationPage() {
                 ))}
               </select>
             </Field>
-            <Field label="Sektör Durumu">
-              <select
-                value={form.sectorStatus}
-                onChange={(e) => setForm({ ...form, sectorStatus: e.target.value })}
-                className={inputClass}
-              >
-                <option value="">Seçiniz</option>
-                {sectorStatusOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </Field>
             <div className="sm:col-span-2">
               <ul className="grid gap-2 text-[0.92rem] text-assid-muted">
                 <li>* Sınıflandırma Yönetim Kurulu kriterlerine göre kesinleşir.</li>
                 <li>
-                  * Sektör içi bireysel: Siteler bölgesi ve ilgili sektörlerde faaliyet gösteren gerçek kişiler
-                </li>
-                <li>* Sektör içi kurumsal: Siteler bölgesi ve ilgili sektörlerde faaliyet gösteren tüzel kişiler</li>
-                <li>* Sektör dışı bireysel: Sektör dışında olup dernek amaçlarını destekleyen gerçek kişiler</li>
-                <li>
-                  * Sektör dışı kurumsal: Sektör dışında faaliyet gösteren, dernekle iş birliği yapmak isteyen tüzel
-                  kişiler
+                  * Sektör durumu (Sektör İçi / Sektör Dışı) başvurunuz değerlendirilirken Yönetim Kurulu tarafından
+                  belirlenir; bu formdan girilmez.
                 </li>
               </ul>
             </div>
@@ -393,10 +418,10 @@ export default function MembershipApplicationPage() {
               />
             </Field>
             <Field label="Doğum Tarihi">
-              <input
-                type="date"
+              <DateField
+                id="birthDate"
                 value={form.birthDate}
-                onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
+                onChange={(v) => setForm({ ...form, birthDate: v })}
                 className={inputClass}
               />
             </Field>
@@ -524,6 +549,98 @@ export default function MembershipApplicationPage() {
               />
             </Section>
           )}
+
+          <Section title="Ödeme Tercihi (Opsiyonel)">
+            <div className="sm:col-span-2">
+              <p className="text-[0.85rem] text-assid-muted">
+                Ödeme entegrasyonu bulunmamaktadır. Kart bilgilerinizi paylaşırsanız, üyelik aidatının çekimi ASSİD
+                yönetimi tarafından manuel olarak gerçekleştirilir.
+              </p>
+            </div>
+            <Field label="Tahsilat Türü">
+              <select
+                value={form.collectionType}
+                onChange={(e) =>
+                  setForm({ ...form, collectionType: e.target.value as typeof form.collectionType })
+                }
+                className={inputClass}
+              >
+                <option value="">Seçiniz</option>
+                {collectionTypeOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            {form.collectionType === "monthly_fee" || form.collectionType === "both" ? (
+              <Field label="Otomatik Çekim Günü">
+                <select
+                  value={form.autoDebitDayOfMonth}
+                  onChange={(e) => setForm({ ...form, autoDebitDayOfMonth: e.target.value })}
+                  className={inputClass}
+                >
+                  <option value="">Seçiniz</option>
+                  {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                    <option key={day} value={day}>
+                      Her ayın {day}'i
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            ) : (
+              <Field label="Otomatik Çekim Tarihi">
+                <DateField
+                  id="autoDebitDate"
+                  value={form.autoDebitDate}
+                  onChange={(v) => setForm({ ...form, autoDebitDate: v })}
+                  className={inputClass}
+                />
+              </Field>
+            )}
+            <Field label="Kart Üzerindeki İsim">
+              <input
+                value={form.cardHolderName}
+                onChange={(e) => setForm({ ...form, cardHolderName: e.target.value })}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Kart Numarası">
+              <input
+                inputMode="numeric"
+                value={form.cardNumber}
+                onChange={(e) => setForm({ ...form, cardNumber: e.target.value.replace(/[^0-9\s]/g, "") })}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Son Kullanma Tarihi (AA/YY)">
+              <input
+                placeholder="AA/YY"
+                value={form.cardExpiry}
+                onChange={(e) => setForm({ ...form, cardExpiry: e.target.value })}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Güvenlik Kodu (CVC)">
+              <input
+                inputMode="numeric"
+                maxLength={4}
+                value={form.cardCvc}
+                onChange={(e) => setForm({ ...form, cardCvc: e.target.value.replace(/\D/g, "") })}
+                className={inputClass}
+              />
+            </Field>
+            <div className="sm:col-span-2">
+              <label className="flex cursor-pointer items-center gap-2 text-[0.85rem] text-assid-ink">
+                <input
+                  type="checkbox"
+                  checked={paymentConsent}
+                  onChange={(e) => setPaymentConsent(e.target.checked)}
+                />
+                Üyelik aidatımın karttan çekilmesine rıza gösteriyorum
+              </label>
+            </div>
+          </Section>
 
           {((settings?.showKvkkConsent ?? true) || (settings?.showBylawsConsent ?? true)) && (
             <Section title="Onaylar">
