@@ -37,6 +37,13 @@ export interface AdminMember {
   createdAt: string;
 }
 
+export interface CardInfo {
+  cardHolderName?: string;
+  cardNumber?: string;
+  cardExpiry?: string;
+  cardCvc?: string;
+}
+
 export interface AdminEvent {
   _id: string;
   title: string;
@@ -179,6 +186,14 @@ export function setMemberApplicationStatus(id: string, applicationStatus: "pendi
 
 export function updateAdminMember(id: string, dto: Partial<AdminMember>) {
   return request<AdminMember>(`/members/${id}`, { method: "PATCH", body: JSON.stringify(dto) });
+}
+
+export function fetchMemberCardInfo(id: string) {
+  return request<CardInfo | null>(`/members/${id}/card-info`);
+}
+
+export function updateMemberCardInfo(id: string, dto: CardInfo) {
+  return request<CardInfo | null>(`/members/${id}/card-info`, { method: "PATCH", body: JSON.stringify(dto) });
 }
 
 export function deleteAdminMember(id: string) {

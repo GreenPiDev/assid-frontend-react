@@ -14,6 +14,7 @@ import { DateField } from "../components/forms/DateField";
 import {
   businessActivityOptions,
   collectionTypeOptions,
+  contactPreferenceOptions,
   maritalStatusOptions,
   membershipTypeOptions,
 } from "../constants/memberEnums";
@@ -22,6 +23,7 @@ import { LOCATIONS } from "../constants/locations";
 import { useToast } from "../context/ToastContext";
 import { useOrganizationSettings } from "../api/resources/organizationSettings";
 import { useMembershipFees } from "../api/resources/membershipFees";
+import { formatCardNumber, formatCardExpiry } from "../utils/cardFormat";
 
 function RequiredMark() {
   return (
@@ -64,15 +66,6 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 const inputClass =
   "rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50";
 
-function formatCardNumber(digits: string) {
-  return digits.replace(/(.{4})/g, "$1 ").trim();
-}
-
-function formatCardExpiry(value: string) {
-  const digits = value.replace(/\D/g, "").slice(0, 4);
-  return digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
-}
-
 function formatPhoneDigits(raw: string): string {
   const digits = raw.replace(/\D/g, "").slice(0, 10);
   const p1 = digits.slice(0, 3);
@@ -106,9 +99,14 @@ const initialForm = {
   faxPhone: "",
   personalMobilePhone: "",
   affiliatedOrganizations: "",
+  contactPreference: "" as "" | "email" | "sms" | "phone",
   collectionType: "" as "" | "entry_fee" | "monthly_fee" | "both",
   autoDebitDate: "",
   autoDebitDayOfMonth: "",
+  paymentHolderFullName: "",
+  paymentHolderCompanyName: "",
+  paymentHolderTitle: "",
+  paymentHolderCompanyAddress: "",
   cardHolderName: "",
   cardNumber: "",
   cardExpiry: "",
@@ -219,6 +217,7 @@ export default function MembershipApplicationPage() {
           faxPhone: form.faxPhone || undefined,
           personalMobilePhone: form.personalMobilePhone || undefined,
           affiliatedOrganizations: form.affiliatedOrganizations || undefined,
+          contactPreference: form.contactPreference || undefined,
           activityAreas: activityAreas.length ? activityAreas : undefined,
           productsAndServices: productsAndServices.length ? productsAndServices : undefined,
           kvkkConsent,
@@ -232,6 +231,10 @@ export default function MembershipApplicationPage() {
                 ? Number(form.autoDebitDayOfMonth)
                 : undefined
               : undefined,
+          paymentHolderFullName: form.paymentHolderFullName || undefined,
+          paymentHolderCompanyName: form.paymentHolderCompanyName || undefined,
+          paymentHolderTitle: form.paymentHolderTitle || undefined,
+          paymentHolderCompanyAddress: form.paymentHolderCompanyAddress || undefined,
           cardHolderName: form.cardHolderName || undefined,
           cardNumber: form.cardNumber || undefined,
           cardExpiry: form.cardExpiry || undefined,
@@ -622,6 +625,30 @@ export default function MembershipApplicationPage() {
             </Section>
           )}
 
+          <Section title="İletişim Tercihi">
+            <div className="sm:col-span-2">
+              <span className="mb-2 block text-[0.78rem] font-bold text-assid-muted">İletişim Tercihim</span>
+              <div className="flex flex-wrap gap-4">
+                {contactPreferenceOptions.map((opt) => (
+                  <label key={opt.value} className="flex items-center gap-2 text-[0.88rem] font-bold text-assid-ink">
+                    <input
+                      type="checkbox"
+                      checked={form.contactPreference === opt.value}
+                      onChange={() =>
+                        setForm({
+                          ...form,
+                          contactPreference: form.contactPreference === opt.value ? "" : (opt.value as "email" | "sms" | "phone"),
+                        })
+                      }
+                      className="h-4 w-4 shrink-0"
+                    />
+                    {opt.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </Section>
+
           <Section title="Ödeme Tercihi (Opsiyonel)">
             <div className="sm:col-span-2">
               <p className="text-[0.85rem] text-assid-muted">
@@ -629,6 +656,37 @@ export default function MembershipApplicationPage() {
                 yönetimi tarafından manuel olarak gerçekleştirilir.
               </p>
             </div>
+            <div className="sm:col-span-2">
+              <span className="mb-2 block text-[0.78rem] font-bold text-assid-muted">Üye / Firma Bilgileri</span>
+            </div>
+            <Field label="Adı Soyadı">
+              <input
+                value={form.paymentHolderFullName}
+                onChange={(e) => setForm({ ...form, paymentHolderFullName: e.target.value })}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Şirket / Kurum Adı">
+              <input
+                value={form.paymentHolderCompanyName}
+                onChange={(e) => setForm({ ...form, paymentHolderCompanyName: e.target.value })}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Görevi / Ünvanı">
+              <input
+                value={form.paymentHolderTitle}
+                onChange={(e) => setForm({ ...form, paymentHolderTitle: e.target.value })}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Şirket / Kurum Adresi">
+              <input
+                value={form.paymentHolderCompanyAddress}
+                onChange={(e) => setForm({ ...form, paymentHolderCompanyAddress: e.target.value })}
+                className={inputClass}
+              />
+            </Field>
             <Field label="Tahsilat Türü">
               <select
                 value={form.collectionType}

@@ -45,6 +45,13 @@ export interface UpdateMyMemberProfileDto {
   productsAndServices?: string[];
 }
 
+export interface CardInfo {
+  cardHolderName?: string;
+  cardNumber?: string;
+  cardExpiry?: string;
+  cardCvc?: string;
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE_URL}${path}`, {
     credentials: "include",
@@ -65,6 +72,14 @@ export function fetchMyMemberProfile() {
 
 export function updateMyMemberProfile(dto: UpdateMyMemberProfileDto) {
   return request<MyMemberProfile>("/members/me", { method: "PATCH", body: JSON.stringify(dto) });
+}
+
+export function fetchMyCardInfo() {
+  return request<CardInfo | null>("/members/me/card-info");
+}
+
+export function updateMyCardInfo(dto: CardInfo) {
+  return request<CardInfo | null>("/members/me/card-info", { method: "PATCH", body: JSON.stringify(dto) });
 }
 
 export async function uploadMyLogo(file: File): Promise<MyMemberProfile> {

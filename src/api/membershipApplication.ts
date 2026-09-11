@@ -30,6 +30,10 @@ export interface MembershipApplicationPayload {
   collectionType?: "entry_fee" | "monthly_fee" | "both";
   autoDebitDate?: string;
   autoDebitDayOfMonth?: number;
+  paymentHolderFullName?: string;
+  paymentHolderCompanyName?: string;
+  paymentHolderTitle?: string;
+  paymentHolderCompanyAddress?: string;
   cardHolderName?: string;
   cardNumber?: string;
   cardExpiry?: string;

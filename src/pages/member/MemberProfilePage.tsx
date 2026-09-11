@@ -1,9 +1,17 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchMyMemberProfile, updateMyMemberProfile, uploadMyLogo, type UpdateMyMemberProfileDto } from "../../api/member";
+import {
+  fetchMyCardInfo,
+  fetchMyMemberProfile,
+  updateMyCardInfo,
+  updateMyMemberProfile,
+  uploadMyLogo,
+  type UpdateMyMemberProfileDto,
+} from "../../api/member";
 import Badge from "../../components/admin/Badge";
 import MemberCardContent from "../../components/directory/MemberCardContent";
 import TagEditor from "../../components/forms/TagEditor";
+import CardInfoSection from "../../components/forms/CardInfoSection";
 import {
   businessActivityOptions,
   contactPreferenceOptions,
@@ -492,6 +500,14 @@ export default function MemberProfilePage() {
             {saveMutation.isPending ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
           </button>
         </div>
+      </div>
+
+      <div className="mt-5">
+        <CardInfoSection
+          queryKey={["member", "card-info"]}
+          fetchCardInfo={fetchMyCardInfo}
+          updateCardInfo={updateMyCardInfo}
+        />
       </div>
 
       <div className="mt-5">

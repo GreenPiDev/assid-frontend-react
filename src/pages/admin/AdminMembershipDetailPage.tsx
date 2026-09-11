@@ -1,9 +1,17 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchAdminMember, fetchMemberMaskedNationalId, updateAdminMember, type AdminMember } from "../../api/admin";
+import {
+  fetchAdminMember,
+  fetchMemberCardInfo,
+  fetchMemberMaskedNationalId,
+  updateAdminMember,
+  updateMemberCardInfo,
+  type AdminMember,
+} from "../../api/admin";
 import Badge from "../../components/admin/Badge";
 import { ArrowLeftIcon } from "../../components/admin/icons";
+import CardInfoSection from "../../components/forms/CardInfoSection";
 import {
   businessActivityOptions,
   contactPreferenceOptions,
@@ -614,6 +622,12 @@ export default function AdminMembershipDetailPage() {
             );
           })}
         </Section>
+
+        <CardInfoSection
+          queryKey={["admin", "member", id, "card-info"]}
+          fetchCardInfo={() => fetchMemberCardInfo(id as string)}
+          updateCardInfo={(dto) => updateMemberCardInfo(id as string, dto)}
+        />
       </div>
     </div>
   );
