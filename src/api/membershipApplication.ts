@@ -12,7 +12,7 @@ export interface MembershipApplicationPayload {
   businessActivityTypes?: string[];
   references?: string;
   membershipType?: "individual" | "corporate";
-  location?: string;
+  locations?: string[];
   birthPlace?: string;
   birthDate?: string;
   nationality?: string;

@@ -1,7 +1,49 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { changeMyPassword } from "../../api/member";
+import { EyeIcon, EyeOffIcon } from "../../components/admin/icons";
 import { useToast } from "../../context/ToastContext";
+
+function PasswordField({
+  label,
+  value,
+  onChange,
+  minLength,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  minLength?: number;
+  placeholder?: string;
+}) {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <label className="grid gap-1.5">
+      <span className="text-[0.78rem] font-bold text-assid-muted">{label}</span>
+      <div className="relative">
+        <input
+          required
+          minLength={minLength}
+          type={visible ? "text" : "password"}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 pr-11 outline-none focus:border-assid-green/50"
+        />
+        <button
+          type="button"
+          onClick={() => setVisible((v) => !v)}
+          aria-label={visible ? "Şifreyi gizle" : "Şifreyi göster"}
+          className="absolute inset-y-0 right-0 grid w-10 cursor-pointer place-items-center text-assid-muted"
+        >
+          {visible ? <EyeOffIcon className="h-4.5 w-4.5" /> : <EyeIcon className="h-4.5 w-4.5" />}
+        </button>
+      </div>
+    </label>
+  );
+}
 
 export default function MemberPasswordPage() {
   const showToast = useToast();
@@ -43,39 +85,20 @@ export default function MemberPasswordPage() {
         onSubmit={handleSubmit}
         className="grid max-w-md gap-4 rounded-[20px] border border-assid-line bg-white p-6 md:p-8"
       >
-        <label className="grid gap-1.5">
-          <span className="text-[0.78rem] font-bold text-assid-muted">Mevcut Şifre</span>
-          <input
-            required
-            type="password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
-          />
-        </label>
-        <label className="grid gap-1.5">
-          <span className="text-[0.78rem] font-bold text-assid-muted">Yeni Şifre</span>
-          <input
-            required
-            minLength={8}
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="En az 8 karakter"
-            className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
-          />
-        </label>
-        <label className="grid gap-1.5">
-          <span className="text-[0.78rem] font-bold text-assid-muted">Yeni Şifre (Tekrar)</span>
-          <input
-            required
-            minLength={8}
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50"
-          />
-        </label>
+        <PasswordField label="Mevcut Şifre" value={currentPassword} onChange={setCurrentPassword} />
+        <PasswordField
+          label="Yeni Şifre"
+          value={newPassword}
+          onChange={setNewPassword}
+          minLength={8}
+          placeholder="En az 8 karakter"
+        />
+        <PasswordField
+          label="Yeni Şifre (Tekrar)"
+          value={confirmPassword}
+          onChange={setConfirmPassword}
+          minLength={8}
+        />
         <div className="mt-2 flex justify-end">
           <button
             type="submit"

@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 export default function LegalConsentBox({
   title,
   text,
@@ -9,7 +11,7 @@ export default function LegalConsentBox({
   text: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
-  checkboxLabel: string;
+  checkboxLabel: ReactNode;
 }) {
   return (
     <div className="sm:col-span-2">

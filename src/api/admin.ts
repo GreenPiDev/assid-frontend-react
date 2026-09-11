@@ -14,6 +14,7 @@ export interface AdminMember {
   references?: string;
   membershipType?: "individual" | "corporate";
   sectorStatus?: string;
+  locations: string[];
   birthPlace?: string;
   birthDate?: string;
   nationality?: string;

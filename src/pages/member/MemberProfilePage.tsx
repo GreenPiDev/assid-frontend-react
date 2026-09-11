@@ -1,21 +1,18 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchMyMemberProfile, updateMyMemberProfile, uploadMyLogo } from "../../api/member";
+import { fetchMyMemberProfile, updateMyMemberProfile, uploadMyLogo, type UpdateMyMemberProfileDto } from "../../api/member";
 import Badge from "../../components/admin/Badge";
 import MemberCardContent from "../../components/directory/MemberCardContent";
 import TagEditor from "../../components/forms/TagEditor";
-import { businessActivityLabels } from "../../constants/memberEnums";
+import {
+  businessActivityOptions,
+  contactPreferenceOptions,
+  maritalStatusOptions,
+  membershipTypeOptions,
+} from "../../constants/memberEnums";
+import { SECTORS } from "../../constants/sectors";
+import { LOCATIONS } from "../../constants/locations";
 import { useToast } from "../../context/ToastContext";
-import { getSectorName } from "../../utils/directory";
-
-function Field({ label, value }: { label: string; value?: string | null }) {
-  return (
-    <div>
-      <div className="text-[0.74rem] font-bold uppercase tracking-wide text-assid-muted">{label}</div>
-      <div className="mt-1 text-[0.92rem] text-assid-ink">{value && value.length > 0 ? value : "—"}</div>
-    </div>
-  );
-}
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -26,7 +23,63 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <label className="grid gap-1.5">
+      <span className="text-[0.78rem] font-bold text-assid-muted">{label}</span>
+      {children}
+    </label>
+  );
+}
+
+const inputClass =
+  "rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50";
+
 const profileQueryKey = ["member", "profile"];
+
+type EditableFields = Required<
+  Pick<
+    UpdateMyMemberProfileDto,
+    | "companyName"
+    | "title"
+    | "companyAddress"
+    | "phone"
+    | "mobilePhone"
+    | "references"
+    | "faxPhone"
+    | "personalMobilePhone"
+    | "affiliatedOrganizations"
+  >
+> & {
+  membershipType: "individual" | "corporate" | "";
+  contactPreference: "email" | "sms" | "phone" | "";
+  maritalStatus: "married" | "single" | "";
+  sectors: string[];
+  locations: string[];
+  businessActivityTypes: string[];
+  activityAreas: string[];
+  productsAndServices: string[];
+};
+
+const emptyFields: EditableFields = {
+  companyName: "",
+  title: "",
+  companyAddress: "",
+  phone: "",
+  mobilePhone: "",
+  references: "",
+  faxPhone: "",
+  personalMobilePhone: "",
+  affiliatedOrganizations: "",
+  membershipType: "",
+  contactPreference: "",
+  maritalStatus: "",
+  sectors: [],
+  locations: [],
+  businessActivityTypes: [],
+  activityAreas: [],
+  productsAndServices: [],
+};
 
 export default function MemberProfilePage() {
   const showToast = useToast();
@@ -35,8 +88,7 @@ export default function MemberProfilePage() {
     queryKey: profileQueryKey,
     queryFn: fetchMyMemberProfile,
   });
-  const [activityAreas, setActivityAreas] = useState<string[]>([]);
-  const [productsAndServices, setProductsAndServices] = useState<string[]>([]);
+  const [fields, setFields] = useState<EditableFields>(emptyFields);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -46,8 +98,25 @@ export default function MemberProfilePage() {
 
   useEffect(() => {
     if (!profile) return;
-    setActivityAreas(profile.activityAreas);
-    setProductsAndServices(profile.productsAndServices);
+    setFields({
+      companyName: profile.companyName ?? "",
+      title: profile.title ?? "",
+      companyAddress: profile.companyAddress ?? "",
+      phone: profile.phone ?? "",
+      mobilePhone: profile.mobilePhone ?? "",
+      references: profile.references ?? "",
+      faxPhone: profile.faxPhone ?? "",
+      personalMobilePhone: profile.personalMobilePhone ?? "",
+      affiliatedOrganizations: profile.affiliatedOrganizations ?? "",
+      membershipType: profile.membershipType ?? "",
+      contactPreference: profile.contactPreference ?? "",
+      maritalStatus: profile.maritalStatus ?? "",
+      sectors: profile.sectors,
+      locations: profile.locations,
+      businessActivityTypes: profile.businessActivityTypes,
+      activityAreas: profile.activityAreas,
+      productsAndServices: profile.productsAndServices,
+    });
   }, [profile]);
 
   const saveMutation = useMutation({
@@ -55,12 +124,54 @@ export default function MemberProfilePage() {
     onSuccess: (updated) => queryClient.setQueryData(profileQueryKey, updated),
   });
 
+  function toggleSector(slug: string) {
+    setFields((f) => ({
+      ...f,
+      sectors: f.sectors.includes(slug) ? f.sectors.filter((s) => s !== slug) : [...f.sectors, slug],
+    }));
+  }
+
+  function toggleLocation(slug: string) {
+    setFields((f) => ({
+      ...f,
+      locations: f.locations.includes(slug) ? f.locations.filter((s) => s !== slug) : [...f.locations, slug],
+    }));
+  }
+
+  function toggleActivityType(value: string) {
+    setFields((f) => ({
+      ...f,
+      businessActivityTypes: f.businessActivityTypes.includes(value)
+        ? f.businessActivityTypes.filter((v) => v !== value)
+        : [...f.businessActivityTypes, value],
+    }));
+  }
+
   async function handleSave() {
     try {
-      await saveMutation.mutateAsync({ activityAreas, productsAndServices });
+      const dto: UpdateMyMemberProfileDto = {
+        companyName: fields.companyName || undefined,
+        title: fields.title || undefined,
+        companyAddress: fields.companyAddress || undefined,
+        phone: fields.phone || undefined,
+        mobilePhone: fields.mobilePhone || undefined,
+        references: fields.references || undefined,
+        faxPhone: fields.faxPhone || undefined,
+        personalMobilePhone: fields.personalMobilePhone || undefined,
+        affiliatedOrganizations: fields.affiliatedOrganizations || undefined,
+        membershipType: fields.membershipType || undefined,
+        contactPreference: fields.contactPreference || undefined,
+        maritalStatus: fields.maritalStatus || undefined,
+        sectors: fields.sectors,
+        locations: fields.locations,
+        businessActivityTypes: fields.businessActivityTypes as UpdateMyMemberProfileDto["businessActivityTypes"],
+        activityAreas: fields.activityAreas,
+        productsAndServices: fields.productsAndServices,
+      };
+      await saveMutation.mutateAsync(dto);
       showToast("Profil güncellendi.");
-    } catch {
-      showToast("Güncelleme başarısız oldu.");
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Güncelleme başarısız oldu.");
     }
   }
 
@@ -86,8 +197,23 @@ export default function MemberProfilePage() {
   }
 
   const isDirty =
-    JSON.stringify(activityAreas) !== JSON.stringify(profile.activityAreas) ||
-    JSON.stringify(productsAndServices) !== JSON.stringify(profile.productsAndServices);
+    (fields.companyName !== (profile.companyName ?? "") ||
+      fields.title !== (profile.title ?? "") ||
+      fields.companyAddress !== (profile.companyAddress ?? "") ||
+      fields.phone !== (profile.phone ?? "") ||
+      fields.mobilePhone !== (profile.mobilePhone ?? "") ||
+      fields.references !== (profile.references ?? "") ||
+      fields.faxPhone !== (profile.faxPhone ?? "") ||
+      fields.personalMobilePhone !== (profile.personalMobilePhone ?? "") ||
+      fields.affiliatedOrganizations !== (profile.affiliatedOrganizations ?? "") ||
+      fields.membershipType !== (profile.membershipType ?? "") ||
+      fields.contactPreference !== (profile.contactPreference ?? "") ||
+      fields.maritalStatus !== (profile.maritalStatus ?? "") ||
+      JSON.stringify(fields.sectors) !== JSON.stringify(profile.sectors) ||
+      JSON.stringify(fields.locations) !== JSON.stringify(profile.locations) ||
+      JSON.stringify(fields.businessActivityTypes) !== JSON.stringify(profile.businessActivityTypes) ||
+      JSON.stringify(fields.activityAreas) !== JSON.stringify(profile.activityAreas) ||
+      JSON.stringify(fields.productsAndServices) !== JSON.stringify(profile.productsAndServices));
 
   return (
     <div>
@@ -140,55 +266,232 @@ export default function MemberProfilePage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+      <div className="grid gap-5">
         <Section title="Başvuru Bilgileri">
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <Field label="Ad Soyad" value={profile.fullName} />
-            <Field label="Firma Adı" value={profile.companyName} />
-            <Field label="Unvan" value={profile.title} />
-            <Field label="E-posta" value={profile.email} />
-            <Field label="Telefon" value={profile.phone} />
-            <Field label="Cep Telefonu" value={profile.mobilePhone} />
-            <Field label="Firma Adresi" value={profile.companyAddress} />
-            <Field label="Üyelik Tipi" value={profile.membershipType === "corporate" ? "Kurumsal" : "Bireysel"} />
-            <Field label="Sektörler" value={profile.sectors.map((s) => getSectorName(s)).join(", ")} />
-            <Field
-              label="Faaliyet Türleri"
-              value={profile.businessActivityTypes.map((t) => businessActivityLabels[t] ?? t).join(", ")}
-            />
-          </div>
-          <p className="mt-4 text-[0.78rem] text-assid-muted">
-            Bu bilgiler başvurunuzda belirttiğiniz bilgilerdir. Değişiklik için lütfen ASSİD ile iletişime geçin.
+          <p className="mb-4 -mt-2 text-[0.78rem] text-assid-muted">
+            Ad Soyad ve e-posta adresiniz giriş bilginizdir; değişiklik için ASSİD ile iletişime geçin. Diğer
+            alanları aşağıdan güncelleyebilirsiniz.
           </p>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <Field label="Ad Soyad">
+              <input value={profile.fullName} disabled className={`${inputClass} opacity-60`} />
+            </Field>
+            <Field label="E-posta">
+              <input value={profile.email} disabled className={`${inputClass} opacity-60`} />
+            </Field>
+            <Field label="Firma Adı">
+              <input
+                value={fields.companyName}
+                onChange={(e) => setFields((f) => ({ ...f, companyName: e.target.value }))}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Unvan">
+              <input
+                value={fields.title}
+                onChange={(e) => setFields((f) => ({ ...f, title: e.target.value }))}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Telefon">
+              <input
+                value={fields.phone}
+                onChange={(e) => setFields((f) => ({ ...f, phone: e.target.value }))}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Cep Telefonu">
+              <input
+                value={fields.mobilePhone}
+                onChange={(e) => setFields((f) => ({ ...f, mobilePhone: e.target.value }))}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Firma Adresi">
+              <input
+                value={fields.companyAddress}
+                onChange={(e) => setFields((f) => ({ ...f, companyAddress: e.target.value }))}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Üyelik Tipi">
+              <select
+                value={fields.membershipType}
+                onChange={(e) =>
+                  setFields((f) => ({ ...f, membershipType: e.target.value as EditableFields["membershipType"] }))
+                }
+                className={inputClass}
+              >
+                <option value="">Seçiniz</option>
+                {membershipTypeOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Referanslar">
+              <input
+                value={fields.references}
+                onChange={(e) => setFields((f) => ({ ...f, references: e.target.value }))}
+                className={inputClass}
+              />
+            </Field>
+          </div>
+
+          <div className="mt-5">
+            <span className="mb-2 block text-[0.78rem] font-bold text-assid-muted">Sektörler</span>
+            <div className="flex flex-wrap gap-2">
+              {SECTORS.map((sector) => (
+                <button
+                  type="button"
+                  key={sector.slug}
+                  onClick={() => toggleSector(sector.slug)}
+                  className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-[0.78rem] font-bold ${
+                    fields.sectors.includes(sector.slug)
+                      ? "border-assid-green bg-assid-green text-white"
+                      : "border-assid-line bg-transparent text-assid-ink"
+                  }`}
+                >
+                  {sector.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-5">
+            <span className="mb-2 block text-[0.78rem] font-bold text-assid-muted">Lokasyonlar</span>
+            <div className="flex flex-wrap gap-2">
+              {LOCATIONS.map((loc) => (
+                <button
+                  type="button"
+                  key={loc.slug}
+                  onClick={() => toggleLocation(loc.slug)}
+                  className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-[0.78rem] font-bold ${
+                    fields.locations.includes(loc.slug)
+                      ? "border-assid-green bg-assid-green text-white"
+                      : "border-assid-line bg-transparent text-assid-ink"
+                  }`}
+                >
+                  {loc.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-5">
+            <span className="mb-2 block text-[0.78rem] font-bold text-assid-muted">Faaliyet Türleri</span>
+            <div className="flex flex-wrap gap-2">
+              {businessActivityOptions.map((opt) => (
+                <button
+                  type="button"
+                  key={opt.value}
+                  onClick={() => toggleActivityType(opt.value)}
+                  className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-[0.78rem] font-bold ${
+                    fields.businessActivityTypes.includes(opt.value)
+                      ? "border-assid-green bg-assid-green text-white"
+                      : "border-assid-line bg-transparent text-assid-ink"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </Section>
+
+        <Section title="Kişisel / İletişim Bilgileri">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <Field label="Telefon / Faks">
+              <input
+                value={fields.faxPhone}
+                onChange={(e) => setFields((f) => ({ ...f, faxPhone: e.target.value }))}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Kişisel Cep Telefonu">
+              <input
+                value={fields.personalMobilePhone}
+                onChange={(e) => setFields((f) => ({ ...f, personalMobilePhone: e.target.value }))}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Bağlı Olduğu Kuruluşlar">
+              <input
+                value={fields.affiliatedOrganizations}
+                onChange={(e) => setFields((f) => ({ ...f, affiliatedOrganizations: e.target.value }))}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="İletişim Tercihi">
+              <select
+                value={fields.contactPreference}
+                onChange={(e) =>
+                  setFields((f) => ({
+                    ...f,
+                    contactPreference: e.target.value as EditableFields["contactPreference"],
+                  }))
+                }
+                className={inputClass}
+              >
+                <option value="">Seçiniz</option>
+                {contactPreferenceOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Medeni Hal">
+              <select
+                value={fields.maritalStatus}
+                onChange={(e) =>
+                  setFields((f) => ({ ...f, maritalStatus: e.target.value as EditableFields["maritalStatus"] }))
+                }
+                className={inputClass}
+              >
+                <option value="">Seçiniz</option>
+                {maritalStatusOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          </div>
         </Section>
 
         <Section title="Firma Rehberinde Görünecek Bilgiler">
           <div className="grid gap-5">
             <div>
               <span className="mb-2 block text-[0.78rem] font-bold text-assid-muted">Alt Faaliyet Alanları</span>
-              <TagEditor items={activityAreas} onChange={setActivityAreas} placeholder="Faaliyet alanı ekle..." />
+              <TagEditor
+                items={fields.activityAreas}
+                onChange={(items) => setFields((f) => ({ ...f, activityAreas: items }))}
+                placeholder="Faaliyet alanı ekle..."
+              />
             </div>
             <div>
               <span className="mb-2 block text-[0.78rem] font-bold text-assid-muted">Ürün ve Hizmetler</span>
               <TagEditor
-                items={productsAndServices}
-                onChange={setProductsAndServices}
+                items={fields.productsAndServices}
+                onChange={(items) => setFields((f) => ({ ...f, productsAndServices: items }))}
                 placeholder="Ürün / hizmet ekle..."
               />
             </div>
           </div>
-
-          <div className="mt-6 flex justify-end">
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saveMutation.isPending || !isDirty}
-              className="cursor-pointer rounded-full border-0 bg-assid-green px-6 py-3 text-[0.88rem] font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {saveMutation.isPending ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
-            </button>
-          </div>
         </Section>
+
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saveMutation.isPending || !isDirty}
+            className="cursor-pointer rounded-full border-0 bg-assid-green px-6 py-3 text-[0.88rem] font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {saveMutation.isPending ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
+          </button>
+        </div>
       </div>
 
       <div className="mt-5">
@@ -201,9 +504,9 @@ export default function MemberProfilePage() {
               id: profile._id,
               name: profile.companyName || profile.fullName,
               logo: profile.logo,
-              sectors: profile.sectors,
-              activityAreas,
-              productsAndServices,
+              sectors: fields.sectors,
+              activityAreas: fields.activityAreas,
+              productsAndServices: fields.productsAndServices,
               contact: {
                 memberType: profile.membershipType === "corporate" ? "Kurumsal" : "Bireysel",
                 representative: profile.fullName,
@@ -214,8 +517,7 @@ export default function MemberProfilePage() {
           />
         </div>
         <p className="mt-3 text-[0.78rem] text-assid-muted">
-          Faaliyet alanları/ürünler için önizleme anlıktır — herkese açık rehberde görünmesi için "Değişiklikleri
-          Kaydet"e basmanız gerekir.
+          Önizleme anlıktır — herkese açık rehberde görünmesi için "Değişiklikleri Kaydet"e basmanız gerekir.
         </p>
       </div>
     </div>

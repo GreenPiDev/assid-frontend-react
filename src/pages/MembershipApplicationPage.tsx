@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -8,7 +8,6 @@ import {
 } from "../api/membershipApplication";
 import Button from "../components/ui/Button";
 import TagEditor from "../components/forms/TagEditor";
-import FileUploadField from "../components/forms/FileUploadField";
 import LegalConsentBox from "../components/forms/LegalConsentBox";
 import PhoneInput from "../components/forms/PhoneInput";
 import { DateField } from "../components/forms/DateField";
@@ -19,6 +18,7 @@ import {
   membershipTypeOptions,
 } from "../constants/memberEnums";
 import { SECTORS } from "../constants/sectors";
+import { LOCATIONS } from "../constants/locations";
 import { useToast } from "../context/ToastContext";
 import { useOrganizationSettings } from "../api/resources/organizationSettings";
 import { useMembershipFees } from "../api/resources/membershipFees";
@@ -64,6 +64,30 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 const inputClass =
   "rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50";
 
+function formatCardNumber(digits: string) {
+  return digits.replace(/(.{4})/g, "$1 ").trim();
+}
+
+function formatCardExpiry(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 4);
+  return digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
+}
+
+function formatPhoneDigits(raw: string): string {
+  const digits = raw.replace(/\D/g, "").slice(0, 10);
+  const p1 = digits.slice(0, 3);
+  const p2 = digits.slice(3, 6);
+  const p3 = digits.slice(6, 8);
+  const p4 = digits.slice(8, 10);
+  let out = "";
+  if (p1) out += `(${p1}`;
+  if (p1.length === 3) out += ")";
+  if (p2) out += ` ${p2}`;
+  if (p3) out += ` ${p3}`;
+  if (p4) out += ` ${p4}`;
+  return out;
+}
+
 const initialForm = {
   fullName: "",
   companyName: "",
@@ -74,7 +98,6 @@ const initialForm = {
   companyAddress: "",
   references: "",
   membershipType: "" as "" | "individual" | "corporate",
-  location: "",
   birthPlace: "",
   birthDate: "",
   nationality: "",
@@ -92,6 +115,15 @@ const initialForm = {
   cardCvc: "",
 };
 
+const REQUIRED_DOCUMENTS = [
+  "2 Adet Fotoğraf",
+  "Adli Sicil Kaydı",
+  "Kimlik Fotokopisi",
+  "Ticaret Sicil Gazetesi (Kurumsal)",
+  "Vergi Levhası (Kurumsal)",
+  "İmza Sirküleri (Kurumsal)",
+];
+
 const initialFiles: MembershipApplicationFiles = {
   photos: [],
   criminalRecord: [],
@@ -107,15 +139,22 @@ export default function MembershipApplicationPage() {
   const { data: membershipFees } = useMembershipFees();
   const [form, setForm] = useState(initialForm);
   const [sectors, setSectors] = useState<string[]>([]);
+  const [locations, setLocations] = useState<string[]>([]);
   const [businessActivityTypes, setBusinessActivityTypes] = useState<string[]>([]);
   const [activityAreas, setActivityAreas] = useState<string[]>([]);
   const [productsAndServices, setProductsAndServices] = useState<string[]>([]);
-  const [files, setFiles] = useState<MembershipApplicationFiles>(initialFiles);
   const [kvkkConsent, setKvkkConsent] = useState(false);
   const [bylawsAcknowledged, setBylawsAcknowledged] = useState(false);
   const [infoAccuracyConfirmed, setInfoAccuracyConfirmed] = useState(false);
   const [paymentConsent, setPaymentConsent] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    };
+  }, [pdfUrl]);
 
   const applyMutation = useMutation({
     mutationFn: ({ payload, files: applicationFiles }: { payload: MembershipApplicationPayload; files: MembershipApplicationFiles }) =>
@@ -124,6 +163,10 @@ export default function MembershipApplicationPage() {
 
   function toggleSector(slug: string) {
     setSectors((prev) => (prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]));
+  }
+
+  function toggleLocation(slug: string) {
+    setLocations((prev) => (prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]));
   }
 
   function toggleActivityType(value: string) {
@@ -164,10 +207,10 @@ export default function MembershipApplicationPage() {
           mobilePhone: form.mobilePhone || undefined,
           companyAddress: form.companyAddress || undefined,
           sectors,
+          locations: locations.length ? locations : undefined,
           businessActivityTypes: businessActivityTypes.length ? businessActivityTypes : undefined,
           references: form.references || undefined,
           membershipType: form.membershipType || undefined,
-          location: form.location || undefined,
           birthPlace: form.birthPlace || undefined,
           birthDate: form.birthDate || undefined,
           nationality: form.nationality || undefined,
@@ -195,7 +238,7 @@ export default function MembershipApplicationPage() {
           cardCvc: form.cardCvc || undefined,
           paymentConsent: hasCardInfo ? paymentConsent : undefined,
         },
-        files,
+        files: initialFiles,
       });
 
       const url = URL.createObjectURL(pdfBlob);
@@ -205,8 +248,11 @@ export default function MembershipApplicationPage() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      URL.revokeObjectURL(url);
 
+      // Otomatik indirme her cihaz/tarayıcıda güvenilir olmayabileceğinden
+      // URL hemen serbest bırakılmıyor — "Başvurunuz alındı" ekranında
+      // manuel bir indirme linki olarak da sunulabilsin diye saklanıyor.
+      setPdfUrl(url);
       setIsSent(true);
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Başvuru gönderilemedi.");
@@ -225,6 +271,25 @@ export default function MembershipApplicationPage() {
             Başvurunuz ASSİD yönetimi tarafından incelenecek. Onaylandığında, panelinize giriş yapabilmeniz için size
             e-posta adresinize giriş bilgileri iletilecektir.
           </p>
+          {settings?.address && (
+            <p className="mt-4 rounded-[14px] border border-assid-line bg-assid-paper px-5 py-4 text-[0.88rem] text-assid-ink">
+              İndirilen başvuru formunu imzalayıp ıslak imzalı olarak posta yoluyla{" "}
+              <strong>{settings.address}</strong> adresine göndermeniz gerekmektedir.
+            </p>
+          )}
+          {pdfUrl && (
+            <p className="mt-3 text-[0.85rem] text-assid-muted">
+              PDF cihazınıza otomatik inmediyse{" "}
+              <a
+                href={pdfUrl}
+                download="assid-uyelik-basvuru-formu.pdf"
+                className="font-bold text-assid-green hover:underline"
+              >
+                buraya tıklayıp indirebilirsiniz
+              </a>
+              .
+            </p>
+          )}
           <Button as={Link} to="/anasayfa" variant="primary" className="mt-6">
             Ana Sayfaya Dön
           </Button>
@@ -282,15 +347,15 @@ export default function MembershipApplicationPage() {
                   />
                 </Field>
               </div>
-              <Field label="Lokasyon">
+              <Field label="Telefon/Faks">
                 <input
-                  value={form.location}
-                  onChange={(e) => setForm({ ...form, location: e.target.value })}
+                  type="tel"
+                  inputMode="numeric"
+                  placeholder="(---) --- -- --"
+                  value={formatPhoneDigits(form.phone)}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
                   className={inputClass}
                 />
-              </Field>
-              <Field label="Telefon">
-                <PhoneInput value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
               </Field>
               <Field label="Cep Telefonu">
                 <PhoneInput value={form.mobilePhone} onChange={(v) => setForm({ ...form, mobilePhone: v })} />
@@ -377,6 +442,25 @@ export default function MembershipApplicationPage() {
             </div>
           </div>
 
+          <Section title="Lokasyonlar">
+            <div className="sm:col-span-2 flex flex-wrap gap-2">
+              {LOCATIONS.map((loc) => (
+                <button
+                  type="button"
+                  key={loc.slug}
+                  onClick={() => toggleLocation(loc.slug)}
+                  className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-[0.78rem] font-bold ${
+                    locations.includes(loc.slug)
+                      ? "border-assid-green bg-assid-green text-white"
+                      : "border-assid-line bg-transparent text-assid-ink"
+                  }`}
+                >
+                  {loc.name}
+                </button>
+              ))}
+            </div>
+          </Section>
+
           {(settings?.showMembershipClassSection ?? true) && (
           <Section title="Üyelik Sınıfı">
             <Field label="Üyelik Tipi">
@@ -456,7 +540,14 @@ export default function MembershipApplicationPage() {
               </select>
             </Field>
             <Field label="Telefon / Faks">
-              <PhoneInput value={form.faxPhone} onChange={(v) => setForm({ ...form, faxPhone: v })} />
+              <input
+                type="tel"
+                inputMode="numeric"
+                placeholder="(---) --- -- --"
+                value={formatPhoneDigits(form.faxPhone)}
+                onChange={(e) => setForm({ ...form, faxPhone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
+                className={inputClass}
+              />
             </Field>
             <Field label="Cep Telefonu">
               <PhoneInput
@@ -464,7 +555,7 @@ export default function MembershipApplicationPage() {
                 onChange={(v) => setForm({ ...form, personalMobilePhone: v })}
               />
             </Field>
-            <Field label="Bağlı Olduğu Kuruluşlar">
+            <Field label="Üye Olduğu Oda veya Dernekler">
               <input
                 value={form.affiliatedOrganizations}
                 onChange={(e) => setForm({ ...form, affiliatedOrganizations: e.target.value })}
@@ -479,6 +570,7 @@ export default function MembershipApplicationPage() {
                   onChange={(e) => setInfoAccuracyConfirmed(e.target.checked)}
                 />
                 Belirttiğim bilgilerimin doğru olduğunu kabul ediyorum
+                <RequiredMark />
               </label>
             </div>
           </Section>
@@ -510,43 +602,23 @@ export default function MembershipApplicationPage() {
 
           {(settings?.showAttachmentsSection ?? true) && (
             <Section title="Ekler">
-              <FileUploadField
-                label="2 Adet Fotoğraf"
-                hint="PNG, JPEG veya WEBP"
-                files={files.photos ?? []}
-                onChange={(f) => setFiles({ ...files, photos: f })}
-                multiple
-              />
-              <FileUploadField
-                label="Adli Sicil Kaydı"
-                hint="PNG, JPEG veya PDF"
-                files={files.criminalRecord ?? []}
-                onChange={(f) => setFiles({ ...files, criminalRecord: f })}
-              />
-              <FileUploadField
-                label="Kimlik Fotokopisi"
-                hint="PNG, JPEG veya PDF"
-                files={files.idCopy ?? []}
-                onChange={(f) => setFiles({ ...files, idCopy: f })}
-              />
-              <FileUploadField
-                label="Ticaret Sicil Gazetesi (Kurumsal)"
-                hint="PNG, JPEG veya PDF"
-                files={files.tradeRegistryGazette ?? []}
-                onChange={(f) => setFiles({ ...files, tradeRegistryGazette: f })}
-              />
-              <FileUploadField
-                label="Vergi Levhası (Kurumsal)"
-                hint="PNG, JPEG veya PDF"
-                files={files.taxCertificate ?? []}
-                onChange={(f) => setFiles({ ...files, taxCertificate: f })}
-              />
-              <FileUploadField
-                label="İmza Sirküleri (Kurumsal)"
-                hint="PNG, JPEG veya PDF"
-                files={files.signatureCircular ?? []}
-                onChange={(f) => setFiles({ ...files, signatureCircular: f })}
-              />
+              <div className="sm:col-span-2">
+                <p className="mb-3 text-[0.88rem] text-assid-ink">
+                  Aşağıdaki evrakları, başvuru formunu gönderdiğinizde oluşacak PDF çıktısıyla birlikte fiziksel
+                  olarak derneğe ulaştırmanız gerekmektedir:
+                </p>
+                <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {REQUIRED_DOCUMENTS.map((doc) => (
+                    <li key={doc} className="flex items-center gap-2 text-[0.88rem] text-assid-ink">
+                      <span
+                        aria-hidden="true"
+                        className="inline-block h-4 w-4 shrink-0 rounded-[4px] border border-assid-line"
+                      />
+                      {doc}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </Section>
           )}
 
@@ -608,16 +680,19 @@ export default function MembershipApplicationPage() {
             <Field label="Kart Numarası">
               <input
                 inputMode="numeric"
-                value={form.cardNumber}
-                onChange={(e) => setForm({ ...form, cardNumber: e.target.value.replace(/[^0-9\s]/g, "") })}
+                value={formatCardNumber(form.cardNumber)}
+                onChange={(e) =>
+                  setForm({ ...form, cardNumber: e.target.value.replace(/[^0-9]/g, "").slice(0, 16) })
+                }
                 className={inputClass}
               />
             </Field>
             <Field label="Son Kullanma Tarihi (AA/YY)">
               <input
                 placeholder="AA/YY"
+                inputMode="numeric"
                 value={form.cardExpiry}
-                onChange={(e) => setForm({ ...form, cardExpiry: e.target.value })}
+                onChange={(e) => setForm({ ...form, cardExpiry: formatCardExpiry(e.target.value) })}
                 className={inputClass}
               />
             </Field>
@@ -626,7 +701,7 @@ export default function MembershipApplicationPage() {
                 inputMode="numeric"
                 maxLength={4}
                 value={form.cardCvc}
-                onChange={(e) => setForm({ ...form, cardCvc: e.target.value.replace(/\D/g, "") })}
+                onChange={(e) => setForm({ ...form, cardCvc: e.target.value.replace(/\D/g, "").slice(0, 4) })}
                 className={inputClass}
               />
             </Field>
@@ -650,7 +725,12 @@ export default function MembershipApplicationPage() {
                   text={settings?.kvkkText ?? ""}
                   checked={kvkkConsent}
                   onChange={setKvkkConsent}
-                  checkboxLabel="KVKK Aydınlatma Metni'ni okudum, anladım."
+                  checkboxLabel={
+                    <>
+                      KVKK Aydınlatma Metni'ni okudum, anladım.
+                      <RequiredMark />
+                    </>
+                  }
                 />
               )}
               {(settings?.showBylawsConsent ?? true) && (
@@ -659,7 +739,12 @@ export default function MembershipApplicationPage() {
                   text={settings?.bylawsText ?? ""}
                   checked={bylawsAcknowledged}
                   onChange={setBylawsAcknowledged}
-                  checkboxLabel="Dernek tüzüğünü okudum, anladım."
+                  checkboxLabel={
+                    <>
+                      Dernek tüzüğünü okudum, anladım.
+                      <RequiredMark />
+                    </>
+                  }
                 />
               )}
             </Section>

@@ -11,11 +11,38 @@ export interface MyMemberProfile {
   email: string;
   sectors: string[];
   businessActivityTypes: string[];
+  references?: string;
   membershipType: "individual" | "corporate";
+  locations: string[];
+  faxPhone?: string;
+  personalMobilePhone?: string;
+  affiliatedOrganizations?: string;
+  contactPreference?: "email" | "sms" | "phone";
+  maritalStatus?: "married" | "single";
   applicationStatus: "pending" | "approved" | "rejected";
   logo?: string;
   activityAreas: string[];
   productsAndServices: string[];
+}
+
+export interface UpdateMyMemberProfileDto {
+  companyName?: string;
+  title?: string;
+  companyAddress?: string;
+  phone?: string;
+  mobilePhone?: string;
+  sectors?: string[];
+  businessActivityTypes?: string[];
+  references?: string;
+  membershipType?: "individual" | "corporate";
+  locations?: string[];
+  faxPhone?: string;
+  personalMobilePhone?: string;
+  affiliatedOrganizations?: string;
+  contactPreference?: "email" | "sms" | "phone";
+  maritalStatus?: "married" | "single";
+  activityAreas?: string[];
+  productsAndServices?: string[];
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -36,7 +63,7 @@ export function fetchMyMemberProfile() {
   return request<MyMemberProfile>("/members/me");
 }
 
-export function updateMyMemberProfile(dto: { activityAreas?: string[]; productsAndServices?: string[] }) {
+export function updateMyMemberProfile(dto: UpdateMyMemberProfileDto) {
   return request<MyMemberProfile>("/members/me", { method: "PATCH", body: JSON.stringify(dto) });
 }
 

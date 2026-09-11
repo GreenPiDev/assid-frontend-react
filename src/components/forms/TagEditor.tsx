@@ -56,7 +56,7 @@ export default function TagEditor({
             }
           }}
           placeholder={placeholder}
-          className="flex-1 rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 text-[0.85rem] outline-none focus:border-assid-green/50"
+          className="w-full max-w-[260px] rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 text-[0.85rem] outline-none focus:border-assid-green/50"
         />
         <button
           type="button"
