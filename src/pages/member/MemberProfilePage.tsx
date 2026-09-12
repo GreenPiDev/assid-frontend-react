@@ -12,8 +12,10 @@ import {
   uploadMyPortfolioSlides,
   type UpdateMyMemberProfileDto,
 } from "../../api/member";
+import { createPost, deletePost, usePostsInvalidate, type Post } from "../../api/resources/posts";
 import Badge from "../../components/admin/Badge";
 import MemberCardContent from "../../components/directory/MemberCardContent";
+import CompanyFeed from "../../components/directory/CompanyFeed";
 import TagEditor from "../../components/forms/TagEditor";
 import CardInfoSection from "../../components/forms/CardInfoSection";
 import {
@@ -267,6 +269,34 @@ export default function MemberProfilePage() {
     }
   }
 
+  const invalidatePosts = usePostsInvalidate(profile?._id);
+  const [postBody, setPostBody] = useState("");
+  const [postImage, setPostImage] = useState<File | null>(null);
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
+
+  const createPostMutation = useMutation({
+    mutationFn: () => createPost(postBody, postImage ?? undefined),
+    onSuccess: () => {
+      invalidatePosts();
+      setPostBody("");
+      setPostImage(null);
+      showToast("Gönderi paylaşıldı.");
+    },
+    onError: (err) => showToast(err instanceof Error ? err.message : "Gönderi paylaşılamadı."),
+  });
+
+  async function handleDeletePost(post: Post) {
+    setDeletingPostId(post.id);
+    try {
+      await deletePost(post.id);
+      invalidatePosts();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Gönderi silinemedi.");
+    } finally {
+      setDeletingPostId(null);
+    }
+  }
+
   if (isLoading || !profile) {
     return <p className="text-assid-muted">Yükleniyor...</p>;
   }
@@ -422,6 +452,55 @@ export default function MemberProfilePage() {
           {uploadCompanyDocsMutation.isPending ? "Yükleniyor..." : "PDF Yükle"}
         </button>
         <p className="mt-2 text-[0.78rem] text-assid-muted">En fazla 10MB, sadece PDF.</p>
+      </div>
+
+      <div className="mb-5 rounded-[20px] border border-assid-line bg-white p-6 md:p-7">
+        <h2 className="mb-4 text-[1.02rem] font-bold text-assid-ink">Gönderiler</h2>
+        <div className="mb-5 grid gap-3">
+          <textarea
+            value={postBody}
+            onChange={(e) => setPostBody(e.target.value)}
+            placeholder="Firmanızla ilgili bir gönderi paylaşın..."
+            rows={3}
+            className={`${inputClass} resize-none`}
+          />
+          <div className="flex flex-wrap items-center gap-3">
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={(e) => setPostImage(e.target.files?.[0] ?? null)}
+              className="hidden"
+              id="post-image-input"
+            />
+            <button
+              type="button"
+              onClick={() => document.getElementById("post-image-input")?.click()}
+              className="cursor-pointer rounded-full border border-assid-line bg-transparent px-4 py-2 text-[0.8rem] font-bold text-assid-ink"
+            >
+              {postImage ? postImage.name : "Görsel Ekle (opsiyonel)"}
+            </button>
+            {postImage && (
+              <button
+                type="button"
+                onClick={() => setPostImage(null)}
+                className="cursor-pointer border-0 bg-transparent text-[0.8rem] font-bold text-assid-muted hover:text-[#c0392b]"
+              >
+                Kaldır
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => createPostMutation.mutate()}
+              disabled={createPostMutation.isPending || !postBody.trim()}
+              className="ml-auto cursor-pointer rounded-full border-0 bg-assid-green px-5 py-2.5 text-[0.85rem] font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {createPostMutation.isPending ? "Paylaşılıyor..." : "Paylaş"}
+            </button>
+          </div>
+        </div>
+        <div className="rounded-[16px] bg-[rgba(9,34,58,.92)] p-5">
+          <CompanyFeed memberId={profile._id} onDelete={handleDeletePost} deletingId={deletingPostId ?? undefined} />
+        </div>
       </div>
 
       <div className="grid gap-5">

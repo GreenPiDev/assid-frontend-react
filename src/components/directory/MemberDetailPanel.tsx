@@ -1,13 +1,14 @@
 import type { Member } from "../../types";
 import MemberCardContent from "./MemberCardContent";
+import CompanyFeed from "./CompanyFeed";
 
 export default function MemberDetailPanel({ member, onClose }: { member: Member | null; onClose: () => void }) {
   const open = !!member;
 
   return (
     <aside
-      className={`fixed bottom-0 left-0 top-0 z-17 flex w-full flex-col overflow-y-auto rounded-r-2xl border-r border-white/35 bg-[rgba(9,34,58,.92)] text-white shadow-[18px_0_48px_rgba(6,18,30,.4)] backdrop-blur-xl transition-transform duration-350 [transition-timing-function:cubic-bezier(.22,.9,.3,1)] lg:w-[min(420px,92vw)] ${
-        open ? "translate-x-0" : "-translate-x-full"
+      className={`fixed inset-4 z-17 flex flex-col overflow-hidden rounded-3xl border border-white/25 bg-[rgba(9,34,58,.92)] text-white shadow-[0_30px_80px_rgba(6,18,30,.5)] backdrop-blur-xl transition-[opacity,transform] duration-350 [transition-timing-function:cubic-bezier(.22,.9,.3,1)] lg:inset-6 lg:right-[444px] ${
+        open ? "scale-100 opacity-100" : "pointer-events-none scale-97 opacity-0"
       }`}
       aria-hidden={!open}
     >
@@ -20,7 +21,19 @@ export default function MemberDetailPanel({ member, onClose }: { member: Member 
           <path d="M18 6 6 18M6 6l12 12" />
         </svg>
       </button>
-      <div className="px-8.5 pb-8.5 pt-10">{member && <MemberCardContent member={member} />}</div>
+      {member && (
+        <div className="min-h-0 flex-1 overflow-y-auto px-8.5 pb-8.5 pt-10">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[320px_1fr]">
+            <MemberCardContent member={member} />
+            <div>
+              <span className="mb-3 block text-[0.8rem] font-extrabold uppercase tracking-wide text-white/60">
+                Gönderiler
+              </span>
+              <CompanyFeed memberId={member.id} />
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   );
 }
