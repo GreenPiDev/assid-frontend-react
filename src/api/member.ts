@@ -23,6 +23,8 @@ export interface MyMemberProfile {
   logo?: string;
   activityAreas: string[];
   productsAndServices: string[];
+  portfolioSlides: string[];
+  companyDocuments: { label: string; url: string }[];
 }
 
 export interface UpdateMyMemberProfileDto {
@@ -96,6 +98,38 @@ export async function uploadMyLogo(file: File): Promise<MyMemberProfile> {
     throw new Error(message ?? `İstek başarısız (${res.status})`);
   }
   return res.json() as Promise<MyMemberProfile>;
+}
+
+async function uploadFiles(path: string, files: File[]): Promise<MyMemberProfile> {
+  const formData = new FormData();
+  files.forEach((file) => formData.append("files", file));
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as { message?: string | string[] } | null;
+    const message = Array.isArray(body?.message) ? body.message[0] : body?.message;
+    throw new Error(message ?? `İstek başarısız (${res.status})`);
+  }
+  return res.json() as Promise<MyMemberProfile>;
+}
+
+export function uploadMyPortfolioSlides(files: File[]) {
+  return uploadFiles("/members/me/portfolio-slides", files);
+}
+
+export function removeMyPortfolioSlide(url: string) {
+  return request<MyMemberProfile>("/members/me/portfolio-slides", { method: "DELETE", body: JSON.stringify({ url }) });
+}
+
+export function uploadMyCompanyDocuments(files: File[]) {
+  return uploadFiles("/members/me/company-documents", files);
+}
+
+export function removeMyCompanyDocument(url: string) {
+  return request<MyMemberProfile>("/members/me/company-documents", { method: "DELETE", body: JSON.stringify({ url }) });
 }
 
 export function changeMyPassword(currentPassword: string, newPassword: string) {

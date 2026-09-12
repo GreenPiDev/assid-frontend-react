@@ -1,5 +1,27 @@
 import { Paths, useGet, useGetList } from "../factory";
+import { API_BASE_URL } from "../env";
 import type { Member } from "../../types";
+
+export interface InfoRequestDto {
+  name: string;
+  email: string;
+  phone?: string;
+  message: string;
+}
+
+// POST /members/:id/info-request — ziyaretçi bilgi talebi
+export async function submitInfoRequest(memberId: string, dto: InfoRequestDto): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/members/${memberId}/info-request`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(dto),
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as { message?: string | string[] } | null;
+    const message = Array.isArray(body?.message) ? body.message[0] : body?.message;
+    throw new Error(message ?? `İstek başarısız (${res.status})`);
+  }
+}
 
 // GET /members — dernek üyesi firmalar
 export function useMembers() {

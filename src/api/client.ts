@@ -29,6 +29,9 @@ interface BackendMember {
   logo?: string;
   notes?: Record<string, string>;
   applicationStatus: "pending" | "approved" | "rejected";
+  companyDocuments?: { label: string; url: string }[];
+  portfolioSlides?: string[];
+  isFeatured?: boolean;
 }
 
 export interface BackendNews {
@@ -146,6 +149,9 @@ function toFrontendMember(m: BackendMember): Member {
       address: m.companyAddress || "",
     },
     notes: m.notes,
+    companyDocuments: m.companyDocuments ?? [],
+    portfolioSlides: m.portfolioSlides ?? [],
+    isFeatured: m.isFeatured ?? false,
   };
 }
 

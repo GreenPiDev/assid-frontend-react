@@ -3,9 +3,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   fetchMyCardInfo,
   fetchMyMemberProfile,
+  removeMyCompanyDocument,
+  removeMyPortfolioSlide,
   updateMyCardInfo,
   updateMyMemberProfile,
+  uploadMyCompanyDocuments,
   uploadMyLogo,
+  uploadMyPortfolioSlides,
   type UpdateMyMemberProfileDto,
 } from "../../api/member";
 import Badge from "../../components/admin/Badge";
@@ -44,6 +48,7 @@ const inputClass =
   "rounded-[12px] border border-assid-line bg-assid-paper px-3.5 py-2.5 outline-none focus:border-assid-green/50";
 
 const profileQueryKey = ["member", "profile"];
+const MAX_PORTFOLIO_SLIDES = 25;
 
 type EditableFields = Required<
   Pick<
@@ -200,6 +205,68 @@ export default function MemberProfilePage() {
     }
   }
 
+  const uploadPortfolioMutation = useMutation({
+    mutationFn: uploadMyPortfolioSlides,
+    onSuccess: (updated) => queryClient.setQueryData(profileQueryKey, updated),
+  });
+  const removePortfolioMutation = useMutation({
+    mutationFn: removeMyPortfolioSlide,
+    onSuccess: (updated) => queryClient.setQueryData(profileQueryKey, updated),
+  });
+
+  async function handlePortfolioChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    if (!files.length || !profile) return;
+    if (profile.portfolioSlides.length + files.length > MAX_PORTFOLIO_SLIDES) {
+      showToast(`En fazla ${MAX_PORTFOLIO_SLIDES} slayt yükleyebilirsiniz.`);
+      return;
+    }
+    try {
+      await uploadPortfolioMutation.mutateAsync(files);
+      showToast("Slaytlar yüklendi.");
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Slayt yüklenemedi.");
+    }
+  }
+
+  async function handleRemovePortfolioSlide(url: string) {
+    try {
+      await removePortfolioMutation.mutateAsync(url);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Slayt kaldırılamadı.");
+    }
+  }
+
+  const uploadCompanyDocsMutation = useMutation({
+    mutationFn: uploadMyCompanyDocuments,
+    onSuccess: (updated) => queryClient.setQueryData(profileQueryKey, updated),
+  });
+  const removeCompanyDocMutation = useMutation({
+    mutationFn: removeMyCompanyDocument,
+    onSuccess: (updated) => queryClient.setQueryData(profileQueryKey, updated),
+  });
+
+  async function handleCompanyDocsChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    if (!files.length) return;
+    try {
+      await uploadCompanyDocsMutation.mutateAsync(files);
+      showToast("PDF dosyaları yüklendi.");
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "PDF yüklenemedi.");
+    }
+  }
+
+  async function handleRemoveCompanyDoc(url: string) {
+    try {
+      await removeCompanyDocMutation.mutateAsync(url);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Dosya kaldırılamadı.");
+    }
+  }
+
   if (isLoading || !profile) {
     return <p className="text-assid-muted">Yükleniyor...</p>;
   }
@@ -272,6 +339,89 @@ export default function MemberProfilePage() {
             <p className="mt-2 text-[0.78rem] text-assid-muted">PNG, JPEG, WEBP veya SVG — en fazla 5MB.</p>
           </div>
         </div>
+      </div>
+
+      <div className="mb-5 rounded-[20px] border border-assid-line bg-white p-6 md:p-7">
+        <h2 className="mb-1 text-[1.02rem] font-bold text-assid-ink">Portfolyo Slaytları</h2>
+        <p className="mb-4 text-[0.78rem] text-assid-muted">
+          Firma rehberindeki profilinizde gösterilecek slayt görselleri ({profile.portfolioSlides.length}/
+          {MAX_PORTFOLIO_SLIDES}).
+        </p>
+        {profile.portfolioSlides.length > 0 && (
+          <div className="mb-4 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
+            {profile.portfolioSlides.map((url) => (
+              <div key={url} className="group relative aspect-square overflow-hidden rounded-[10px] border border-assid-line">
+                <img src={url} alt="Portfolyo slaytı" className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => handleRemovePortfolioSlide(url)}
+                  disabled={removePortfolioMutation.isPending}
+                  aria-label="Slaytı kaldır"
+                  className="absolute right-1 top-1 grid h-6 w-6 cursor-pointer place-items-center rounded-full border-0 bg-black/60 text-white opacity-0 transition group-hover:opacity-100"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <input
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          multiple
+          onChange={handlePortfolioChange}
+          className="hidden"
+          id="portfolio-slide-input"
+        />
+        <button
+          type="button"
+          disabled={uploadPortfolioMutation.isPending || profile.portfolioSlides.length >= MAX_PORTFOLIO_SLIDES}
+          onClick={() => document.getElementById("portfolio-slide-input")?.click()}
+          className="cursor-pointer rounded-full border border-assid-line bg-transparent px-5 py-2.5 text-[0.85rem] font-bold text-assid-ink disabled:opacity-60"
+        >
+          {uploadPortfolioMutation.isPending ? "Yükleniyor..." : "Slayt Ekle"}
+        </button>
+      </div>
+
+      <div className="mb-5 rounded-[20px] border border-assid-line bg-white p-6 md:p-7">
+        <h2 className="mb-4 text-[1.02rem] font-bold text-assid-ink">Firma PDF'leri</h2>
+        {profile.companyDocuments.length > 0 && (
+          <ul className="mb-4 grid gap-2">
+            {profile.companyDocuments.map((doc) => (
+              <li key={doc.url} className="flex items-center justify-between gap-3 rounded-[10px] border border-assid-line px-3.5 py-2.5">
+                <a href={doc.url} target="_blank" rel="noopener noreferrer" className="truncate text-[0.85rem] font-bold text-assid-ink underline">
+                  {doc.label}
+                </a>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveCompanyDoc(doc.url)}
+                  disabled={removeCompanyDocMutation.isPending}
+                  className="cursor-pointer border-0 bg-transparent text-assid-muted hover:text-[#c0392b]"
+                  aria-label={`${doc.label} dosyasını kaldır`}
+                >
+                  ×
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <input
+          type="file"
+          accept="application/pdf"
+          multiple
+          onChange={handleCompanyDocsChange}
+          className="hidden"
+          id="company-document-input"
+        />
+        <button
+          type="button"
+          disabled={uploadCompanyDocsMutation.isPending}
+          onClick={() => document.getElementById("company-document-input")?.click()}
+          className="cursor-pointer rounded-full border border-assid-line bg-transparent px-5 py-2.5 text-[0.85rem] font-bold text-assid-ink disabled:opacity-60"
+        >
+          {uploadCompanyDocsMutation.isPending ? "Yükleniyor..." : "PDF Yükle"}
+        </button>
+        <p className="mt-2 text-[0.78rem] text-assid-muted">En fazla 10MB, sadece PDF.</p>
       </div>
 
       <div className="grid gap-5">

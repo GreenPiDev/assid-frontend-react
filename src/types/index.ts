@@ -21,6 +21,9 @@ export interface Member {
   productsAndServices: string[];
   contact: MemberContact;
   notes?: Record<string, string>;
+  companyDocuments?: { label: string; url: string }[];
+  portfolioSlides?: string[];
+  isFeatured?: boolean;
 }
 
 export interface SelectItem {

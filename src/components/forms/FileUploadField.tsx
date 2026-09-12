@@ -6,12 +6,16 @@ export default function FileUploadField({
   files,
   onChange,
   multiple,
+  maxCount = 2,
+  accept = "image/png,image/jpeg,image/webp,application/pdf",
 }: {
   label: string;
   hint?: string;
   files: File[];
   onChange: (files: File[]) => void;
   multiple?: boolean;
+  maxCount?: number;
+  accept?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -19,7 +23,7 @@ export default function FileUploadField({
     const selected = Array.from(e.target.files ?? []);
     e.target.value = "";
     if (!selected.length) return;
-    onChange(multiple ? [...files, ...selected].slice(0, 2) : selected);
+    onChange(multiple ? [...files, ...selected].slice(0, maxCount) : selected);
   }
 
   return (
@@ -28,7 +32,7 @@ export default function FileUploadField({
       <input
         ref={inputRef}
         type="file"
-        accept="image/png,image/jpeg,image/webp,application/pdf"
+        accept={accept}
         multiple={multiple}
         onChange={handleChange}
         className="hidden"

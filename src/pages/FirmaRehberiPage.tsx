@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useMemberById, useMembersBySector } from "../api/resources/members";
-import MemberModal from "../components/directory/MemberModal";
+import MemberDetailPanel from "../components/directory/MemberDetailPanel";
 import FilterPanel from "../components/directory/FilterPanel";
 import MapView from "../components/directory/MapView";
 import { SECTORS } from "../constants/sectors";
@@ -15,7 +15,7 @@ export default function FirmaRehberiPage() {
   const [panelOpen, setPanelOpen] = useState(false);
   const [currentSector, setCurrentSector] = useState<string | null>(null);
   const [currentActivity, setCurrentActivity] = useState("");
-  const [modalMember, setModalMember] = useState<Member | null>(null);
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const initialized = useRef(false);
 
   const { data: membersInSector } = useMembersBySector(currentSector);
@@ -51,7 +51,7 @@ export default function FirmaRehberiPage() {
   }, []);
 
   useEffect(() => {
-    if (memberIdParam && requestedMember) setModalMember(requestedMember);
+    if (memberIdParam && requestedMember) setSelectedMember(requestedMember);
   }, [memberIdParam, requestedMember]);
 
   // Harita sürüklenirken mobilde sayfanın "bounce" ile kaymasını engelle.
@@ -65,7 +65,7 @@ export default function FirmaRehberiPage() {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key !== "Escape") return;
-      if (modalMember) setModalMember(null);
+      if (selectedMember) setSelectedMember(null);
       else if (panelOpen) closePanel();
     }
     document.addEventListener("keydown", handleKeyDown);
@@ -86,7 +86,15 @@ export default function FirmaRehberiPage() {
     openPanel(slug);
   }
 
-  const scrimOpen = panelOpen || !!modalMember;
+  const MOBILE_BREAKPOINT = 1024;
+
+  function handleMemberSelect(member: Member) {
+    setSelectedMember(member);
+    // Mobilde iki panel yan yana sığmaz — firma seçilince filtre paneli kapanır.
+    if (window.innerWidth < MOBILE_BREAKPOINT) closePanel();
+  }
+
+  const scrimOpen = panelOpen || !!selectedMember;
 
   return (
     <>
@@ -107,10 +115,10 @@ export default function FirmaRehberiPage() {
 
       <div
         className={`fixed inset-0 z-15 transition-opacity duration-300 ${
-          modalMember ? "bg-[rgba(6,18,30,.38)]" : "bg-transparent"
+          selectedMember ? "bg-[rgba(6,18,30,.38)]" : "bg-transparent"
         } ${scrimOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
         onClick={() => {
-          if (modalMember) setModalMember(null);
+          if (selectedMember) setSelectedMember(null);
           else if (panelOpen) closePanel();
         }}
       />
@@ -127,10 +135,10 @@ export default function FirmaRehberiPage() {
         onActivityChange={setCurrentActivity}
         filteredMembers={filteredMembers}
         totalMembers={membersInSector.length}
-        onMemberClick={setModalMember}
+        onMemberClick={handleMemberSelect}
       />
 
-      <MemberModal member={modalMember} onClose={() => setModalMember(null)} />
+      <MemberDetailPanel member={selectedMember} onClose={() => setSelectedMember(null)} />
     </>
   );
 }

@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import type { Member } from "../../types";
 import { getSectorName } from "../../utils/directory";
+import InfoRequestForm from "./InfoRequestForm";
+import CompanyDocumentLinks from "./CompanyDocumentLinks";
+import PortfolioGallery from "./PortfolioGallery";
 
 function Tags({ items }: { items?: string[] }) {
   return (
@@ -43,9 +46,16 @@ export default function MemberCardContent({ member }: { member: Member }) {
     <div className="flex flex-col gap-5.5">
       <div className="flex items-start justify-between gap-4 pr-10">
         <div>
-          <span className="text-[0.78rem] font-extrabold uppercase tracking-[.12em] text-white/75">
-            Firma Profili
-          </span>
+          <div className="flex items-center gap-2.5">
+            <span className="text-[0.78rem] font-extrabold uppercase tracking-[.12em] text-white/75">
+              Firma Profili
+            </span>
+            {member.isFeatured && (
+              <span className="rounded-full bg-assid-lime px-2.5 py-1 text-[0.68rem] font-extrabold uppercase tracking-wide text-assid-ink">
+                Öne Çıkan
+              </span>
+            )}
+          </div>
           <h2 className="mt-2 text-[clamp(1.6rem,3.4vw,2.3rem)] leading-[1.15] tracking-[-.03em]">{member.name}</h2>
         </div>
         {member.logo && (
@@ -88,6 +98,22 @@ export default function MemberCardContent({ member }: { member: Member }) {
           </div>
         </ModalSection>
       )}
+
+      {(member.companyDocuments?.length ?? 0) > 0 && (
+        <ModalSection label="Dökümanlar">
+          <CompanyDocumentLinks documents={member.companyDocuments ?? []} />
+        </ModalSection>
+      )}
+
+      {(member.portfolioSlides?.length ?? 0) > 0 && (
+        <ModalSection label="Portfolyo">
+          <PortfolioGallery slides={member.portfolioSlides ?? []} />
+        </ModalSection>
+      )}
+
+      <ModalSection label="Bilgi Talep Et">
+        <InfoRequestForm memberId={member.id} />
+      </ModalSection>
     </div>
   );
 }
