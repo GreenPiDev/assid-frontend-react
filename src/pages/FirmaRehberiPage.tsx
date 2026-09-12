@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { useMemberById, useMembersBySector } from "../api/resources/members";
+import { useMemberById, useMembers, useMembersBySector } from "../api/resources/members";
 import MemberDetailPanel from "../components/directory/MemberDetailPanel";
 import FilterPanel from "../components/directory/FilterPanel";
 import MapView from "../components/directory/MapView";
@@ -15,10 +15,24 @@ export default function FirmaRehberiPage() {
   const [panelOpen, setPanelOpen] = useState(false);
   const [currentSector, setCurrentSector] = useState<string | null>(null);
   const [currentActivity, setCurrentActivity] = useState("");
+  const [nameQuery, setNameQuery] = useState("");
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const initialized = useRef(false);
 
+  const isSearching = nameQuery.trim().length > 0;
   const { data: membersInSector } = useMembersBySector(currentSector);
+  const { data: allMembers } = useMembers();
+
+  function handleNameQueryChange(value: string) {
+    setNameQuery(value);
+    // İsimle arama, seçili sektör/faaliyet alanı ile birlikte çift filtreye
+    // dönüşmesin diye — arama başlayınca bu filtreler sıfırlanıp tüm
+    // firmalar arasında aranır.
+    if (value.trim()) {
+      setCurrentSector(null);
+      setCurrentActivity("");
+    }
+  }
 
   const memberIdParam = searchParams.get("firma");
   const { data: requestedMember } = useMemberById(memberIdParam);
@@ -77,10 +91,12 @@ export default function FirmaRehberiPage() {
     return [{ value: "", label: "Tüm Faaliyet Alanları" }, ...tags.map((t) => ({ value: t, label: t }))];
   }, [membersInSector]);
 
+  const baseMembers = isSearching ? allMembers : membersInSector;
+
   const filteredMembers = useMemo(() => {
-    if (!currentActivity) return membersInSector;
-    return membersInSector.filter((m) => (m.activityAreas || []).includes(currentActivity));
-  }, [membersInSector, currentActivity]);
+    if (!currentActivity) return baseMembers;
+    return baseMembers.filter((m) => (m.activityAreas || []).includes(currentActivity));
+  }, [baseMembers, currentActivity]);
 
   function handlePinClick(slug: string) {
     openPanel(slug);
@@ -134,7 +150,9 @@ export default function FirmaRehberiPage() {
         activityValue={currentActivity}
         onActivityChange={setCurrentActivity}
         filteredMembers={filteredMembers}
-        totalMembers={membersInSector.length}
+        totalMembers={baseMembers.length}
+        nameQuery={nameQuery}
+        onNameQueryChange={handleNameQueryChange}
         onMemberClick={handleMemberSelect}
       />
 

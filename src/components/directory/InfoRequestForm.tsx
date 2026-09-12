@@ -4,7 +4,7 @@ import { submitInfoRequest } from "../../api/resources/members";
 import { useToast } from "../../context/ToastContext";
 
 const inputClass =
-  "rounded-[10px] border border-white/30 bg-white/10 px-3.5 py-2.5 text-white placeholder:text-white/50 outline-none focus:border-white/60";
+  "rounded-[10px] border border-assid-line bg-assid-paper px-3.5 py-2.5 text-assid-ink placeholder:text-assid-muted outline-none focus:border-assid-green/50";
 
 export default function InfoRequestForm({ memberId }: { memberId: string }) {
   const showToast = useToast();
@@ -61,7 +61,7 @@ export default function InfoRequestForm({ memberId }: { memberId: string }) {
       <button
         type="submit"
         disabled={mutation.isPending}
-        className="cursor-pointer self-start rounded-full border-0 bg-assid-lime px-5 py-2.5 text-[0.85rem] font-extrabold text-assid-ink disabled:cursor-not-allowed disabled:opacity-60"
+        className="cursor-pointer self-start rounded-full border-0 bg-assid-green px-5 py-2.5 text-[0.85rem] font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-60"
       >
         {mutation.isPending ? "Gönderiliyor..." : "Bilgi Talep Et"}
       </button>

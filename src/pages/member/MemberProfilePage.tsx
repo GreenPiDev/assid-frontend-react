@@ -498,7 +498,7 @@ export default function MemberProfilePage() {
             </button>
           </div>
         </div>
-        <div className="rounded-[16px] bg-[rgba(9,34,58,.92)] p-5">
+        <div className="rounded-[16px] border border-assid-line bg-white p-5">
           <CompanyFeed memberId={profile._id} onDelete={handleDeletePost} deletingId={deletingPostId ?? undefined} />
         </div>
       </div>
@@ -743,7 +743,7 @@ export default function MemberProfilePage() {
         <span className="mb-3 block text-[0.78rem] font-bold uppercase tracking-wide text-assid-muted">
           Firma Rehberinde Böyle Görünecek
         </span>
-        <div className="rounded-3xl border border-white/35 bg-[rgba(9,34,58,.92)] px-8.5 py-8.5 text-white shadow-[0_30px_80px_rgba(6,18,30,.5)] backdrop-blur-xl">
+        <div className="rounded-3xl border border-assid-line bg-white px-8.5 py-8.5 text-assid-ink shadow-[0_10px_30px_rgba(13,27,42,.08)]">
           <MemberCardContent
             member={{
               id: profile._id,

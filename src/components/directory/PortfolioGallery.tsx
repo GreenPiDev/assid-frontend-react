@@ -15,7 +15,7 @@ export default function PortfolioGallery({ slides }: { slides: string[] }) {
             type="button"
             key={url}
             onClick={() => setLightboxIndex(index)}
-            className="aspect-square cursor-pointer overflow-hidden rounded-[10px] border border-white/25 transition duration-200 hover:border-white/55"
+            className="aspect-square cursor-pointer overflow-hidden rounded-[10px] border border-assid-line transition duration-200 hover:border-assid-green/50"
           >
             <img src={url} alt={`Slayt ${index + 1}`} className="h-full w-full object-cover" />
           </button>
