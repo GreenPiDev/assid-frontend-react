@@ -17,7 +17,7 @@ export const Paths = {
 };
 
 interface GetOptions extends Partial<Omit<UseQueryOptions, "queryKey" | "queryFn">> {
-  params?: { sector?: string; q?: string; limit?: number; upcoming?: boolean };
+  params?: { sector?: string; location?: string; q?: string; limit?: number; upcoming?: boolean };
   queryKey?: unknown[];
 }
 

@@ -13,7 +13,10 @@ interface FilterPanelProps {
   sectorItems: SelectItem[];
   sectorValue: string | null;
   onSectorChange: (value: string) => void;
-  sectorName: string;
+  locationItems: SelectItem[];
+  locationValue: string | null;
+  onLocationChange: (value: string) => void;
+  panelName: string;
   activityItems: SelectItem[];
   activityValue: string;
   onActivityChange: (value: string) => void;
@@ -30,7 +33,10 @@ export default function FilterPanel({
   sectorItems,
   sectorValue,
   onSectorChange,
-  sectorName,
+  locationItems,
+  locationValue,
+  onLocationChange,
+  panelName,
   activityItems,
   activityValue,
   onActivityChange,
@@ -57,8 +63,10 @@ export default function FilterPanel({
     >
       <div className="flex flex-none items-start justify-between gap-3.5 border-b border-assid-line px-5.5 pb-4.5 pt-5.5">
         <div>
-          <span className="text-[0.68rem] font-extrabold uppercase tracking-[.12em] text-assid-muted">Sektör Firmaları</span>
-          <h2 className="mt-1.5 text-[1.35rem] tracking-tight text-assid-ink">{sectorName || "—"}</h2>
+          <span className="text-[0.68rem] font-extrabold uppercase tracking-[.12em] text-assid-muted">
+            {locationValue ? "Lokasyon Firmaları" : "Sektör Firmaları"}
+          </span>
+          <h2 className="mt-1.5 text-[1.35rem] tracking-tight text-assid-ink">{panelName || "—"}</h2>
         </div>
         <button
           className="flex-none grid h-8.5 w-8.5 place-items-center rounded-lg border border-assid-line bg-assid-paper text-assid-ink transition duration-250 hover:bg-assid-line/60"
@@ -121,6 +129,15 @@ export default function FilterPanel({
               value={sectorValue}
               onChange={onSectorChange}
               placeholder="Sektör ara..."
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[0.68rem] font-extrabold uppercase tracking-wide text-assid-muted">Lokasyon</label>
+            <CustomDropdown
+              items={locationItems}
+              value={locationValue}
+              onChange={onLocationChange}
+              placeholder="Lokasyon ara..."
             />
           </div>
           <div className="flex flex-col gap-1.5">

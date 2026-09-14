@@ -322,20 +322,34 @@ export default function MemberProfilePage() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <span className="text-[0.74rem] font-extrabold uppercase tracking-[.16em] text-assid-green">
             Üye Paneli
           </span>
           <h1 className="mt-1 text-[1.5rem] tracking-[-.03em] text-assid-ink">Profilim</h1>
+          <p className="mt-2 text-[0.82rem] font-bold text-[#c0392b]">
+            Yaptığınız güncellemelerin geçerli olması için değişiklikleri tamamladıktan sonra "Değişiklikleri
+            Kaydet" butonuna basmanız gerekir.
+          </p>
         </div>
-        <Badge variant={profile.applicationStatus === "approved" ? "success" : profile.applicationStatus === "rejected" ? "danger" : "pending"}>
-          {profile.applicationStatus === "approved"
-            ? "Onaylı Üye"
-            : profile.applicationStatus === "rejected"
-              ? "Başvurusu Reddedildi"
-              : "Onay Bekliyor"}
-        </Badge>
+        <div className="flex flex-col items-end gap-3">
+          <Badge variant={profile.applicationStatus === "approved" ? "success" : profile.applicationStatus === "rejected" ? "danger" : "pending"}>
+            {profile.applicationStatus === "approved"
+              ? "Onaylı Üye"
+              : profile.applicationStatus === "rejected"
+                ? "Başvurusu Reddedildi"
+                : "Onay Bekliyor"}
+          </Badge>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saveMutation.isPending || !isDirty}
+            className="cursor-pointer rounded-full border-0 bg-assid-green px-6 py-3 text-[0.88rem] font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {saveMutation.isPending ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
+          </button>
+        </div>
       </div>
 
       <div className="mb-5 rounded-[20px] border border-assid-line bg-white p-6 md:p-7">

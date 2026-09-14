@@ -1,19 +1,22 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { useMemberById, useMembers, useMembersBySector } from "../api/resources/members";
+import { useMemberById, useMembers, useMembersByLocation, useMembersBySector } from "../api/resources/members";
 import MemberDetailPanel from "../components/directory/MemberDetailPanel";
 import FilterPanel from "../components/directory/FilterPanel";
 import MapView from "../components/directory/MapView";
 import { SECTORS } from "../constants/sectors";
+import { LOCATIONS, getLocationName } from "../constants/locations";
 import type { Member } from "../types";
 import { getActivityAreasForMembers, getSectorName } from "../utils/directory";
 
 const sectorItems = SECTORS.map((s) => ({ value: s.slug, label: s.name }));
+const locationItems = LOCATIONS.map((l) => ({ value: l.slug, label: l.name }));
 
 export default function FirmaRehberiPage() {
   const [searchParams] = useSearchParams();
   const [panelOpen, setPanelOpen] = useState(false);
   const [currentSector, setCurrentSector] = useState<string | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<string | null>(null);
   const [currentActivity, setCurrentActivity] = useState("");
   const [nameQuery, setNameQuery] = useState("");
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
@@ -21,15 +24,17 @@ export default function FirmaRehberiPage() {
 
   const isSearching = nameQuery.trim().length > 0;
   const { data: membersInSector } = useMembersBySector(currentSector);
+  const { data: membersInLocation } = useMembersByLocation(currentLocation);
   const { data: allMembers } = useMembers();
 
   function handleNameQueryChange(value: string) {
     setNameQuery(value);
-    // İsimle arama, seçili sektör/faaliyet alanı ile birlikte çift filtreye
-    // dönüşmesin diye — arama başlayınca bu filtreler sıfırlanıp tüm
-    // firmalar arasında aranır.
+    // İsimle arama, seçili sektör/lokasyon/faaliyet alanı ile birlikte çift
+    // filtreye dönüşmesin diye — arama başlayınca bu filtreler sıfırlanıp
+    // tüm firmalar arasında aranır.
     if (value.trim()) {
       setCurrentSector(null);
+      setCurrentLocation(null);
       setCurrentActivity("");
     }
   }
@@ -39,7 +44,15 @@ export default function FirmaRehberiPage() {
 
   function selectSector(slug: string) {
     setCurrentSector(slug);
+    setCurrentLocation(null);
     setCurrentActivity("");
+  }
+
+  function selectLocation(slug: string) {
+    setCurrentLocation(slug);
+    setCurrentSector(null);
+    setCurrentActivity("");
+    setNameQuery("");
   }
 
   function openPanel(slug: string) {
@@ -86,12 +99,14 @@ export default function FirmaRehberiPage() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   });
 
-  const activityItems = useMemo(() => {
-    const tags = getActivityAreasForMembers(membersInSector);
-    return [{ value: "", label: "Tüm Faaliyet Alanları" }, ...tags.map((t) => ({ value: t, label: t }))];
-  }, [membersInSector]);
+  const sectorContextMembers = currentLocation ? membersInLocation : membersInSector;
 
-  const baseMembers = isSearching ? allMembers : membersInSector;
+  const activityItems = useMemo(() => {
+    const tags = getActivityAreasForMembers(sectorContextMembers);
+    return [{ value: "", label: "Tüm Faaliyet Alanları" }, ...tags.map((t) => ({ value: t, label: t }))];
+  }, [sectorContextMembers]);
+
+  const baseMembers = isSearching ? allMembers : sectorContextMembers;
 
   const filteredMembers = useMemo(() => {
     if (!currentActivity) return baseMembers;
@@ -145,7 +160,10 @@ export default function FirmaRehberiPage() {
         sectorItems={sectorItems}
         sectorValue={currentSector}
         onSectorChange={selectSector}
-        sectorName={getSectorName(currentSector)}
+        locationItems={locationItems}
+        locationValue={currentLocation}
+        onLocationChange={selectLocation}
+        panelName={currentLocation ? getLocationName(currentLocation) : getSectorName(currentSector)}
         activityItems={activityItems}
         activityValue={currentActivity}
         onActivityChange={setCurrentActivity}

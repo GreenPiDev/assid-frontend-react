@@ -39,6 +39,16 @@ export function useMembersBySector(slug: string | null | undefined) {
   return { ...query, data: query.data as Member[] };
 }
 
+// GET /members?location=slug
+export function useMembersByLocation(slug: string | null | undefined) {
+  const query = useGetList(Paths.Members, {
+    params: { location: slug ?? undefined },
+    queryKey: [Paths.Members, "location", slug],
+    enabled: !!slug,
+  });
+  return { ...query, data: query.data as Member[] };
+}
+
 // GET /members/:id
 export function useMemberById(id: string | number | null | undefined) {
   const query = useGet(`${Paths.Members}/${id}`, {
