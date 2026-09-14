@@ -1,34 +1,48 @@
 import { useState, type ReactNode } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { fetchUnreadCount, fetchNotifications, markNotificationRead } from "../../api/messaging";
 import { useAuth } from "../../context/AuthContext";
-import { ArrowLeftIcon, CloseIcon, KeyIcon, LogoutIcon, MenuIcon, UserIcon } from "../admin/icons";
+import NotificationBell from "../ui/NotificationBell";
+import { ArrowLeftIcon, CloseIcon, KeyIcon, LogoutIcon, MenuIcon, MessageIcon, UserIcon } from "../admin/icons";
 
 const navItems = [
   { to: "/panel/profilim", label: "Profilim", icon: UserIcon },
+  { to: "/panel/mesajlasma", label: "Mesajlaşma", icon: MessageIcon },
   { to: "/panel/sifre", label: "Şifre Değiştir", icon: KeyIcon },
 ];
 
 function NavList({ onNavigate, collapsed = false }: { onNavigate?: () => void; collapsed?: boolean }) {
+  const { data: unread } = useQuery({ queryKey: ["messaging", "unread-count"], queryFn: fetchUnreadCount });
+
   return (
     <nav className="grid gap-1">
-      {navItems.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          onClick={onNavigate}
-          title={collapsed ? item.label : undefined}
-          className={({ isActive }) =>
-            `flex items-center gap-3 overflow-hidden rounded-[12px] px-4 py-3 text-[0.88rem] font-bold whitespace-nowrap transition ${
-              isActive ? "bg-assid-green text-white" : "text-assid-ink hover:bg-assid-paper"
-            }`
-          }
-        >
-          <item.icon className="h-5 w-5 shrink-0" />
-          <span className={`transition-opacity duration-150 ${collapsed ? "opacity-0" : "opacity-100"}`}>
-            {item.label}
-          </span>
-        </NavLink>
-      ))}
+      {navItems.map((item) => {
+        const badgeCount = item.to === "/panel/mesajlasma" ? unread?.count ?? 0 : 0;
+        return (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            onClick={onNavigate}
+            title={collapsed ? item.label : undefined}
+            className={({ isActive }) =>
+              `flex items-center gap-3 overflow-hidden rounded-[12px] px-4 py-3 text-[0.88rem] font-bold whitespace-nowrap transition ${
+                isActive ? "bg-assid-green text-white" : "text-assid-ink hover:bg-assid-paper"
+              }`
+            }
+          >
+            <item.icon className="h-5 w-5 shrink-0" />
+            <span className={`flex flex-1 items-center gap-2 transition-opacity duration-150 ${collapsed ? "opacity-0" : "opacity-100"}`}>
+              {item.label}
+              {badgeCount > 0 && (
+                <span className="grid h-4.5 min-w-4.5 place-items-center rounded-full bg-red-500 px-1 text-[0.62rem] font-bold text-white">
+                  {badgeCount > 9 ? "9+" : badgeCount}
+                </span>
+              )}
+            </span>
+          </NavLink>
+        );
+      })}
     </nav>
   );
 }
@@ -74,6 +88,13 @@ export default function MemberLayout({ children }: { children: ReactNode }) {
           <span className="text-[0.95rem] font-extrabold tracking-[-.02em] text-assid-ink">Üye Paneli</span>
         </div>
         <div className="flex items-center gap-3">
+          <NotificationBell
+            notificationsQueryKey={["messaging", "notifications"]}
+            unreadCountQueryKey={["messaging", "unread-count"]}
+            fetchNotifications={fetchNotifications}
+            markRead={markNotificationRead}
+            getConversationLink={(n) => (n.conversationId ? `/panel/mesaj/${n.conversationId}` : null)}
+          />
           <span className="hidden text-[0.85rem] text-assid-muted sm:inline">{user?.email}</span>
           <button
             type="button"

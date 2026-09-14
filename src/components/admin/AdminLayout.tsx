@@ -1,6 +1,9 @@
 import { useState, type ReactNode } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { fetchAdminNotifications, fetchAdminUnreadCount, markAdminNotificationRead } from "../../api/messaging";
 import { useAuth } from "../../context/AuthContext";
+import NotificationBell from "../ui/NotificationBell";
 import {
   ArrowLeftIcon,
   BuildingIcon,
@@ -10,6 +13,7 @@ import {
   ListIcon,
   LogoutIcon,
   MenuIcon,
+  MessageIcon,
   UserCogIcon,
   UsersIcon,
 } from "./icons";
@@ -27,6 +31,7 @@ const contentChildren = [
 const navItems = [
   { type: "link" as const, to: "/panel/uye-basvurulari", label: "Üye Başvuruları", icon: UsersIcon },
   { type: "link" as const, to: "/panel/uyelikler", label: "Üyelikler", icon: ListIcon },
+  { type: "link" as const, to: "/panel/mesajlasma", label: "Mesajlaşma", icon: MessageIcon },
   { type: "link" as const, to: "/panel/kullanicilar", label: "Kullanıcılar", icon: UserCogIcon },
   { type: "link" as const, to: "/panel/organizasyon-bilgileri", label: "Organizasyon Bilgileri", icon: BuildingIcon },
   { type: "group" as const, label: "İçerik Yönetimi", icon: FolderIcon, children: contentChildren },
@@ -34,6 +39,10 @@ const navItems = [
 
 function NavList({ onNavigate, collapsed = false }: { onNavigate?: () => void; collapsed?: boolean }) {
   const location = useLocation();
+  const { data: unread } = useQuery({
+    queryKey: ["messaging", "admin-unread-count"],
+    queryFn: fetchAdminUnreadCount,
+  });
   const [openGroup, setOpenGroup] = useState<string | null>(() => {
     const activeGroup = navItems.find(
       (item) => item.type === "group" && item.children.some((child) => location.pathname.startsWith(child.to)),
@@ -86,6 +95,7 @@ function NavList({ onNavigate, collapsed = false }: { onNavigate?: () => void; c
           );
         }
 
+        const badgeCount = item.to === "/panel/mesajlasma" ? unread?.count ?? 0 : 0;
         return (
           <NavLink
             key={item.to}
@@ -99,8 +109,13 @@ function NavList({ onNavigate, collapsed = false }: { onNavigate?: () => void; c
             }
           >
             <item.icon className="h-5 w-5 shrink-0" />
-            <span className={`transition-opacity duration-150 ${collapsed ? "opacity-0" : "opacity-100"}`}>
+            <span className={`flex flex-1 items-center gap-2 transition-opacity duration-150 ${collapsed ? "opacity-0" : "opacity-100"}`}>
               {item.label}
+              {badgeCount > 0 && (
+                <span className="grid h-4.5 min-w-4.5 place-items-center rounded-full bg-red-500 px-1 text-[0.62rem] font-bold text-white">
+                  {badgeCount > 9 ? "9+" : badgeCount}
+                </span>
+              )}
             </span>
           </NavLink>
         );
@@ -150,6 +165,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           </span>
         </div>
         <div className="flex items-center gap-3">
+          <NotificationBell
+            notificationsQueryKey={["messaging", "admin-notifications"]}
+            unreadCountQueryKey={["messaging", "admin-unread-count"]}
+            fetchNotifications={fetchAdminNotifications}
+            markRead={markAdminNotificationRead}
+            getConversationLink={(n) => (n.conversationId ? `/panel/mesajlasma/${n.conversationId}` : null)}
+          />
           <span className="hidden text-[0.85rem] text-assid-muted sm:inline">{user?.email}</span>
           <button
             type="button"

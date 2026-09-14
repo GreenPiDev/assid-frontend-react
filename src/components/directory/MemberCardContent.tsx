@@ -1,4 +1,5 @@
 import type { Member } from "../../types";
+import { MessageIcon } from "../admin/icons";
 import { getSectorName } from "../../utils/directory";
 
 function FeaturedBadge() {
@@ -32,7 +33,13 @@ function SidebarList({ label, items }: { label: string; items?: string[] }) {
   );
 }
 
-export default function MemberCardContent({ member }: { member: Member }) {
+export default function MemberCardContent({
+  member,
+  onMessageClick,
+}: {
+  member: Member;
+  onMessageClick?: () => void;
+}) {
   return (
     <div className="mx-auto flex w-full max-w-[280px] flex-col items-center gap-6">
       <div className="flex flex-col items-center gap-3 text-center">
@@ -54,6 +61,17 @@ export default function MemberCardContent({ member }: { member: Member }) {
         <SidebarList label="Alt Faaliyet Alanları" items={member.activityAreas} />
         <SidebarList label="Ürün ve Hizmetler" items={member.productsAndServices} />
       </div>
+
+      {onMessageClick && (
+        <button
+          type="button"
+          onClick={onMessageClick}
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border-0 bg-assid-green px-5 py-3 text-[0.88rem] font-bold text-white transition hover:opacity-90"
+        >
+          <MessageIcon className="h-4.5 w-4.5" />
+          Mesaj Gönder
+        </button>
+      )}
     </div>
   );
 }

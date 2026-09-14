@@ -1,9 +1,28 @@
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { fetchConversations } from "../../api/messaging";
+import { useAuth } from "../../context/AuthContext";
 import type { Member } from "../../types";
 import MemberCardContent from "./MemberCardContent";
 import MemberProfileTabs from "./MemberProfileTabs";
 
 export default function MemberDetailPanel({ member, onClose }: { member: Member | null; onClose: () => void }) {
   const open = !!member;
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const canMessage = !!member && user?.role === "member" && user.memberId !== member.id;
+
+  const { data: conversations } = useQuery({
+    queryKey: ["messaging", "conversations"],
+    queryFn: fetchConversations,
+    enabled: canMessage,
+  });
+
+  function handleMessageClick() {
+    if (!member) return;
+    const existing = conversations?.find((c) => c.otherMember.id === member.id);
+    navigate(existing ? `/panel/mesaj/${existing.id}` : `/panel/mesaj/new?to=${member.id}`);
+  }
 
   return (
     <aside
@@ -24,7 +43,7 @@ export default function MemberDetailPanel({ member, onClose }: { member: Member 
       {member && (
         <div className="min-h-0 flex-1 overflow-y-auto px-8.5 pb-8.5 pt-10">
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-[260px_1fr]">
-            <MemberCardContent member={member} />
+            <MemberCardContent member={member} onMessageClick={canMessage ? handleMessageClick : undefined} />
             <MemberProfileTabs member={member} />
           </div>
         </div>

@@ -3,7 +3,6 @@ import { SECTORS } from "../../constants/sectors";
 import Button from "../ui/Button";
 import MemberSearch from "./MemberSearch";
 import SectorCard from "./SectorCard";
-import MemberLogoSlider from "./MemberLogoSlider";
 
 export default function DirectorySection() {
   return (
@@ -24,9 +23,6 @@ export default function DirectorySection() {
         </div>
         <div className="mb-4.5 flex flex-wrap items-start gap-3">
           <MemberSearch />
-        </div>
-        <div className="mb-4.5">
-          <MemberLogoSlider />
         </div>
         <div className="grid min-h-0 flex-1 grid-cols-2 gap-3 [grid-auto-rows:1fr] md:grid-cols-3 lg:grid-cols-5">
           {SECTORS.map((sector) => (
